@@ -85,20 +85,20 @@ graph TD
 
 ### Routing Map
 
-| Path | Component | Role Access | Description |
-|------|-----------|-------------|-------------|
-| `/login` | `Login` | Public | Unified login interface with mock routing |
-| `/` | `StudentDashboard` | Student | Student home — weekly missions |
-| `/exam/:examId` | `ExamExecution` | Student | Exam taking interface |
-| `/exam/:examId/result` | `ExamResult` | Student | Post-exam score summary |
-| `/modules` | `LearningModules` | Student | Catalog view of study materials |
-| `/teacher` | `AdminDashboard` | Teacher | Stats overview & Advanced Analytics for Teacher |
-| `/admin` | `AdminDashboard` | Super Admin | Stats overview & Advanced Analytics for Admin |
-| `/admin/question-bank` | `QuestionBank` | Teacher / Super Admin | Manage questions |
-| `/admin/tryout` | `TryoutManagement` | Teacher / Super Admin | Manage tryout sessions |
-| `/admin/reports` | `ScoreReports` | Teacher / Super Admin | View student scores |
-| `/admin/modules` | `ModuleManagement` | Teacher / Super Admin | Manage learning materials |
-| `/admin/users` | `UserManagement` | Super Admin | Manage Student and Teacher accounts |
+| Path                     | Component            | Role Access           | Description                                     |
+| ------------------------ | -------------------- | --------------------- | ----------------------------------------------- |
+| `/login`               | `Login`            | Public                | Unified login interface with mock routing       |
+| `/`                    | `StudentDashboard` | Student               | Student home — weekly missions                 |
+| `/exam/:examId`        | `ExamExecution`    | Student               | Exam taking interface                           |
+| `/exam/:examId/result` | `ExamResult`       | Student               | Post-exam score summary                         |
+| `/modules`             | `LearningModules`  | Student               | Catalog view of study materials                 |
+| `/teacher`             | `AdminDashboard`   | Teacher               | Stats overview & Advanced Analytics for Teacher |
+| `/admin`               | `AdminDashboard`   | Super Admin           | Stats overview & Advanced Analytics for Admin   |
+| `/admin/question-bank` | `QuestionBank`     | Teacher / Super Admin | Manage questions                                |
+| `/admin/tryout`        | `TryoutManagement` | Teacher / Super Admin | Manage tryout sessions                          |
+| `/admin/reports`       | `ScoreReports`     | Teacher / Super Admin | View student scores                             |
+| `/admin/modules`       | `ModuleManagement` | Teacher / Super Admin | Manage learning materials                       |
+| `/admin/users`         | `UserManagement`   | Super Admin           | Manage Student and Teacher accounts             |
 
 > [!NOTE]
 > Based on mock login credentials, Students are routed to `/`, Teachers to `/teacher` (with limited sidebar), and Super Admins to `/admin` (with full sidebar including User Management).
@@ -109,58 +109,86 @@ graph TD
 
 ### Color Palette
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `primary` | `#6C5CE7` | Primary actions, highlights |
-| `primary-dark` | `#5A4BD1` | Hover/active states |
-| `secondary` | `#00CEC9` | Success states, accents |
-| `surface` | `#F8F9FE` | Page background (light) |
-| `dark` | `#1E1E2E` | Admin sidebar, dark mode backgrounds |
+| Token            | Hex         | Usage                                |
+| ---------------- | ----------- | ------------------------------------ |
+| `primary`      | `#6C5CE7` | Primary actions, highlights          |
+| `primary-dark` | `#5A4BD1` | Hover/active states                  |
+| `secondary`    | `#00CEC9` | Success states, accents              |
+| `surface`      | `#F8F9FE` | Page background (light)              |
+| `dark`         | `#1E1E2E` | Admin sidebar, dark mode backgrounds |
 
 ---
 
 ## Build Phases (Execution Order)
 
 ### Phase 2: Student Exam Execution View ⭐ (Completed/Refinement needed)
+
 - `ExamExecution.jsx` & inner components.
 - Establish responsive foundation for inner layouts.
 
 ### Phase 3: Student Dashboard View (Completed/Refinement needed)
+
 - `StudentDashboard.jsx` & layout scaffolding.
 
 ### Phase 4: Teacher / Admin Dashboard Structure (Completed/Refinement needed)
+
 - Scaffold `AdminLayout.jsx` and collapsible `Sidebar.jsx`.
 - Implement `QuestionBank.jsx`, `TryoutManagement.jsx`, and `ScoreReports.jsx`.
 
 ### Phase 5: Initial Polish
+
 - Ensure `lucide-react` icons are standard.
 - Enforce responsive Tailwind classes (`md:`, `lg:`) on all layouts.
 - Basic system-wide Dark Mode implementation.
 
 ### Phase 6: System Expansions (Auth, Roles, & Learning Modules) 🚀 NEW
+
 - **Unified Login UI**: Create public `/login` route featuring a modern login interface. Implement mock routing logic directing users based on dummy credentials (Students -> `/`, Teachers -> `/teacher`, Super Admins -> `/admin`).
 - **Role Separation & User Management**: Separate the Admin role. Teachers handle Tryouts, Questions, Reports, and Modules. Super Admins get an exclusive `UserManagement.jsx` view to add/edit/delete Student and Teacher accounts.
-- **Learning Modules**: Add a "Learning Modules" ecosystem.
-  - *Teacher/Admin*: `ModuleManagement.jsx` to upload/manage study materials (text, video links, PDFs).
-  - *Student*: `LearningModules.jsx` as a catalog-style view to browse and consume materials.
+- ***Learning Modules**: Add a "Learning Modules" ecosystem.*
+  - *Teacher/Admin: `ModuleManagement.jsx` to upload/manage study materials (text, video links, PDFs).*
+  - *Student: `LearningModules.jsx` as a catalog-style view to browse and consume materials.*
 
-### Phase 7: UX Polish & Analytics Upgrade ✨ NEW
-- **Advanced Analytics (Recharts)**: Upgrade the `AdminDashboard.jsx` stats:
-  1. **Bar Chart**: Comparing average scores between classes (e.g., Class 6A vs 6B).
-  2. **Leaderboard UI**: Displaying top-scoring students and most active users.
-  3. **Radar/Line Chart**: Visualizing the overall average score per subject.
-- **Desktop Optimization for Students**: Resolve the issue where the Student UI is too mobile-centric and stretched on large screens. Mandate structural rules (e.g., `max-w-4xl mx-auto`) to ensure the Student Dashboard and Exam View appear as a centered, professional web-app on desktop monitors.
-- **Dark Mode Bug Fixes**: Execute a strict auditing phase to fix incomplete dark mode. Enforce `dark:` variants on ALL deeply nested components (backgrounds, modals, option cards, question grid), especially within the `ExamExecution` view.
+### Phase 7: UX Polish, Analytics Upgrade, and Desktop Optimization ✨ NEW
+
+#### 1. Student Desktop Optimization (Responsiveness)
+- Mandate a structural change for the Student Dashboard and Exam Execution view.
+- Use a "Centered Container Strategy" (e.g., `max-w-5xl mx-auto`) so the UI doesn't look stretched on large monitors.
+- Add hover effects and subtle drop shadows to Mission Cards and Learning Modules to make them feel more interactive.
+
+#### 2. Deep Dark Mode Audit
+- Identify and list all components that are still "leaking" bright colors when dark mode is active, specifically:
+  - The entire Exam Execution view (`/exam/:id`).
+  - Option Cards, Question Grid, and Modals.
+  - Text backgrounds and borders.
+- Enforce strict `dark:` utility class coverage for every nested element.
+
+#### 3. Advanced Analytics Dashboard (Teacher/Admin)
+- Detail the implementation of Recharts for the following:
+  - **Bar Chart**: Comparing average scores of Class 6A vs Class 6B.
+  - **Leaderboard**: A UI component for Top 5 Highest Scoring Students.
+  - **Activity Tracker**: Stats for "Most Active Students".
+  - **Radar Chart**: Average scores per subject (Matematika, IPA, dll).
+
+#### 4. Login UI Refinement
+- Redesign the Login page to be more professional:
+  - Desktop: Use a split-screen layout (Illustration/Logo on one side, Form on the other).
+  - Add interactive elements: Floating labels, smooth transitions, and a Dark Mode toggle button on the login screen.
+
+#### 5. Content Organization (Tabs/Accordions)
+- Update the UI plan for "Question Bank" and "Learning Modules" (Admin side) to use Tabs or Accordions categorized by Subject to avoid long scrolling.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
+
 - `npm run build` — Ensure zero build errors.
 - Visual inspection checking Recharts rendering.
 
 ### Manual Verification
+
 - Testing user separation routing in `/login`.
 - Verify Super Admin sees "User Management", but Teacher does not.
 - Verify Student Interface applies `max-w-[896px] mx-auto` on wide desktop screens.
@@ -171,5 +199,6 @@ graph TD
 ## Open Questions
 
 > [!IMPORTANT]
+>
 > 1. Do we want standard dummy credentials provided on the Login screen so users don't have to guess? (e.g. "Use student/123 for Student").
 > 2. For Learning Modules, should video links embed directly via an `<iframe>` or simply link outwards into a new tab?

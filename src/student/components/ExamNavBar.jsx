@@ -17,7 +17,7 @@ export default function ExamNavBar({
   return (
     <nav
       id="exam-nav-bar"
-      className="sticky bottom-0 z-40 bg-white/90 backdrop-blur-md border-t border-gray-100 safe-bottom"
+      className="sticky bottom-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 safe-bottom transition-colors duration-300"
     >
       <div className="flex items-center justify-between gap-3 px-4 py-3 max-w-2xl mx-auto">
         {/* Previous Button */}
@@ -25,7 +25,7 @@ export default function ExamNavBar({
           id="btn-previous"
           onClick={onPrevious}
           disabled={isFirst}
-          className={`btn-ghost flex items-center gap-2 ${
+          className={`btn-ghost dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-slate-700 dark:hover:bg-slate-700 flex items-center gap-2 py-2 px-4 rounded-xl transition-all duration-200 ${
             isFirst ? 'opacity-40 cursor-not-allowed active:scale-100' : ''
           }`}
         >
@@ -44,7 +44,7 @@ export default function ExamNavBar({
                 className={`w-2 h-2 rounded-full transition-all duration-200 ${
                   dotIndex === currentQuestion
                     ? 'bg-primary w-6'
-                    : 'bg-gray-200'
+                    : 'bg-slate-200 dark:bg-slate-800'
                 }`}
               />
             );
@@ -57,7 +57,7 @@ export default function ExamNavBar({
             id="btn-submit"
             onClick={onSubmit}
             className="btn-primary flex items-center gap-2 bg-gradient-to-r from-primary to-secondary
-                       hover:shadow-glow"
+                       hover:shadow-glow shadow-lg dark:shadow-black/20"
           >
             <Send size={18} />
             <span>Selesai</span>
@@ -66,7 +66,7 @@ export default function ExamNavBar({
           <button
             id="btn-next"
             onClick={onNext}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center gap-2 shadow-lg dark:shadow-black/20"
           >
             <span className="hidden sm:inline">Selanjutnya</span>
             <span className="sm:hidden">Lanjut</span>

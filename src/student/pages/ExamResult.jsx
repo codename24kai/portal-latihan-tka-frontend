@@ -1,15 +1,17 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Trophy, Target, ArrowLeft, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
+import { Trophy, Target, ArrowLeft, RotateCcw, CheckCircle2, XCircle, Sun, Moon } from 'lucide-react';
 import { useMemo } from 'react';
 import mockQuestions from '../../data/mockQuestions';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 /**
  * Post-exam result summary page.
- * Shows score, stats, and a breakdown indicator.
+ * Major Layout Overhaul: 2-Column Desktop View & No Overlap.
  */
 export default function ExamResult() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isDark, toggleDarkMode } = useDarkMode();
 
   const { answers = {}, totalQuestions = 40, timeUp = false } = location.state || {};
 
@@ -51,12 +53,22 @@ export default function ExamResult() {
   };
 
   return (
-    <div id="exam-result" className="min-h-screen bg-surface">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-primary via-primary-dark to-primary-light pt-8 pb-20 px-4 text-center text-white relative overflow-hidden">
+    <div id="exam-result" className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+      
+      {/* Header Banner (No Overlap) */}
+      <div className="relative bg-gradient-to-br from-primary via-primary-dark to-primary-light pt-12 pb-16 px-4 text-center text-white overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute top-0 left-0 w-40 h-40 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-60 h-60 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3" />
+
+        {/* Dark Mode Toggle */}
+        <button
+          onClick={toggleDarkMode}
+          className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all active:scale-95"
+          aria-label="Toggle dark mode"
+        >
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
 
         {timeUp && (
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-200 rounded-lg text-xs font-medium mb-4">
@@ -65,128 +77,131 @@ export default function ExamResult() {
         )}
 
         <div className="animate-bounce-in">
-          <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-            <Trophy size={36} className="text-white" />
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+            <Trophy size={32} className="text-white" />
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold mb-1">Ujian Selesai!</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold mb-1">Hasil Ujian Kamu</h1>
         <p className="text-white/70 text-sm">Matematika — Tryout Minggu ke-1</p>
       </div>
 
-      {/* Score Card (overlapping header) */}
-      <div className="px-4 -mt-14 mb-6 max-w-md mx-auto">
-        <div className="bg-white rounded-3xl shadow-card p-6 text-center animate-slide-up">
-          <p className="text-sm text-gray-400 font-medium mb-2">Skor Kamu</p>
-          <p className={`text-6xl font-extrabold ${getScoreColor()} mb-1`}>
-            {score}
-          </p>
-          <p className="text-sm text-gray-400 mb-3">dari 100</p>
-          <p className="text-lg font-semibold text-dark">{getScoreLabel()}</p>
+      {/* Optimized Layout Container */}
+      <main className="max-w-5xl mx-auto w-full px-4 pt-8 pb-12 flex-grow">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          
+          {/* LEFT COLUMN: Score & Stats */}
+          <div className="space-y-8">
+            {/* Score Card */}
+            <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-3xl shadow-card dark:shadow-none p-8 text-center animate-slide-up">
+              <p className="text-sm text-slate-400 dark:text-slate-400 font-medium mb-2">Skor Akhir</p>
+              <p className={`text-7xl font-extrabold ${getScoreColor()} mb-2`}>
+                {score}
+              </p>
+              <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">dari 100 poin</p>
+              <div className="py-3 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl inline-block">
+                <p className="text-xl font-bold text-dark dark:text-slate-200">{getScoreLabel()}</p>
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-2xl shadow-card dark:shadow-none p-5 text-center animate-slide-up" style={{ animationDelay: '100ms' }}>
+                <div className="w-10 h-10 rounded-xl bg-correct/10 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 size={20} className="text-correct" />
+                </div>
+                <p className="text-2xl font-bold text-correct">{correctCount}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 uppercase font-semibold">Benar</p>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-2xl shadow-card dark:shadow-none p-5 text-center animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <div className="w-10 h-10 rounded-xl bg-incorrect/10 flex items-center justify-center mx-auto mb-3">
+                  <XCircle size={20} className="text-incorrect" />
+                </div>
+                <p className="text-2xl font-bold text-incorrect">{wrongCount}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 uppercase font-semibold">Salah</p>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-2xl shadow-card dark:shadow-none p-5 text-center animate-slide-up" style={{ animationDelay: '300ms' }}>
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                  <Target size={20} className="text-slate-400 dark:text-slate-500" />
+                </div>
+                <p className="text-2xl font-bold text-slate-500 dark:text-slate-400">{unanswered}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 uppercase font-semibold">Kosong</p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Summary & Actions */}
+          <div className="space-y-8">
+            {/* Progress Summary Bars */}
+            <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-2xl shadow-card dark:shadow-none p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
+              <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-6">Analisis Jawaban</h3>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-slate-500 dark:text-slate-400">Akurasi Benar</span>
+                    <span className="font-bold text-correct">{correctCount}/{totalQuestions}</span>
+                  </div>
+                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-correct to-secondary rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${(correctCount / totalQuestions) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-slate-500 dark:text-slate-400">Total Salah</span>
+                    <span className="font-bold text-incorrect">{wrongCount}/{totalQuestions}</span>
+                  </div>
+                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-incorrect to-accent rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${(wrongCount / totalQuestions) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-slate-500 dark:text-slate-400">Tanpa Jawaban</span>
+                    <span className="font-bold text-slate-400 dark:text-slate-500">{unanswered}/{totalQuestions}</span>
+                  </div>
+                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-slate-300 dark:bg-slate-700 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${(unanswered / totalQuestions) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: '500ms' }}>
+              <button
+                id="btn-back-dashboard"
+                onClick={() => navigate('/')}
+                className="flex-1 btn-primary flex items-center justify-center gap-2 py-4 rounded-xl font-bold shadow-lg"
+              >
+                <ArrowLeft size={18} />
+                Dashboard
+              </button>
+              <button
+                id="btn-retry"
+                onClick={() => navigate(`/exam/1`)}
+                className="flex-1 btn-ghost dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition-all border border-transparent dark:border-slate-700"
+              >
+                <RotateCcw size={18} />
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+
         </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="px-4 mb-6 max-w-md mx-auto">
-        <div className="grid grid-cols-3 gap-3">
-          {/* Correct */}
-          <div className="bg-white rounded-2xl shadow-card p-4 text-center animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <div className="w-10 h-10 rounded-xl bg-correct/10 flex items-center justify-center mx-auto mb-2">
-              <CheckCircle2 size={20} className="text-correct" />
-            </div>
-            <p className="text-2xl font-bold text-correct">{correctCount}</p>
-            <p className="text-xs text-gray-400 mt-1">Benar</p>
-          </div>
-
-          {/* Wrong */}
-          <div className="bg-white rounded-2xl shadow-card p-4 text-center animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <div className="w-10 h-10 rounded-xl bg-incorrect/10 flex items-center justify-center mx-auto mb-2">
-              <XCircle size={20} className="text-incorrect" />
-            </div>
-            <p className="text-2xl font-bold text-incorrect">{wrongCount}</p>
-            <p className="text-xs text-gray-400 mt-1">Salah</p>
-          </div>
-
-          {/* Unanswered */}
-          <div className="bg-white rounded-2xl shadow-card p-4 text-center animate-slide-up" style={{ animationDelay: '300ms' }}>
-            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-2">
-              <Target size={20} className="text-gray-400" />
-            </div>
-            <p className="text-2xl font-bold text-gray-500">{unanswered}</p>
-            <p className="text-xs text-gray-400 mt-1">Kosong</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Progress Ring Visual */}
-      <div className="px-4 mb-6 max-w-md mx-auto">
-        <div className="bg-white rounded-2xl shadow-card p-5 animate-slide-up" style={{ animationDelay: '400ms' }}>
-          <h3 className="text-sm font-semibold text-gray-500 mb-4">Ringkasan</h3>
-          <div className="space-y-3">
-            {/* Correct bar */}
-            <div>
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="text-gray-500">Benar</span>
-                <span className="font-semibold text-correct">{correctCount}/{totalQuestions}</span>
-              </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-correct to-secondary rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${(correctCount / totalQuestions) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Wrong bar */}
-            <div>
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="text-gray-500">Salah</span>
-                <span className="font-semibold text-incorrect">{wrongCount}/{totalQuestions}</span>
-              </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-incorrect to-accent rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${(wrongCount / totalQuestions) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Unanswered bar */}
-            <div>
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="text-gray-500">Tidak Dijawab</span>
-                <span className="font-semibold text-gray-400">{unanswered}/{totalQuestions}</span>
-              </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gray-300 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${(unanswered / totalQuestions) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="px-4 pb-8 max-w-md mx-auto flex flex-col gap-3 animate-slide-up" style={{ animationDelay: '500ms' }}>
-        <button
-          id="btn-back-dashboard"
-          onClick={() => navigate('/')}
-          className="btn-primary w-full flex items-center justify-center gap-2"
-        >
-          <ArrowLeft size={18} />
-          Kembali ke Dashboard
-        </button>
-        <button
-          id="btn-retry"
-          onClick={() => navigate(`/exam/1`)}
-          className="btn-ghost w-full flex items-center justify-center gap-2"
-        >
-          <RotateCcw size={18} />
-          Coba Lagi
-        </button>
-      </div>
+      </main>
     </div>
   );
 }

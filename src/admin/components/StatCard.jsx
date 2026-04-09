@@ -28,7 +28,7 @@ export default function StatCard({ icon: Icon, label, value, trend, color = 'pri
         )}
       </div>
       <p className={`text-2xl font-bold ${c.text} mb-0.5`}>{value}</p>
-      <p className="text-sm text-gray-400 dark:text-gray-500">{label}</p>
+      <p className="text-sm text-slate-400 dark:text-slate-500">{label}</p>
     </div>
   );
 }

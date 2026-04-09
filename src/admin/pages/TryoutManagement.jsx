@@ -11,7 +11,7 @@ const mockTryouts = [
 
 const statusConfig = {
   active: { label: 'Aktif', color: 'bg-correct/10 text-correct', dot: 'bg-correct' },
-  draft: { label: 'Draft', color: 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-gray-400', dot: 'bg-gray-400 dark:bg-gray-500' },
+  draft: { label: 'Draft', color: 'bg-slate-100 dark:bg-dark-border text-slate-500 dark:text-slate-400', dot: 'bg-slate-400 dark:bg-slate-500' },
   ended: { label: 'Selesai', color: 'bg-primary-50 dark:bg-primary/20 text-primary dark:text-primary-light', dot: 'bg-primary' },
 };
 
@@ -21,7 +21,7 @@ export default function TryoutManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-dark dark:text-white">Manajemen Tryout</h1>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Kelola sesi tryout dan ujian</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Kelola sesi tryout dan ujian</p>
         </div>
         <button className="btn-primary flex items-center gap-2">
           <Plus size={18} />
@@ -42,38 +42,38 @@ export default function TryoutManagement() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-bold text-dark dark:text-white">{tryout.name}</h3>
-                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{tryout.subject}</p>
+                  <p className="text-sm text-slate-400 dark:text-slate-500 mt-0.5">{tryout.subject}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${status.color}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
                     {status.label}
                   </span>
-                  <button className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-border flex items-center justify-center transition-colors opacity-100 md:opacity-0 group-hover:opacity-100">
-                    <MoreVertical size={16} className="text-gray-400 dark:text-gray-500" />
+                  <button className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-border flex items-center justify-center transition-colors opacity-100 md:opacity-0 group-hover:opacity-100">
+                    <MoreVertical size={16} className="text-slate-400 dark:text-slate-500" />
                   </button>
                 </div>
               </div>
 
               {/* Info grid */}
               <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 flex-col sm:flex-row items-start sm:items-center">
-                  <Users size={14} className="text-gray-400 dark:text-gray-500" />
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 flex-col sm:flex-row items-start sm:items-center">
+                  <Users size={14} className="text-slate-400 dark:text-slate-500" />
                   <span>{tryout.students} siswa</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 flex-col sm:flex-row items-start sm:items-center">
-                  <Clock size={14} className="text-gray-400 dark:text-gray-500" />
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 flex-col sm:flex-row items-start sm:items-center">
+                  <Clock size={14} className="text-slate-400 dark:text-slate-500" />
                   <span>{tryout.duration}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 flex-col sm:flex-row items-start sm:items-center">
-                  <Calendar size={14} className="text-gray-400 dark:text-gray-500" />
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 flex-col sm:flex-row items-start sm:items-center">
+                  <Calendar size={14} className="text-slate-400 dark:text-slate-500" />
                   <span>{tryout.questions} soal</span>
                 </div>
               </div>
 
               {/* Date range */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-dark-border">
-                <span className="text-xs text-gray-400 dark:text-gray-500">
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-dark-border">
+                <span className="text-xs text-slate-400 dark:text-slate-500">
                   {tryout.startDate} — {tryout.endDate}
                 </span>
                 {tryout.status === 'active' && (

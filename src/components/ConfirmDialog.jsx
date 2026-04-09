@@ -30,10 +30,10 @@ export default function ConfirmDialog({
         {/* Close button */}
         <button
           onClick={onCancel}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-gray-100
-                     flex items-center justify-center hover:bg-gray-200 transition-colors"
+          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-100
+                     flex items-center justify-center hover:bg-slate-200 transition-colors"
         >
-          <X size={16} className="text-gray-400" />
+          <X size={16} className="text-slate-400" />
         </button>
 
         <div className="p-6 text-center">
@@ -52,7 +52,7 @@ export default function ConfirmDialog({
           <h3 className="text-xl font-bold text-dark mb-2">{title}</h3>
 
           {/* Message */}
-          <p className="text-gray-500 text-sm leading-relaxed mb-2">{message}</p>
+          <p className="text-slate-500 text-sm leading-relaxed mb-2">{message}</p>
 
           {/* Extra content (e.g., unanswered count) */}
           {children}

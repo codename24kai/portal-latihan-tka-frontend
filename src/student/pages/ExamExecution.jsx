@@ -12,6 +12,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 /**
  * Full exam-taking page.
  * Orchestrates the timer, question navigation, answer selection, and submission.
+ * Audited for deep Dark Mode support and responsive desktop centering.
  */
 export default function ExamExecution() {
   const { examId } = useParams();
@@ -91,7 +92,7 @@ export default function ExamExecution() {
   if (isSubmitted) return null;
 
   return (
-    <div id="exam-execution" className="min-h-screen flex flex-col bg-surface">
+    <div id="exam-execution" className="min-h-screen flex flex-col bg-surface dark:bg-dark transition-colors duration-300">
       {/* Sticky Top Bar */}
       <ExamHeader
         timeLeft={timeLeft}
@@ -102,18 +103,18 @@ export default function ExamExecution() {
         onToggleNavigator={() => setShowNavigator(true)}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full">
-        {/* Question */}
-        <div key={currentQuestion.id}>
+      {/* Main Content: Deep scan for dark mode leakages */}
+      <main className="flex-1 px-4 py-8 max-w-3xl mx-auto w-full dark:bg-dark">
+        {/* Question Item Container */}
+        <div key={currentQuestion.id} className="animate-fade-in">
           <QuestionContent
             questionNumber={currentNumber}
             text={currentQuestion.text}
             image={currentQuestion.image}
           />
 
-          {/* Answer Options */}
-          <div className="flex flex-col gap-3 mt-2">
+          {/* Answer Options Grid */}
+          <div className="flex flex-col gap-3 mt-6">
             {currentQuestion.options.map((option) => (
               <OptionCard
                 key={option.label}
@@ -136,7 +137,7 @@ export default function ExamExecution() {
         onSubmit={handleSubmitClick}
       />
 
-      {/* Question Navigator Overlay */}
+      {/* Overlays & Dialogs */}
       <QuestionNavigator
         isOpen={showNavigator}
         onClose={() => setShowNavigator(false)}
@@ -146,21 +147,21 @@ export default function ExamExecution() {
         onGoToQuestion={goToQuestion}
       />
 
-      {/* Submit Confirmation Dialog */}
+      {/* Submission Confirmation Dialog */}
       <ConfirmDialog
         isOpen={showSubmitDialog}
         title="Kumpulkan Ujian?"
         message="Pastikan semua jawabanmu sudah benar. Jawaban tidak bisa diubah setelah dikumpulkan."
         confirmLabel="Ya, Kumpulkan"
         cancelLabel="Periksa Lagi"
-        variant={unansweredCount > 0 ? 'warning' : 'warning'}
+        variant="warning"
         onConfirm={handleConfirmSubmit}
         onCancel={() => setShowSubmitDialog(false)}
       >
         {unansweredCount > 0 && (
-          <div className="mt-3 px-4 py-3 bg-red-50 rounded-xl text-sm">
-            <span className="font-bold text-red-500">{unansweredCount} soal</span>
-            <span className="text-red-400"> belum dijawab!</span>
+          <div className="mt-3 px-4 py-3 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 rounded-xl text-sm transition-colors">
+            <span className="font-bold text-red-600 dark:text-red-400">{unansweredCount} soal</span>
+            <span className="text-red-500 dark:text-red-400/80"> belum dijawab!</span>
           </div>
         )}
       </ConfirmDialog>

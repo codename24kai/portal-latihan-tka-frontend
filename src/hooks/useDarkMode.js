@@ -1,25 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
 export function useDarkMode() {
-  const [isDark, setIsDark] = useState(() => {
-    // Check local storage or system preference
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
-  const toggleDarkMode = () => setIsDark(prev => !prev);
-
-  return { isDark, toggleDarkMode };
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useDarkMode must be used within a ThemeProvider');
+  }
+  return context;
 }

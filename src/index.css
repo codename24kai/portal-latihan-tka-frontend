@@ -64,7 +64,7 @@
 
   /* Exam option card */
   .option-card {
-    @apply relative w-full min-h-[56px] p-4 rounded-xl border-2 border-gray-100
+    @apply relative w-full min-h-[56px] p-4 rounded-xl border-2 border-slate-100
            bg-white shadow-option text-left
            transition-all duration-200 ease-out
            active:scale-[0.98] select-none cursor-pointer;
@@ -75,7 +75,7 @@
   }
 
   .option-card:hover:not(.selected) {
-    @apply border-gray-200 shadow-card;
+    @apply border-slate-200 shadow-card;
   }
 }
 
