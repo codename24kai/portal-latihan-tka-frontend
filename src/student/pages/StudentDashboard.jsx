@@ -36,10 +36,10 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 
 // Mock User Data
 const userData = {
-  name: 'Budi Santoso',
-  school: 'SD Negeri 1 Merdeka',
+  name: 'Budi Kialang',
+  school: 'SD Negeri Muncul 02',
   class: 'Kelas 6-A',
-  avatar: 'BS'
+  avatar: 'BK'
 };
 
 // Mock Module Data (Simplified for Overview)
@@ -66,7 +66,7 @@ export default function StudentDashboard() {
       displayName = 'B. INDONESIA';
       fill = '#3b82f6';
     } else if (exam.subject.includes('Lingkungan')) {
-      displayName = 'SURVEI LINGKUNGAN';
+      displayName = 'SURVEI LINGKUNGAN BELAJAR';
       fill = '#10b981'; // Emerald/Green
     } else if (exam.subject.includes('Karakter')) {
       displayName = 'SURVEI KARAKTER';

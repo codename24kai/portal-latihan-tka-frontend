@@ -73,8 +73,8 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
       >
         {/* Logo area (h-20 matching Header) */}
         <div className="flex items-center gap-3 px-5 border-b border-slate-800 h-20">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center flex-shrink-0 shadow-lg">
-            <GraduationCap size={22} className="text-white" />
+          <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+            <img src="/logo-sd-1.svg" alt="Logo" className="w-10 h-10 object-contain shadow-lg rounded-xl" />
           </div>
           {(!collapsed || mobileMenuOpen) && (
             <div className="overflow-hidden animate-fade-in flex-1">

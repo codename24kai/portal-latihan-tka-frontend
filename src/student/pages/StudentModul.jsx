@@ -1,15 +1,19 @@
 import React from 'react';
-import { 
-  BookOpen, 
-  Search, 
-  FileText, 
-  Download, 
+import {
+  BookOpen,
+  Search,
+  FileText,
+  Download,
   ChevronRight,
   Calculator,
   Globe,
   Heart,
   Book,
-  PenTool
+  PenTool,
+  Trees,
+  Divide,
+  Pi,
+  CalculatorIcon
 } from 'lucide-react';
 
 /**
@@ -17,59 +21,59 @@ import {
  * Displays a catalog of learning materials in a grid-responsive layout.
  */
 export default function StudentModul() {
-  
+
   // Mock Modules Data
   const modules = [
-    { 
-      id: 1, 
-      title: 'Modul Bahasa Indonesia Kelas 6', 
-      subject: 'Bahasa Indonesia', 
-      pages: 45, 
-      size: '2.4 MB', 
-      icon: Book, 
-      color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
+    {
+      id: 1,
+      title: 'Modul Bahasa Indonesia Kelas 6',
+      subject: 'Bahasa Indonesia',
+      pages: 45,
+      size: '2.4 MB',
+      icon: Book,
+      color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
     },
-    { 
-      id: 2, 
-      title: 'Ringkasan Materi Matematika Dasar', 
-      subject: 'Matematika', 
-      pages: 32, 
-      size: '1.8 MB', 
-      icon: Calculator, 
-      color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' 
+    {
+      id: 2,
+      title: 'Ringkasan Materi Matematika Dasar',
+      subject: 'Matematika',
+      pages: 32,
+      size: '1.8 MB',
+      icon: Calculator,
+      color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
     },
-    { 
-      id: 3, 
-      title: 'Panduan Survei Karakter & Lingkungan', 
-      subject: 'Umum', 
-      pages: 20, 
-      size: '1.2 MB', 
-      icon: Heart, 
-      color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' 
+    {
+      id: 3,
+      title: 'Panduan Survei Karakter & Lingkungan',
+      subject: 'Umum',
+      pages: 20,
+      size: '1.2 MB',
+      icon: Trees,
+      color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
     },
-    { 
-      id: 4, 
-      title: 'Latihan Soal Literasi Membaca', 
-      subject: 'Bahasa Indonesia', 
-      pages: 28, 
-      size: '1.5 MB', 
-      icon: PenTool, 
-      color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
+    {
+      id: 4,
+      title: 'Latihan Soal Literasi Membaca',
+      subject: 'Bahasa Indonesia',
+      pages: 28,
+      size: '1.5 MB',
+      icon: PenTool,
+      color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
     },
-    { 
-      id: 5, 
-      title: 'Geografi & Ekosistem Alam', 
-      subject: 'IPA/IPS', 
-      pages: 50, 
-      size: '3.1 MB', 
-      icon: Globe, 
-      color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' 
+    {
+      id: 5,
+      title: 'Linear Aljabar',
+      subject: 'Matematika',
+      pages: 50,
+      size: '3.1 MB',
+      icon: CalculatorIcon,
+      color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
     },
   ];
 
   return (
     <div className="space-y-8 animate-fade-in text-slate-900 dark:text-white">
-      
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
@@ -80,12 +84,12 @@ export default function StudentModul() {
             Perluas wawasanmu dengan materi berkualitas
           </p>
         </div>
-        
+
         <div className="relative w-full md:w-80">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="Cari modul belajar..." 
+          <input
+            type="text"
+            placeholder="Cari modul belajar..."
             className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-sm"
           />
         </div>
@@ -94,8 +98,8 @@ export default function StudentModul() {
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((mod) => (
-          <div 
-            key={mod.id} 
+          <div
+            key={mod.id}
             className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
           >
             <div>
@@ -104,7 +108,7 @@ export default function StudentModul() {
               </div>
               <h3 className="text-lg font-black leading-tight mb-2 pr-4">{mod.title}</h3>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{mod.subject}</p>
-              
+
               <div className="flex items-center gap-4 text-xs font-bold text-slate-400 mb-8 lowercase tracking-tight">
                 <span className="flex items-center gap-1.5"><FileText size={14} className="text-slate-300" /> {mod.pages} halaman</span>
                 <span className="flex items-center gap-1.5"><Download size={14} className="text-slate-300" /> {mod.size}</span>

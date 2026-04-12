@@ -65,7 +65,7 @@ export default function Login() {
         {/* Floating element for Desktop view only */}
         <div className="hidden lg:flex absolute bottom-12 left-16 items-center gap-4 text-white/50 text-sm">
           <div className="w-12 h-[1px] bg-white/30"></div>
-          <span>© 2027 Portal Latihan SD. All Rights Reserved.</span>
+          <span>© 2027 Portal Latihan TKA | UPTD SDN MUNCUL 02. All Rights Reserved</span>
         </div>
       </div>
 

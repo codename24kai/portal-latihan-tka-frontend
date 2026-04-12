@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
-import { 
-  Home, 
-  PenTool, 
-  BookOpen, 
-  Settings, 
-  Moon, 
-  Sun, 
+import {
+  Home,
+  PenTool,
+  BookOpen,
+  Settings,
+  Moon,
+  Sun,
   LogOut,
   Menu,
   ChevronLeft
@@ -34,10 +34,10 @@ export default function StudentLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const navItems = [
-    { label: 'Home', icon: Home, path: '/', end: true },
-    { label: 'Test', icon: PenTool, path: '/test' },
-    { label: 'Modul', icon: BookOpen, path: '/modules' },
-    { label: 'Setting', icon: Settings, path: '/settings' },
+    { label: 'Beranda', icon: Home, path: '/', end: true },
+    { label: 'Latihan', icon: PenTool, path: '/test' },
+    { label: 'Modul Belajar', icon: BookOpen, path: '/modules' },
+    { label: 'Pengaturan', icon: Settings, path: '/settings' },
   ];
 
   const handleLogout = () => {
@@ -49,7 +49,7 @@ export default function StudentLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      
+
       {/* ============================================================
           1. DESKTOP SIDEBAR (Visible md+)
           Fixed left column, full height, collapsible width
@@ -62,14 +62,14 @@ export default function StudentLayout() {
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
             <Link to="/" className="flex items-center gap-3 overflow-hidden animate-in fade-in slide-in-from-left-2 duration-300">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
-                <BookOpen size={24} />
+              <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                <img src="/logo-sd-1.svg" alt="Logo" className="w-10 h-10 object-contain shadow-lg rounded-xl" />
               </div>
               <span className="font-black text-xl tracking-tight text-slate-800 dark:text-white whitespace-nowrap">PORTAL TKA</span>
             </Link>
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg mx-auto shrink-0 animate-in zoom-in duration-300">
-               <BookOpen size={24} />
+            <div className="w-10 h-10 flex items-center justify-center mx-auto shrink-0 animate-in zoom-in duration-300">
+              <img src="/logo-sd-1.svg" alt="Logo" className="w-10 h-10 object-contain shadow-lg rounded-xl" />
             </div>
           )}
         </div>
@@ -85,8 +85,8 @@ export default function StudentLayout() {
               className={({ isActive }) => `
                 flex items-center rounded-xl font-bold text-sm transition-all relative group
                 ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center mb-2'}
-                ${isActive 
-                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' 
+                ${isActive
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400'
                   : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50'
                 }
               `}
@@ -106,7 +106,7 @@ export default function StudentLayout() {
 
         {/* Sidebar Footer: Theme Toggle + Logout */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
-          <button 
+          <button
             onClick={toggleDarkMode}
             title={!isSidebarOpen ? 'Toggle Dark Mode' : ''}
             className={`
@@ -118,7 +118,7 @@ export default function StudentLayout() {
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
             {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">{isDark ? 'Mode Terang' : 'Mode Gelap'}</span>}
           </button>
-          <button 
+          <button
             onClick={handleLogout}
             title={!isSidebarOpen ? 'Keluar' : ''}
             className={`
@@ -139,14 +139,14 @@ export default function StudentLayout() {
           ============================================================ */}
       <header className="md:hidden sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between z-40">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md">
-            <BookOpen size={18} />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src="/logo-sd-1.svg" alt="Logo" className="w-8 h-8 object-contain shadow-md rounded-lg" />
           </div>
           <span className="font-bold text-slate-800 dark:text-white text-sm">PORTAL TKA</span>
         </div>
         <div className="flex items-center gap-3">
           <NetworkIndicator isOnline={isOnline} />
-          <button 
+          <button
             onClick={toggleDarkMode}
             className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300"
           >
@@ -164,29 +164,29 @@ export default function StudentLayout() {
         ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'} 
         transition-all duration-300 min-h-screen flex flex-col
       `}>
-        
+
         {/* Desktop Top Utility Bar (burger + network status + user info) */}
         <div className="hidden md:flex h-16 px-8 items-center justify-between bg-transparent shrink-0">
-           {/* Sidebar Toggle Burger */}
-           <button 
-             onClick={toggleSidebar}
-             className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-indigo-600 transition-all hover:shadow-md active:scale-90"
-           >
-             {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
-           </button>
+          {/* Sidebar Toggle Burger */}
+          <button
+            onClick={toggleSidebar}
+            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-indigo-600 transition-all hover:shadow-md active:scale-90"
+          >
+            {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
+          </button>
 
-           <div className="flex items-center gap-4">
-             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
-               <NetworkIndicator isOnline={isOnline} />
-             </div>
-             <div className="flex items-center gap-3">
-               <div className="text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Siswa</p>
-                  <p className="text-sm font-black text-slate-800 dark:text-white whitespace-nowrap">Budi Santoso</p>
-               </div>
-               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 border-2 border-white dark:border-slate-700 shadow-md" />
-             </div>
-           </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <NetworkIndicator isOnline={isOnline} />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Siswa</p>
+                <p className="text-sm font-black text-slate-800 dark:text-white whitespace-nowrap">Budi Kialang</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 border-2 border-white dark:border-slate-700 shadow-md" />
+            </div>
+          </div>
         </div>
 
         {/* OUTLET WRAPPER */}
