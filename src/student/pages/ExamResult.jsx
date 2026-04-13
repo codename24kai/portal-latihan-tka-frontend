@@ -13,7 +13,8 @@ export default function ExamResult() {
   const navigate = useNavigate();
   const { isDark, toggleDarkMode } = useDarkMode();
 
-  const { answers = {}, totalQuestions = 40, timeUp = false } = location.state || {};
+  const { answers = {}, totalQuestions = 40, timeUp = false, examType = 'practice' } = location.state || {};
+  const isTryout = examType === 'tryout';
 
   // Calculate score based on mock correct answers
   const { correctCount, wrongCount, unanswered, score } = useMemo(() => {
@@ -93,16 +94,29 @@ export default function ExamResult() {
           {/* LEFT COLUMN: Score & Stats */}
           <div className="space-y-8">
             {/* Score Card */}
-            <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-3xl shadow-card dark:shadow-none p-8 text-center animate-slide-up">
-              <p className="text-sm text-slate-400 dark:text-slate-400 font-medium mb-2">Skor Akhir</p>
-              <p className={`text-7xl font-extrabold ${getScoreColor()} mb-2`}>
-                {score}
-              </p>
-              <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">dari 100 poin</p>
-              <div className="py-3 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl inline-block">
-                <p className="text-xl font-bold text-dark dark:text-slate-200">{getScoreLabel()}</p>
+            {isTryout ? (
+              <div className="bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[3rem] p-12 text-center animate-pulse">
+                <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                  <CheckCircle2 size={40} />
+                </div>
+                <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-4 italic tracking-tight underline decoration-orange-400 decoration-4 underline-offset-8 uppercase">Jawaban Tersimpan</h3>
+                <p className="text-slate-500 dark:text-slate-400 font-bold leading-relaxed px-4">
+                  Terima kasih telah menyelesaikan simulasi ini. <br/>
+                  <span className="text-orange-600 dark:text-orange-400 uppercase tracking-widest text-[10px] block mt-4">Nilai akan diumumkan oleh bapak/ibu guru.</span>
+                </p>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-3xl shadow-card dark:shadow-none p-8 text-center animate-slide-up">
+                <p className="text-sm text-slate-400 dark:text-slate-400 font-medium mb-2">Skor Akhir</p>
+                <p className={`text-7xl font-extrabold ${getScoreColor()} mb-2`}>
+                  {score}
+                </p>
+                <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">dari 100 poin</p>
+                <div className="py-3 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl inline-block">
+                  <p className="text-xl font-bold text-dark dark:text-slate-200">{getScoreLabel()}</p>
+                </div>
+              </div>
+            )}
 
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-4">
@@ -135,49 +149,51 @@ export default function ExamResult() {
           {/* RIGHT COLUMN: Summary & Actions */}
           <div className="space-y-8">
             {/* Progress Summary Bars */}
-            <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-2xl shadow-card dark:shadow-none p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
-              <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-6">Analisis Jawaban</h3>
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-500 dark:text-slate-400">Akurasi Benar</span>
-                    <span className="font-bold text-correct">{correctCount}/{totalQuestions}</span>
+            {!isTryout && (
+              <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-700 rounded-2xl shadow-card dark:shadow-none p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
+                <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-6">Analisis Jawaban</h3>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-slate-500 dark:text-slate-400">Akurasi Benar</span>
+                      <span className="font-bold text-correct">{correctCount}/{totalQuestions}</span>
+                    </div>
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-correct to-secondary rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${(correctCount / totalQuestions) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-correct to-secondary rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${(correctCount / totalQuestions) * 100}%` }}
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-500 dark:text-slate-400">Total Salah</span>
-                    <span className="font-bold text-incorrect">{wrongCount}/{totalQuestions}</span>
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-slate-500 dark:text-slate-400">Total Salah</span>
+                      <span className="font-bold text-incorrect">{wrongCount}/{totalQuestions}</span>
+                    </div>
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-incorrect to-accent rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${(wrongCount / totalQuestions) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-incorrect to-accent rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${(wrongCount / totalQuestions) * 100}%` }}
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-500 dark:text-slate-400">Tanpa Jawaban</span>
-                    <span className="font-bold text-slate-400 dark:text-slate-500">{unanswered}/{totalQuestions}</span>
-                  </div>
-                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-slate-300 dark:bg-slate-700 rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${(unanswered / totalQuestions) * 100}%` }}
-                    />
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-slate-500 dark:text-slate-400">Tanpa Jawaban</span>
+                      <span className="font-bold text-slate-400 dark:text-slate-500">{unanswered}/{totalQuestions}</span>
+                    </div>
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-slate-300 dark:bg-slate-700 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${(unanswered / totalQuestions) * 100}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: '500ms' }}>

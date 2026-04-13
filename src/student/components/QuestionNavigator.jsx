@@ -11,6 +11,7 @@ export default function QuestionNavigator({
   totalQuestions,
   currentQuestion,
   answers,
+  flaggedQuestions,
   onGoToQuestion,
 }) {
   if (!isOpen) return null;
@@ -61,6 +62,10 @@ export default function QuestionNavigator({
             <span className="w-4 h-4 rounded-full bg-slate-100 dark:bg-dark-bg border border-slate-200 dark:border-dark-border" />
             <span className="text-slate-400/80">Belum Dijawab</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="w-4 h-4 rounded-full bg-orange-400 shadow-glow shadow-orange-500/30" />
+            <span className="text-orange-500">Ditandai (Ragu)</span>
+          </div>
         </div>
 
         {/* Question Grid: Responsive column counts */}
@@ -69,6 +74,7 @@ export default function QuestionNavigator({
             const num = i + 1;
             const isAnswered = answers[num] !== undefined;
             const isCurrent = num === currentQuestion;
+            const isFlagged = flaggedQuestions?.has(num);
 
             return (
               <button
@@ -79,7 +85,7 @@ export default function QuestionNavigator({
                 }}
                 className={`w-full aspect-square rounded-2xl text-base font-extrabold
                            flex items-center justify-center
-                           transition-all duration-300 active:scale-75
+                           transition-all duration-300 active:scale-75 relative
                            ${
                              isCurrent
                                ? 'bg-primary text-white shadow-glow scale-110 ring-4 ring-primary/10'
@@ -89,6 +95,9 @@ export default function QuestionNavigator({
                            }`}
               >
                 {num}
+                {isFlagged && (
+                  <div className="absolute top-1 right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white dark:border-dark-surface animate-pulse" />
+                )}
               </button>
             );
           })}

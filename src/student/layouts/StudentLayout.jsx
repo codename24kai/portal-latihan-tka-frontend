@@ -9,11 +9,18 @@ import {
   Sun,
   LogOut,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  UserCircle,
+  HelpCircle
 } from 'lucide-react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import NetworkIndicator from '../../components/NetworkIndicator';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+
+const userData = {
+  name: 'Budi Kialang',
+  gender: 'Laki-laki'
+};
 
 /**
  * StudentLayout — The "Bulletproof Shell"
@@ -86,7 +93,7 @@ export default function StudentLayout() {
                 flex items-center rounded-xl font-bold text-sm transition-all relative group
                 ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center mb-2'}
                 ${isActive
-                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400'
+                  ? 'bg-teal-50 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400'
                   : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50'
                 }
               `}
@@ -104,8 +111,22 @@ export default function StudentLayout() {
           ))}
         </nav>
 
-        {/* Sidebar Footer: Theme Toggle + Logout */}
+        {/* Sidebar Footer: Theme Toggle + Help + Logout */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
+          
+          <Link
+            to="/help"
+            title={!isSidebarOpen ? 'Bantuan' : ''}
+            className={`
+              flex items-center rounded-xl font-bold text-sm transition-all w-full
+              ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center'}
+              text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50
+            `}
+          >
+            <HelpCircle size={20} />
+            {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">Bantuan</span>}
+          </Link>
+
           <button
             onClick={toggleDarkMode}
             title={!isSidebarOpen ? 'Toggle Dark Mode' : ''}
@@ -118,6 +139,7 @@ export default function StudentLayout() {
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
             {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">{isDark ? 'Mode Terang' : 'Mode Gelap'}</span>}
           </button>
+
           <button
             onClick={handleLogout}
             title={!isSidebarOpen ? 'Keluar' : ''}
@@ -170,7 +192,7 @@ export default function StudentLayout() {
           {/* Sidebar Toggle Burger */}
           <button
             onClick={toggleSidebar}
-            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-indigo-600 transition-all hover:shadow-md active:scale-90"
+            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-teal-600 transition-all hover:shadow-md active:scale-90"
           >
             {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
           </button>
@@ -184,7 +206,12 @@ export default function StudentLayout() {
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Siswa</p>
                 <p className="text-sm font-black text-slate-800 dark:text-white whitespace-nowrap">Budi Kialang</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 border-2 border-white dark:border-slate-700 shadow-md" />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-md ${userData.gender === 'Laki-laki'
+                  ? 'bg-gradient-to-br from-teal-400 to-teal-600'
+                  : 'bg-gradient-to-br from-orange-400 to-yellow-500'
+                }`}>
+                <UserCircle size={24} className="text-white/90" />
+              </div>
             </div>
           </div>
         </div>
@@ -208,13 +235,13 @@ export default function StudentLayout() {
               end={item.end}
               className={({ isActive }) => `
                 flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all
-                ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}
+                ${isActive ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400 dark:text-slate-500'}
               `}
             >
               {({ isActive }) => (
                 <>
                   <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-center">{item.label}</span>
                 </>
               )}
             </NavLink>

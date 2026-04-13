@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* KaTeX Math CSS */
+@import 'katex/dist/katex.min.css';
+
 @layer base {
   *,
   *::before,

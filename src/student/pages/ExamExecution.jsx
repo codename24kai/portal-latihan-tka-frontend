@@ -24,6 +24,7 @@ export default function ExamExecution() {
   const [showNavigator, setShowNavigator] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [flaggedQuestions, setFlaggedQuestions] = useState(new Set());
 
   const questions = mockQuestions;
   const totalQuestions = questions.length;
@@ -75,6 +76,19 @@ export default function ExamExecution() {
     },
     [currentNumber]
   );
+  
+  // Flagging
+  const handleToggleFlag = useCallback(() => {
+    setFlaggedQuestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(currentNumber)) {
+        next.delete(currentNumber);
+      } else {
+        next.add(currentNumber);
+      }
+      return next;
+    });
+  }, [currentNumber]);
 
   // Submit handlers
   const handleSubmitClick = useCallback(() => {
@@ -112,6 +126,21 @@ export default function ExamExecution() {
             text={currentQuestion.text}
             image={currentQuestion.image}
           />
+          
+          {/* Flag Button */}
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleToggleFlag}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all border-2 ${
+                flaggedQuestions.has(currentNumber)
+                  ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm'
+                  : 'bg-white dark:bg-dark border-slate-100 dark:border-dark-border text-slate-400 hover:border-slate-200'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${flaggedQuestions.has(currentNumber) ? 'bg-orange-500 animate-pulse' : 'bg-slate-300'}`} />
+              {flaggedQuestions.has(currentNumber) ? 'Ditandai (Ragu-ragu)' : 'Tandai Soal'}
+            </button>
+          </div>
 
           {/* Answer Options Grid */}
           <div className="flex flex-col gap-3 mt-6">
@@ -144,6 +173,7 @@ export default function ExamExecution() {
         totalQuestions={totalQuestions}
         currentQuestion={currentNumber}
         answers={answers}
+        flaggedQuestions={flaggedQuestions}
         onGoToQuestion={goToQuestion}
       />
 

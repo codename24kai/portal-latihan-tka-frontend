@@ -54,6 +54,8 @@ export default {
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
         'bounce-in': 'bounceIn 0.5s ease-out',
         'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+        'shimmer': 'shimmer 2s infinite',
+        'bounce-subtle': 'bounceSubtle 2s ease-in-out infinite',
       },
       keyframes: {
         shake: {
@@ -86,6 +88,13 @@ export default {
           '0%': { opacity: '0', transform: 'scale(0.8)' },
           '50%': { transform: 'scale(1.05)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+        bounceSubtle: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
         },
       },
     },

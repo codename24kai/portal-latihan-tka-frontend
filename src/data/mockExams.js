@@ -12,6 +12,7 @@ const mockExams = [
     status: 'available', // 'available' | 'in-progress' | 'completed'
     score: null,
     deadline: '2026-04-15',
+    type: 'tryout'
   },
   {
     id: 2,
@@ -25,6 +26,7 @@ const mockExams = [
     status: 'available',
     score: null,
     deadline: '2026-04-15',
+    type: 'tryout'
   },
   {
     id: 3,
@@ -38,6 +40,7 @@ const mockExams = [
     status: 'completed',
     score: 85,
     deadline: '2026-04-15',
+    type: 'practice'
   },
   {
     id: 4,
@@ -51,6 +54,7 @@ const mockExams = [
     status: 'available',
     score: null,
     deadline: '2026-04-15',
+    type: 'practice'
   },
 ];
 

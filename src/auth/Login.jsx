@@ -41,30 +41,30 @@ export default function Login() {
 
       {/* --- VISUAL SECTION --- */}
       {/* Mobile: Top Header | Desktop: Left Column (55%) */}
-      <div className="relative w-full lg:w-[55%] lg:min-h-screen bg-gradient-to-br from-indigo-700 via-purple-700 to-teal-500 flex flex-col justify-center items-center p-8 pt-20 pb-32 lg:p-16 overflow-hidden">
+      <div className="relative w-full lg:w-[55%] lg:min-h-screen bg-gradient-to-br from-orange-400 via-yellow-300 to-teal-500 flex flex-col justify-center items-center p-8 pt-20 pb-32 lg:p-16 overflow-hidden">
 
         {/* Dynamic CSS Glow Blobs for Depth */}
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-white/20 rounded-full blur-[100px] animate-pulse pointer-events-none" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-900/40 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-orange-900/40 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 text-center lg:text-left max-w-2xl w-full">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-sm font-semibold mb-6 tracking-wide uppercase">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-black/5 backdrop-blur-md border border-black/10 text-slate-900 text-sm font-bold mb-6 tracking-wide uppercase">
             Platform Edukasi Terpadu
           </div>
 
-          <h1 className="text-5xl lg:text-8xl font-black text-white tracking-tight leading-[0.9] mb-4 lg:mb-8 drop-shadow-2xl">
-            Portal Latihan <span className="text-teal-300">TKA</span>
+          <h1 className="text-5xl lg:text-8xl font-black text-slate-900 tracking-tight leading-[0.9] mb-4 lg:mb-8">
+            Portal Latihan <span className="text-teal-700">TKA</span>
           </h1>
 
-          <p className="text-xl lg:text-3xl font-medium text-white/80 leading-relaxed max-w-lg">
+          <p className="text-xl lg:text-3xl font-medium text-slate-900 leading-relaxed max-w-lg">
             Satu langkah lebih dekat menuju impianmu. <br className="hidden lg:block" />
-            <span className="text-white font-bold italic underline decoration-teal-400 decoration-2 underline-offset-4">Siap Taklukkan Ujian!</span>
+            <span className="text-slate-900 font-black italic underline decoration-teal-600 decoration-4 underline-offset-8">Siap Taklukkan Ujian!</span>
           </p>
         </div>
 
         {/* Floating element for Desktop view only */}
-        <div className="hidden lg:flex absolute bottom-12 left-16 items-center gap-4 text-white/50 text-sm">
-          <div className="w-12 h-[1px] bg-white/30"></div>
+        <div className="hidden lg:flex absolute bottom-12 left-16 items-center gap-4 text-slate-900/60 text-sm font-bold">
+          <div className="w-12 h-[1.5px] bg-slate-900/20"></div>
           <span>© 2027 Portal Latihan TKA | UPTD SDN MUNCUL 02. All Rights Reserved</span>
         </div>
       </div>
@@ -76,10 +76,10 @@ export default function Login() {
         {/* Theme Toggle (Fixed position for accessibility) */}
         <button
           onClick={toggleDarkMode}
-          className="absolute top-6 right-6 lg:top-10 lg:right-10 w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-all hover:rotate-12 active:scale-90 z-50 focus:ring-2 focus:ring-indigo-500"
+          className="absolute top-6 right-6 lg:top-10 lg:right-10 w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-all hover:rotate-12 active:scale-90 z-50 focus:ring-2 focus:ring-orange-500"
           aria-label="Toggle Dark Mode"
         >
-          {isDark ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-indigo-600" />}
+          {isDark ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-orange-600" />}
         </button>
 
         {/* Login Card Container */}
@@ -111,13 +111,13 @@ export default function Login() {
                   Username
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-600 transition-colors">
                     <User size={18} />
                   </div>
                   <input
                     type="text"
                     id="username"
-                    className="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-base transition-all placeholder:text-slate-400"
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-base transition-all placeholder:text-slate-400"
                     placeholder="Masukkan username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -132,13 +132,13 @@ export default function Login() {
                   Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-600 transition-colors">
                     <Key size={18} />
                   </div>
                   <input
                     type="password"
                     id="password"
-                    className="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-base transition-all placeholder:text-slate-400"
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-base transition-all placeholder:text-slate-400"
                     placeholder="Masukkan password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -151,7 +151,7 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-indigo-200 dark:shadow-indigo-900/20 hover:scale-[1.02] transition-all active:scale-[0.98] mt-4 group"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black text-lg py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-orange-200 dark:shadow-orange-950/20 hover:scale-[1.02] transition-all active:scale-[0.98] mt-4 group"
             >
               Masuk Sekarang
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -159,8 +159,8 @@ export default function Login() {
           </form>
 
           {/* Premium Demo Hint Box */}
-          <div className="mt-10 p-5 rounded-2xl bg-indigo-50/50 dark:bg-slate-900/50 border border-indigo-100 dark:border-slate-700">
-            <h3 className="text-[11px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+          <div className="mt-10 p-5 rounded-2xl bg-orange-50/50 dark:bg-slate-900/50 border border-orange-100 dark:border-slate-700">
+            <h3 className="text-[11px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-2 mb-4">
               <Info className="w-3.5 h-3.5" /> Demo Access Credentials
             </h3>
             <div className="grid grid-cols-1 gap-3">
@@ -171,7 +171,7 @@ export default function Login() {
               ].map((role) => (
                 <div key={role.label} className="flex items-center justify-between text-xs">
                   <span className="text-slate-600 dark:text-slate-400 font-semibold">{role.label}</span>
-                  <span className="bg-white dark:bg-slate-800 px-3 py-1 rounded-lg border border-indigo-100 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 font-mono font-bold shadow-sm">
+                  <span className="bg-white dark:bg-slate-800 px-3 py-1 rounded-lg border border-orange-100 dark:border-slate-700 text-orange-700 dark:text-orange-300 font-mono font-bold shadow-sm">
                     {role.creds}
                   </span>
                 </div>
