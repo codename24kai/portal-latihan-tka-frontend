@@ -18,7 +18,7 @@ import {
 import mockQuestions from '../../data/mockQuestions';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { motion, AnimatePresence } from 'framer-motion';
-import MathText from '../../components/MathText';
+import MathRenderer from '../../components/ui/MathRenderer';
 
 /**
  * ExamResult Page — Post-Exam Performance Summary
@@ -277,7 +277,7 @@ export default function ExamResult() {
                             {isCorrect ? 'Tepat' : 'Terus Belajar'}
                           </span>
                         </div>
-                        <h4 className="font-bold text-slate-800 dark:text-white"><MathText text={q.text} /></h4>
+                        <h4 className="font-bold text-slate-800 dark:text-white"><MathRenderer text={q.text} /></h4>
                         <div className="flex flex-col sm:flex-row gap-4 pt-2">
                           <div className="flex-1 space-y-1">
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jawabanmu</p>

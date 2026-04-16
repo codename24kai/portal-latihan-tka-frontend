@@ -1,5 +1,5 @@
 import { ImageIcon } from 'lucide-react';
-import MathText from '../../components/MathText';
+import MathRenderer from '../../components/ui/MathRenderer';
 
 /**
  * Displays the question text and optional image.
@@ -18,7 +18,7 @@ export default function QuestionContent({ questionNumber, text, image, imageUrl 
 
       {/* Question text: High contrast in both modes */}
       <div className="text-xl sm:text-2xl leading-relaxed text-slate-800 dark:text-slate-100 font-semibold mb-8 transition-colors">
-        <MathText text={text} />
+        <MathRenderer text={text} />
       </div>
 
       {/* Image box: Dark mode border and background adjustment */}

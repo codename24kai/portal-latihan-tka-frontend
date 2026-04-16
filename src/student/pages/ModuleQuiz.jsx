@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   X
 } from 'lucide-react';
-import MathText from '../../components/MathText';
+import MathRenderer from '../../components/ui/MathRenderer';
 import OptionCard from '../components/OptionCard';
 import QuizResult from '../components/QuizResult';
 import QuizGuideModal from '../components/QuizGuideModal';
@@ -200,7 +200,7 @@ export default function ModuleQuiz() {
                   Poin Menunggumu!
                 </div>
                 <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 dark:text-white leading-[1.15] tracking-tight">
-                  <MathText text={currentQuestion.text} />
+                  <MathRenderer text={currentQuestion.text} />
                 </h3>
               </div>
 
@@ -220,7 +220,7 @@ export default function ModuleQuiz() {
                 <OptionCard
                   key={index}
                   label={["A", "B", "C", "D"][index]}
-                  text={<MathText text={option} />}
+                  text={<MathRenderer text={option} />}
                   isSelected={selectedOption === index}
                   onSelect={() => handleOptionSelect(index)}
                   disabled={selectedOption !== null}

@@ -24,6 +24,7 @@ import Dropdown from '../../components/ui/Dropdown';
 import Badge from '../../components/ui/Badge';
 import DataTable from '../../components/ui/DataTable';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import MathRenderer from '../../components/ui/MathRenderer';
 
 /**
  * AddTryout Page — Advanced Session Creator
@@ -363,7 +364,7 @@ export default function AddTryout() {
                               {selectedQuestionIds.includes(q.id) && <CheckCircle2 size={12} />}
                            </div>
                         </td>
-                        <td className="py-4 text-xs font-bold text-slate-700">{q.text}</td>
+                        <td className="py-4 text-xs font-bold text-slate-700"><MathRenderer text={q.text} /></td>
                         <td className="py-4 text-center"><Badge text={q.difficulty} variant={q.difficulty === 'Mudah' ? 'Success' : 'Danger'} /></td>
                       </tr>
                     )}

@@ -23,6 +23,7 @@ import Dropdown from '../../components/ui/Dropdown';
 import Badge from '../../components/ui/Badge';
 import DataTable from '../../components/ui/DataTable';
 import { SUBJECT_CATEGORIES, SUBJECTS } from '../../constants/subjects';
+import MathRenderer from '../../components/ui/MathRenderer';
 
 // Mock question bank data
 export const mockQuestionBank = [
@@ -75,7 +76,9 @@ const AnswerDropdown = ({ question }) => {
                   }`}>
                     {key}
                   </span>
-                  <p className="text-[10px] font-bold truncate" title={val}>{val}</p>
+                  <p className="text-[10px] font-bold truncate" title={val}>
+                    <MathRenderer text={val} />
+                  </p>
                 </div>
               ))}
             </div>
@@ -397,13 +400,17 @@ export default function QuestionBank() {
              <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto">
                 <div className="space-y-3">
                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pertanyaan</label>
-                   <p className="text-lg font-bold text-slate-800 dark:text-white leading-relaxed">{previewQuestion.text}</p>
+                   <div className="text-lg font-bold text-slate-800 dark:text-white leading-relaxed">
+                      <MathRenderer text={previewQuestion.text} />
+                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    {Object.entries(previewQuestion.options).map(([key, val]) => (
                      <div key={key} className={`p-4 rounded-2xl border flex items-center gap-4 ${previewQuestion.correctAnswer === key ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500' : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-700'}`}>
                         <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${previewQuestion.correctAnswer === key ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-400'}`}>{key}</span>
-                        <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{val}</p>
+                        <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                           <MathRenderer text={val} />
+                        </p>
                         {previewQuestion.correctAnswer === key && <CheckCircle size={16} className="text-emerald-500 ml-auto" />}
                      </div>
                    ))}

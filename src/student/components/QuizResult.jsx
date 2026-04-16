@@ -16,7 +16,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import MathText from '../../components/MathText';
+import MathRenderer from '../../components/ui/MathRenderer';
 
 /**
  * QuizResult — Child-Friendly Performance Summary
@@ -221,7 +221,7 @@ export default function QuizResult({ percentage, score, total, history, timeTake
                         )}
                       </div>
                       <h4 className="text-lg font-black text-slate-800 dark:text-white leading-snug">
-                        <MathText text={item.questionText} />
+                        <MathRenderer text={item.questionText} />
                       </h4>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -232,14 +232,14 @@ export default function QuizResult({ percentage, score, total, history, timeTake
                               ? 'bg-white dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
                               : 'bg-white dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400'
                           }`}>
-                            <MathText text={item.studentAnswer} />
+                            <MathRenderer text={item.studentAnswer} />
                           </div>
                         </div>
                         {!item.isCorrect && (
                           <div className="space-y-1">
                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jawaban Benar</span>
                             <div className="p-4 bg-emerald-500 text-white dark:bg-emerald-600 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-500/20">
-                              <MathText text={item.correctAnswer} />
+                              <MathRenderer text={item.correctAnswer} />
                             </div>
                           </div>
                         )}

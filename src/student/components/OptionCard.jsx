@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import MathText from '../../components/MathText';
+import MathRenderer from '../../components/ui/MathRenderer';
 
 /**
  * Single answer option card (A, B, C, or D).
@@ -71,7 +71,7 @@ export default function OptionCard({ label, text, isSelected, onSelect, disabled
               : 'text-slate-700 dark:text-slate-200'
         }`}
       >
-        <MathText text={text} />
+        <MathRenderer text={text} />
       </span>
 
       {/* Feedback Popups for students */}
