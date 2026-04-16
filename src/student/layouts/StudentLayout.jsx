@@ -59,7 +59,7 @@ export default function StudentLayout() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+    <div className="min-h-[100dvh] flex flex-col md:flex-row bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
 
       {/* ============================================================
           1. DESKTOP SIDEBAR (Visible md+)

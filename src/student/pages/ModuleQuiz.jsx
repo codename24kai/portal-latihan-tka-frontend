@@ -139,7 +139,7 @@ export default function ModuleQuiz() {
   }
 
   return (
-    <div className="h-screen bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in relative">
       {/* 1. FOCUS MODE HEADER */}
       <header className="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 px-6 md:px-12 flex items-center justify-between shrink-0 z-50">
         <div className="flex items-center gap-4">

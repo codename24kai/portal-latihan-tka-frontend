@@ -14,7 +14,7 @@ export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div id="admin-layout" className="flex h-screen w-full overflow-hidden bg-indigo-50/40 dark:bg-slate-900 transition-colors duration-300">
+    <div id="admin-layout" className="flex min-h-[100dvh] w-full bg-indigo-50/40 dark:bg-slate-900 transition-colors duration-300">
       {/* Sidebar - Fixed width/height managed inside Sidebar component */}
       <Sidebar 
         mobileMenuOpen={mobileMenuOpen} 
@@ -24,7 +24,7 @@ export default function AdminLayout() {
       />
 
       {/* Main Content Shell - Made scrollable for Glassmorphism */}
-      <div className={`flex-1 flex flex-col min-w-0 h-screen overflow-y-auto overflow-x-hidden transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 min-h-[100dvh] overflow-y-auto overflow-x-hidden transition-all duration-300 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'}`}>
         
         {/* Top Header - Enhanced Glassmorphism (h-20, locked z-40) */}
         <header className="h-20 shrink-0 sticky top-0 z-40 bg-white/70 dark:bg-slate-900/80 backdrop-blur-lg border-b border-indigo-100/50 dark:border-slate-800/50 flex items-center transition-all">
@@ -74,7 +74,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Content Area - Removed overflow-y-auto so it scrolls within parent shell */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 w-full">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 pb-32 lg:pb-8 w-full">
           <Outlet />
         </main>
       </div>

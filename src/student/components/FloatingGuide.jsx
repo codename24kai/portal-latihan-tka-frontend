@@ -22,7 +22,7 @@ export default function FloatingGuide() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={toggleModal}
-        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[60] w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-gradient-to-br from-orange-400 to-yellow-500 shadow-xl shadow-orange-500/30 flex items-center justify-center text-white transition-all overflow-hidden group"
+        className="fixed bottom-24 right-4 md:bottom-10 md:right-10 z-[60] w-14 h-14 md:w-16 md:h-16 scale-90 md:scale-100 rounded-3xl bg-gradient-to-br from-orange-400 to-yellow-500 shadow-xl shadow-orange-500/30 flex items-center justify-center text-white transition-all overflow-hidden group"
       >
         <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
         <HelpCircle size={32} />
