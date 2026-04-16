@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Type,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SUBJECTS, SUBJECT_CATEGORIES } from '../../constants/subjects';
+import { mockQuestionBank } from './QuestionBank';
 import Dropdown from '../../components/ui/Dropdown';
 import Badge from '../../components/ui/Badge';
 import VisualMathEditor from '../../admin/components/VisualMathEditor';
@@ -27,8 +28,9 @@ import VisualMathEditor from '../../admin/components/VisualMathEditor';
  */
 export default function AddQuestion() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
 
-  // 1. Form States
   const [formData, setFormData] = useState({
     subject: SUBJECTS[0].name,
     difficulty: 'Sedang',
@@ -37,6 +39,26 @@ export default function AddQuestion() {
     correctAnswer: 'A',
     options: { A: '', B: '', C: '', D: '' }
   });
+
+  // Fetch data if editing
+  useEffect(() => {
+    if (isEdit) {
+      const question = mockQuestionBank.find(q => q.id === parseInt(id));
+      if (question) {
+        setFormData({
+          subject: question.subject,
+          difficulty: question.difficulty,
+          questionText: question.text,
+          explanation: question.explanation || '',
+          correctAnswer: question.correctAnswer,
+          options: { ...question.options }
+        });
+      } else {
+        toast.error('Data soal tidak ditemukan');
+        navigate('/admin/question-bank');
+      }
+    }
+  }, [id, isEdit, navigate]);
 
   // 2. Media Handling State
   const [mediaTab, setMediaTab] = useState('url'); // 'url' | 'upload'
@@ -81,7 +103,7 @@ export default function AddQuestion() {
       toast.error('Teks soal harus diisi!');
       return;
     }
-    toast.success('Soal berhasil ditambahkan ke Bank Soal');
+    toast.success(isEdit ? 'Soal berhasil diperbarui' : 'Soal berhasil ditambahkan ke Bank Soal');
     setTimeout(() => navigate('/admin/question-bank'), 1500);
   };
 
@@ -98,8 +120,12 @@ export default function AddQuestion() {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Kreator Bank Soal</h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Tambahkan butir soal standar kompetensi baru</p>
+          <h1 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
+            {isEdit ? 'Update Butir Soal' : 'Kreator Bank Soal'}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+            {isEdit ? `Memperbarui standar kompetensi soal ID: #${id}` : 'Tambahkan butir soal standar kompetensi baru'}
+          </p>
         </div>
       </div>
 
@@ -335,7 +361,7 @@ export default function AddQuestion() {
                   onClick={handleSave}
                   className="bg-white text-slate-900 px-12 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95 shadow-xl shadow-white/10"
                 >
-                  Simpan ke Bank Soal
+                  {isEdit ? 'Perbarui Data Soal' : 'Simpan ke Bank Soal'}
                 </button>
             </div>
          </div>

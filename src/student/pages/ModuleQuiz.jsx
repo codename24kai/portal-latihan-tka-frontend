@@ -9,6 +9,7 @@ import {
 import MathText from '../../components/MathText';
 import OptionCard from '../components/OptionCard';
 import QuizResult from '../components/QuizResult';
+import QuizGuideModal from '../components/QuizGuideModal';
 
 /**
  * ModuleQuiz Page — Distraction-Free Focus Mode
@@ -19,11 +20,17 @@ export default function ModuleQuiz() {
   const navigate = useNavigate();
 
   // State Management
-  const [startTime] = useState(Date.now()); // Capture start time on mount
+  const [showGuide, setShowGuide] = useState(true);
+  const [startTime, setStartTime] = useState(null); 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answersMap, setAnswersMap] = useState({}); // { [index]: selectedOptionIndex }
   const [showResults, setShowResults] = useState(false);
   const [isFeedbackActive, setIsFeedbackActive] = useState(false);
+
+  const handleStartQuiz = () => {
+    setShowGuide(false);
+    setStartTime(Date.now());
+  };
 
   // Mock Question Data
   const questions = useMemo(() => {
@@ -127,10 +134,14 @@ export default function ModuleQuiz() {
     );
   }
 
+  if (showGuide) {
+    return <QuizGuideModal onStart={handleStartQuiz} />;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in relative">
+    <div className="h-screen bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in relative overflow-hidden">
       {/* 1. FOCUS MODE HEADER */}
-      <header className="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
+      <header className="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 px-6 md:px-12 flex items-center justify-between shrink-0 z-50">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
             <BookOpen size={20} />
@@ -150,8 +161,8 @@ export default function ModuleQuiz() {
         </button>
       </header>
       
-      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
-        <div className="max-w-5xl w-full space-y-8 md:space-y-12 py-6">
+      <main className="flex-1 overflow-y-auto w-full">
+        <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-8 space-y-8 md:space-y-12">
           
           {/* Progress Section */}
           <div className="space-y-6">
@@ -219,37 +230,41 @@ export default function ModuleQuiz() {
               ))}
             </div>
 
-            {/* Navigation Controls */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-10 border-t border-slate-100 dark:border-slate-700">
-              <button
-                disabled={currentIndex === 0}
-                onClick={handlePrevious}
-                className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black text-sm uppercase tracking-widest transition-all ${
-                  currentIndex === 0 
-                  ? 'text-slate-200 dark:text-slate-800 cursor-not-allowed' 
-                  : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                }`}
-              >
-                <ArrowLeft size={20} />
-                Kembali
-              </button>
-
-              <button
-                disabled={selectedOption === null}
-                onClick={handleNext}
-                className={`flex items-center justify-center gap-3 px-12 py-5 rounded-[2.5rem] font-black text-sm uppercase tracking-widest transition-all shadow-2xl active:scale-95 min-w-[280px] ${
-                  selectedOption === null
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-600/30'
-                }`}
-              >
-                {currentIndex === questions.length - 1 ? 'Selesaikan Kuis' : 'Lanjut ke Soal Berikutnya'}
-                <ArrowRight size={20} />
-              </button>
-            </div>
+            {/* Navigation Controls moved to fixed footer below */}
           </div>
         </div>
       </main>
+
+      {/* 2. NAVIGATION FOOTER - FIXED */}
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 p-4 md:p-6 shrink-0 z-50">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <button
+            disabled={currentIndex === 0}
+            onClick={handlePrevious}
+            className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black text-sm uppercase tracking-widest transition-all ${
+              currentIndex === 0 
+              ? 'text-slate-200 dark:text-slate-800 cursor-not-allowed' 
+              : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+            }`}
+          >
+            <ArrowLeft size={20} />
+            Kembali
+          </button>
+
+          <button
+            disabled={selectedOption === null}
+            onClick={handleNext}
+            className={`flex items-center justify-center gap-3 px-12 py-5 rounded-[2.5rem] font-black text-sm uppercase tracking-widest transition-all shadow-2xl active:scale-95 min-w-[280px] ${
+              selectedOption === null
+              ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
+              : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-600/30'
+            }`}
+          >
+            {currentIndex === questions.length - 1 ? 'Selesaikan Kuis' : 'Lanjut ke Soal Berikutnya'}
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      </footer>
       
       {/* Decorative Floating Star */}
       <div className="fixed bottom-10 right-10 w-32 h-32 bg-teal-400/10 dark:bg-teal-400/20 rounded-full blur-3xl pointer-events-none" />

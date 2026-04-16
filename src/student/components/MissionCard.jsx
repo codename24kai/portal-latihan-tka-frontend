@@ -108,7 +108,7 @@ export default function MissionCard({ exam, onStart, isPractice = false }) {
               <span className="text-2xl font-black text-teal-600">{exam.score}</span>
             </div>
             <button
-              onClick={() => onStart ? onStart(exam) : navigate(`/exam/${exam.id}`)}
+              onClick={() => onStart ? onStart(exam) : navigate(`/exam/${exam.id}/prepare`)}
               className="flex items-center justify-center gap-2 h-14 px-6 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all shrink-0"
             >
               <RotateCcw size={16} /> Kerjakan Ulang
@@ -117,7 +117,7 @@ export default function MissionCard({ exam, onStart, isPractice = false }) {
         ) : (
           <button
             id={`btn-start-exam-${exam.id}`}
-            onClick={() => onStart ? onStart(exam) : navigate(`/exam/${exam.id}`)}
+            onClick={() => onStart ? onStart(exam) : navigate(`/exam/${exam.id}/prepare`)}
             className={`w-full h-16 flex items-center justify-center gap-3 py-4 bg-gradient-to-r ${exam.color} text-white font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-indigo-200 dark:shadow-none transition-all duration-300 hover:scale-[1.02] active:scale-95`}
           >
             <Play size={20} fill="white" />

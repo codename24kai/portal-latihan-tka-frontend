@@ -16,10 +16,14 @@ import {
 import { useDarkMode } from '../../hooks/useDarkMode';
 import NetworkIndicator from '../../components/NetworkIndicator';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+import FloatingGuide from '../components/FloatingGuide';
+import Sidebar from '../components/Sidebar';
+import ProfileHeader from '../components/ProfileHeader';
 
 const userData = {
   name: 'Budi Kialang',
-  gender: 'Laki-laki'
+  gender: 'Laki-laki',
+  avatarId: 'boy-2' // Example avatar
 };
 
 /**
@@ -55,105 +59,21 @@ export default function StudentLayout() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
 
       {/* ============================================================
           1. DESKTOP SIDEBAR (Visible md+)
           Fixed left column, full height, collapsible width
           ============================================================ */}
-      <aside className={`
-        hidden md:flex fixed left-0 top-0 h-full bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col z-40 transition-all duration-300 ease-in-out
-        ${isSidebarOpen ? 'w-64' : 'w-20'}
-      `}>
-        {/* Brand Logo & Burger Toggle */}
-        <div className="p-6 flex items-center justify-between">
-          {isSidebarOpen ? (
-            <Link to="/" className="flex items-center gap-3 overflow-hidden animate-in fade-in slide-in-from-left-2 duration-300">
-              <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                <img src="/logo-sd-1.svg" alt="Logo" className="w-10 h-10 object-contain shadow-lg rounded-xl" />
-              </div>
-              <span className="font-black text-xl tracking-tight text-slate-800 dark:text-white whitespace-nowrap">PORTAL TKA</span>
-            </Link>
-          ) : (
-            <div className="w-10 h-10 flex items-center justify-center mx-auto shrink-0 animate-in zoom-in duration-300">
-              <img src="/logo-sd-1.svg" alt="Logo" className="w-10 h-10 object-contain shadow-lg rounded-xl" />
-            </div>
-          )}
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="flex-1 px-4 space-y-1 mt-4">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.label}
-              to={item.path}
-              end={item.end}
-              title={!isSidebarOpen ? item.label : ''}
-              className={({ isActive }) => `
-                flex items-center rounded-xl font-bold text-sm transition-all relative group
-                ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center mb-2'}
-                ${isActive
-                  ? 'bg-teal-50 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400'
-                  : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50'
-                }
-              `}
-            >
-              <item.icon size={20} className="shrink-0" />
-              {isSidebarOpen && (
-                <span className="whitespace-nowrap animate-in fade-in slide-in-from-left-1 duration-300">{item.label}</span>
-              )}
-              {!isSidebarOpen && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  {item.label}
-                </div>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Sidebar Footer: Theme Toggle + Help + Logout */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
-          
-          <Link
-            to="/help"
-            title={!isSidebarOpen ? 'Bantuan' : ''}
-            className={`
-              flex items-center rounded-xl font-bold text-sm transition-all w-full
-              ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center'}
-              text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50
-            `}
-          >
-            <HelpCircle size={20} />
-            {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">Bantuan</span>}
-          </Link>
-
-          <button
-            onClick={toggleDarkMode}
-            title={!isSidebarOpen ? 'Toggle Dark Mode' : ''}
-            className={`
-              flex items-center rounded-xl font-bold text-sm transition-all w-full
-              ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center'}
-              text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50
-            `}
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">{isDark ? 'Mode Terang' : 'Mode Gelap'}</span>}
-          </button>
-
-          <button
-            onClick={handleLogout}
-            title={!isSidebarOpen ? 'Keluar' : ''}
-            className={`
-              flex items-center rounded-xl font-bold text-sm transition-all w-full
-              ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center'}
-              text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20
-            `}
-          >
-            <LogOut size={20} />
-            {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">Keluar</span>}
-          </button>
-        </div>
-      </aside>
+      <Sidebar 
+        isSidebarOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
+        navItems={navItems}
+        handleLogout={handleLogout}
+        isDark={isDark}
+        toggleDarkMode={toggleDarkMode}
+        userData={userData}
+      />
 
       {/* ============================================================
           2. MOBILE TOP HEADER (Visible < md)
@@ -183,42 +103,22 @@ export default function StudentLayout() {
           - Contains desktop top bar + padded Outlet wrapper
           ============================================================ */}
       <main className={`
-        ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'} 
-        transition-all duration-300 min-h-screen flex flex-col
+        flex-1 flex flex-col min-w-0 transition-all duration-300
+        ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}
       `}>
 
-        {/* Desktop Top Utility Bar (burger + network status + user info) */}
-        <div className="hidden md:flex h-16 px-8 items-center justify-between bg-transparent shrink-0">
-          {/* Sidebar Toggle Burger */}
-          <button
-            onClick={toggleSidebar}
-            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-teal-600 transition-all hover:shadow-md active:scale-90"
-          >
-            {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
-          </button>
+        <ProfileHeader 
+          isSidebarOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          isOnline={isOnline}
+          userData={userData}
+        />
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
-              <NetworkIndicator isOnline={isOnline} />
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Siswa</p>
-                <p className="text-sm font-black text-slate-800 dark:text-white whitespace-nowrap">Budi Kialang</p>
-              </div>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-md ${userData.gender === 'Laki-laki'
-                  ? 'bg-gradient-to-br from-teal-400 to-teal-600'
-                  : 'bg-gradient-to-br from-orange-400 to-yellow-500'
-                }`}>
-                <UserCircle size={24} className="text-white/90" />
-              </div>
-            </div>
+        {/* PDOTLE WRAPPER - SCROLLABLE AREA */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 md:px-6 lg:px-8 pt-6 md:pt-8 pb-32 md:pb-8">
+          <div className="max-w-7xl mx-auto w-full">
+            <Outlet />
           </div>
-        </div>
-
-        {/* OUTLET WRAPPER */}
-        <div className="flex-1 px-4 sm:px-5 md:px-6 lg:px-8 pt-6 md:pt-8 pb-28 md:pb-8">
-          <Outlet />
         </div>
       </main>
 
@@ -249,6 +149,7 @@ export default function StudentLayout() {
         </nav>
       </footer>
 
+      <FloatingGuide />
     </div>
   );
 }

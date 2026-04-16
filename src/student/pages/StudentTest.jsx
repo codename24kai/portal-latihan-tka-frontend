@@ -84,12 +84,12 @@ export default function StudentTest() {
   const handleConfirmStart = () => {
     if (selectedExam.type === 'tryout') {
       if (token === 'TKA2026') {
-        navigate(`/exam/${selectedExam.id}`, { state: { examType: selectedExam.type } });
+        navigate(`/exam/${selectedExam.id}/prepare`, { state: { examType: selectedExam.type } });
       } else {
         setTokenError(true);
       }
     } else {
-      navigate(`/exam/${selectedExam.id}`, { state: { examType: selectedExam.type } });
+      navigate(`/exam/${selectedExam.id}/prepare`, { state: { examType: selectedExam.type } });
     }
   };
 

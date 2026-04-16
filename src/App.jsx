@@ -12,6 +12,8 @@ import StudentSetting from './student/pages/StudentSetting';
 import ModuleQuiz from './student/pages/ModuleQuiz';
 import ExamExecution from './student/pages/ExamExecution';
 import ExamResult from './student/pages/ExamResult';
+import PreSimulation from './student/pages/PreSimulation';
+import HelpCenter from './student/pages/HelpCenter';
 
 /* --- Admin Imports --- */
 import AdminLayout from './admin/layouts/AdminLayout';
@@ -64,10 +66,12 @@ export default function App() {
           <Route path="/test" element={<StudentTest />} />
           <Route path="/modules" element={<StudentModul />} />
           <Route path="/settings" element={<StudentSetting />} />
+          <Route path="/help" element={<HelpCenter />} />
         </Route>
 
         {/* Exam & Quiz Routes (no layout — distraction-free) */}
         <Route path="/modules/quiz/:moduleId" element={<RequireAuth allowedRoles={['student']}><ModuleQuiz /></RequireAuth>} />
+        <Route path="/exam/:examId/prepare" element={<RequireAuth allowedRoles={['student']}><PreSimulation /></RequireAuth>} />
         <Route path="/exam/:examId" element={<RequireAuth allowedRoles={['student']}><ExamExecution /></RequireAuth>} />
         <Route path="/exam/:examId/result" element={<RequireAuth allowedRoles={['student']}><ExamResult /></RequireAuth>} />
 
@@ -79,6 +83,7 @@ export default function App() {
           <Route path="users/edit/:id" element={<AddUser />} />
           <Route path="question-bank" element={<QuestionBank />} />
           <Route path="question-bank/add" element={<AddQuestion />} />
+          <Route path="question-bank/edit/:id" element={<AddQuestion />} />
           <Route path="tryout" element={<TryoutManagement />} />
           <Route path="tryout/add" element={<AddTryout />} />
           <Route path="tryout/edit/:id" element={<AddTryout />} />
@@ -93,6 +98,7 @@ export default function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="question-bank" element={<QuestionBank />} />
           <Route path="question-bank/add" element={<AddQuestion />} />
+          <Route path="question-bank/edit/:id" element={<AddQuestion />} />
           <Route path="tryout" element={<TryoutManagement />} />
           <Route path="tryout/add" element={<AddTryout />} />
           <Route path="tryout/edit/:id" element={<AddTryout />} />

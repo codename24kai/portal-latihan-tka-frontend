@@ -356,7 +356,10 @@ export default function QuestionBank() {
                    >
                      <Eye size={14} /> View
                    </button>
-                   <button className="px-3 py-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all font-black text-[10px] uppercase flex items-center gap-1.5">
+                   <button 
+                     onClick={() => navigate(`/admin/question-bank/edit/${q.id}`)}
+                     className="px-3 py-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all font-black text-[10px] uppercase flex items-center gap-1.5"
+                   >
                      <Edit2 size={14} /> Edit
                    </button>
                    <button
