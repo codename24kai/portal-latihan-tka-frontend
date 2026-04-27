@@ -1,73 +1,70 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
 /**
- * MathRenderer - Custom KaTeX renderer for React 19+.
- * 
+ * MathRenderer: A reusable component to render LaTeX strings using KaTeX.
  * Logic:
- * 1. Safely parse string for $ (inline) and $$ (block) math.
- * 2. Convert math parts to HTML using pure KaTeX.
- * 3. Escape normal text parts to prevent XSS.
- * 4. Render using dangerouslySetInnerHTML.
- * 
- * Anti-Crash: Using throwOnError: false for KaTeX.
+ * 1. Parses strings for $ (inline) and $$ (display) delimiters.
+ * 2. Uses katex.renderToString for fast, secure rendering.
+ * 3. Handles multi-line math and escapes HTML in plain text.
  */
-const MathRenderer = ({ text }) => {
-  // Safe Fallback: Handle null, undefined, or non-string inputs
-  if (!text || typeof text !== 'string') {
-    return null;
-  }
-
-  // Split text by math delimiters while keeping the delimiters in the output
-  const parts = text.split(/(\$\$.*?\$\$|\$.*?\$)/g);
-
-  const finalHtml = parts
-    .map((part) => {
+export default function MathRenderer({ text, className = '' }) {
+  const renderedContent = useMemo(() => {
+    if (!text || typeof text !== 'string') return text;
+    
+    // Split text by $...$ and $$...$$ delimiters
+    // [\s\S] matches any character including newlines
+    // The +? is non-greedy
+    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
+    
+    return parts.map((part) => {
       if (!part) return '';
 
-      // Block Math ($$ ... $$)
+      // Display Mode Math ($$ ... $$)
       if (part.startsWith('$$') && part.endsWith('$$')) {
+        const formula = part.slice(2, -2).trim();
         try {
-          const math = part.slice(2, -2);
-          return katex.renderToString(math.trim(), {
-            displayMode: true,
+          return katex.renderToString(formula, { 
+            displayMode: true, 
             throwOnError: false,
+            strict: false
           });
         } catch (e) {
-          return `<span class="text-rose-500">${part}</span>`;
+          console.error("KaTeX Display Error:", e);
+          return `<span class="text-rose-500 font-mono text-[10px]">[Math Error: ${part}]</span>`;
         }
-      }
-
-      // Inline Math ($ ... $)
+      } 
+      
+      // Inline Mode Math ($ ... $)
       if (part.startsWith('$') && part.endsWith('$')) {
+        const formula = part.slice(1, -1).trim();
         try {
-          const math = part.slice(1, -1);
-          return katex.renderToString(math.trim(), {
-            displayMode: false,
+          return katex.renderToString(formula, { 
+            displayMode: false, 
             throwOnError: false,
+            strict: false
           });
         } catch (e) {
-          return `<span class="text-rose-500">${part}</span>`;
+          console.error("KaTeX Inline Error:", e);
+          return `<span class="text-rose-500 font-mono text-[10px]">[Math Error: ${part}]</span>`;
         }
       }
 
-      // Normal Text - Escape HTML entities
+      // Plain text: Escape HTML to prevent XSS while allowing KaTeX HTML
       return part
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
-    })
-    .join('');
+    }).join('');
+  }, [text]);
 
   return (
-    <span
-      className="math-renderer-wrap inline-block w-full"
-      dangerouslySetInnerHTML={{ __html: finalHtml }}
+    <span 
+      className={`math-renderer-wrap inline-block w-full ${className}`}
+      dangerouslySetInnerHTML={{ __html: renderedContent }} 
     />
   );
-};
-
-export default MathRenderer;
+}

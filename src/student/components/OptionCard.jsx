@@ -6,14 +6,14 @@ import MathRenderer from '../../components/ui/MathRenderer';
  * Single answer option card (A, B, C, or D).
  * Enhanced with instant animated feedback for correctness.
  */
-export default function OptionCard({ label, text, isSelected, onSelect, disabled, isCorrect, isWrong }) {
+export default function OptionCard({ label, text, image, isSelected, onSelect, disabled, isCorrect, isWrong }) {
   return (
     <button
       id={`option-${label}`}
       onClick={onSelect}
       disabled={disabled}
       aria-pressed={isSelected}
-      className={`option-card group relative flex items-center gap-6 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all duration-300 ease-out select-none active:scale-[0.98] ${
+      className={`option-card group relative flex items-start gap-4 p-4 rounded-2xl border-2 transition-all duration-300 ease-out select-none active:scale-[0.98] ${
         isSelected
           ? isCorrect
             ? 'bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20 text-white'
@@ -27,13 +27,13 @@ export default function OptionCard({ label, text, isSelected, onSelect, disabled
     >
       {/* Option label circle */}
       <span
-        className={`flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center
-                     text-xl font-black transition-all duration-300 ${
+        className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+                     text-base font-black transition-all duration-300 mt-1 ${
                        isSelected
                          ? 'bg-white text-indigo-600 scale-110 shadow-lg'
                          : isCorrect && disabled
                            ? 'bg-emerald-500 text-white shadow-lg'
-                           : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900 group-hover:text-indigo-600'
+                           : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-300'
                      }`}
       >
         <AnimatePresence mode="wait">
@@ -62,17 +62,26 @@ export default function OptionCard({ label, text, isSelected, onSelect, disabled
       </span>
 
       {/* Option text content */}
-      <span
-        className={`flex-1 text-lg md:text-xl font-black text-left transition-colors duration-300 ${
-          isSelected 
-            ? 'italic tracking-tight text-white' 
-            : isCorrect && disabled
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-slate-700 dark:text-slate-200'
-        }`}
-      >
-        <MathRenderer text={text} />
-      </span>
+      <div className="flex-1 flex flex-col gap-3">
+        {text && (
+          <span
+            className={`text-sm md:text-base font-black text-left transition-colors duration-300 ${
+              isSelected 
+                ? 'italic tracking-tight text-white' 
+                : isCorrect && disabled
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-slate-700 dark:text-slate-200'
+            }`}
+          >
+            <MathRenderer text={text} />
+          </span>
+        )}
+        {image && (
+          <div className="w-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden p-2 border border-slate-100 dark:border-slate-700 shadow-sm">
+            <img src={image} alt={`Opsi ${label}`} className="max-h-32 w-full object-contain" />
+          </div>
+        )}
+      </div>
 
       {/* Feedback Popups for students */}
       <AnimatePresence>

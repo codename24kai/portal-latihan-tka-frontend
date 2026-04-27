@@ -24,12 +24,15 @@ export default function Login() {
     // Mock Login Logic
     if (username === 'student' && password === '123') {
       localStorage.setItem('userRole', 'student');
+      localStorage.setItem('assignedClass', '6A'); // Mock assigned class
       navigate('/');
-    } else if (username === 'teacher' && password === '123') {
-      localStorage.setItem('userRole', 'teacher');
-      navigate('/teacher');
+    } else if (username === 'guru' && password === '123') {
+      localStorage.setItem('userRole', 'guru');
+      localStorage.setItem('assignedClass', '6A'); // Mock assigned class for teacher
+      navigate('/guru');
     } else if (username === 'admin' && password === '123') {
       localStorage.setItem('userRole', 'admin');
+      localStorage.removeItem('assignedClass');
       navigate('/admin');
     } else {
       setError('Username atau password tidak valid. Silakan coba lagi.');
@@ -166,7 +169,7 @@ export default function Login() {
             <div className="grid grid-cols-1 gap-3">
               {[
                 { label: 'Siswa', creds: 'student / 123' },
-                { label: 'Guru', creds: 'teacher / 123' },
+                { label: 'Guru', creds: 'guru / 123' },
                 { label: 'Admin', creds: 'admin / 123' }
               ].map((role) => (
                 <div key={role.label} className="flex items-center justify-between text-xs">

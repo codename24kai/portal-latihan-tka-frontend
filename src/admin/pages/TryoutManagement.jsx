@@ -16,12 +16,12 @@ import {
   Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { SUBJECTS } from '../../constants/subjects';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import Dropdown from '../../components/ui/Dropdown';
-import Badge from '../../components/ui/Badge';
-import DataTable from '../../components/ui/DataTable';
-import ProgressBar from '../../components/ui/ProgressBar';
+import { SUBJECTS } from '@/constants/subjects';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Dropdown from '@/components/ui/Dropdown';
+import Badge from '@/components/ui/Badge';
+import DataTable from '@/components/ui/DataTable';
+import ProgressBar from '@/components/ui/ProgressBar';
 
 // Mock tryout data
 const mockTryouts = [
@@ -165,7 +165,7 @@ export default function TryoutManagement() {
               />
             </td>
             <td className="py-6 px-8 text-right">
-              <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex justify-end gap-2 opacity-100">
                 <button
                   onClick={() => handleEdit(tryout?.id)}
                   className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all font-black text-[10px] uppercase"

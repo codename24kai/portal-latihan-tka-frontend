@@ -1,18 +1,33 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCountdown } from '../../hooks/useCountdown';
-import mockQuestions from '../../data/mockQuestions';
+import mockQuestions from '../../data/mockQuestionsV2'; // Using V2 for demo
 import ExamHeader from '../components/ExamHeader';
 import QuestionContent from '../components/QuestionContent';
-import OptionCard from '../components/OptionCard';
 import ExamNavBar from '../components/ExamNavBar';
 import QuestionNavigator from '../components/QuestionNavigator';
-import ConfirmDialog from '../../components/ConfirmDialog';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
+import ExamFallback from '../components/ExamFallback';
+
+// Renderers
+import SingleChoiceRenderer from '../components/QuestionRenderers/SingleChoiceRenderer';
+import MultiChoiceRenderer from '../components/QuestionRenderers/MultiChoiceRenderer';
+import TrueFalseRenderer from '../components/QuestionRenderers/TrueFalseRenderer';
+import EssayRenderer from '../components/QuestionRenderers/EssayRenderer';
+
+import { QUESTION_TYPES } from '@/constants/questions';
+
+const RENDERER_MAP = {
+  [QUESTION_TYPES.SINGLE_CHOICE]: SingleChoiceRenderer,
+  [QUESTION_TYPES.MULTI_CHOICE]:  MultiChoiceRenderer,
+  [QUESTION_TYPES.TRUE_FALSE]:    TrueFalseRenderer,
+  [QUESTION_TYPES.ESSAY]:         EssayRenderer,
+};
 
 /**
- * Full exam-taking page.
+ * Full exam-taking page V2.
  * Orchestrates the timer, question navigation, answer selection, and submission.
- * Audited for deep Dark Mode support and responsive desktop centering.
  */
 export default function ExamExecution() {
   const { examId } = useParams();
@@ -20,14 +35,14 @@ export default function ExamExecution() {
 
   // State
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState({}); // { [questionId]: response_object }
   const [showNavigator, setShowNavigator] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [flaggedQuestions, setFlaggedQuestions] = useState(new Set());
 
-  const questions = mockQuestions;
-  const totalQuestions = questions.length;
+  const questions = mockQuestions || [];
+  const totalQuestions = questions?.length || 0;
   const currentQuestion = questions[currentIndex];
   const currentNumber = currentIndex + 1;
 
@@ -38,7 +53,7 @@ export default function ExamExecution() {
   );
   const unansweredCount = totalQuestions - answeredCount;
 
-  // Timer: 90 minutes = 5400 seconds
+  // Timer
   const handleTimeUp = useCallback(() => {
     setIsSubmitted(true);
     navigate(`/exam/${examId}/result`, {
@@ -46,14 +61,13 @@ export default function ExamExecution() {
     });
   }, [answers, examId, navigate, totalQuestions]);
 
-  const { timeLeft, isWarning, start, isRunning } = useCountdown(5400, handleTimeUp);
+  const { timeLeft, isWarning, start } = useCountdown(5400, handleTimeUp);
 
-  // Auto-start timer on mount
   useEffect(() => {
     start();
   }, [start]);
 
-  // Navigation handlers
+  // Navigation
   const goToQuestion = useCallback((num) => {
     setCurrentIndex(num - 1);
   }, []);
@@ -66,18 +80,17 @@ export default function ExamExecution() {
     setCurrentIndex((prev) => Math.min(totalQuestions - 1, prev + 1));
   }, [totalQuestions]);
 
-  // Answer selection
-  const handleSelectOption = useCallback(
-    (label) => {
+  // Answer selection (V2 stores response as object)
+  const handleAnswerChange = useCallback(
+    (response) => {
       setAnswers((prev) => ({
         ...prev,
-        [currentNumber]: label,
+        [currentQuestion.id]: response,
       }));
     },
-    [currentNumber]
+    [currentQuestion?.id]
   );
-  
-  // Flagging
+
   const handleToggleFlag = useCallback(() => {
     setFlaggedQuestions((prev) => {
       const next = new Set(prev);
@@ -90,83 +103,88 @@ export default function ExamExecution() {
     });
   }, [currentNumber]);
 
-  // Submit handlers
-  const handleSubmitClick = useCallback(() => {
-    setShowSubmitDialog(true);
-  }, []);
-
   const handleConfirmSubmit = useCallback(() => {
     setIsSubmitted(true);
     setShowSubmitDialog(false);
     navigate(`/exam/${examId}/result`, {
-      state: { answers, totalQuestions, timeUp: false },
+      state: { answers, totalQuestions, timeUp: false, examData: { id: examId } },
     });
   }, [answers, examId, navigate, totalQuestions]);
 
   if (isSubmitted) return null;
 
+  if (totalQuestions === 0) {
+    return <ExamFallback message="Belum ada soal tersedia untuk simulasi ini." />;
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen flex flex-col bg-surface dark:bg-dark">
+        <LoadingSkeleton className="h-20 w-full mb-8" />
+        <main className="flex-1 px-4 py-8 max-w-3xl mx-auto w-full">
+          <LoadingSkeleton className="h-64 w-full rounded-[3rem]" />
+        </main>
+      </div>
+    );
+  }
+
+  const Renderer = RENDERER_MAP[currentQuestion.question_type] || SingleChoiceRenderer;
+  const currentAnswer = answers[currentQuestion.id];
+
   return (
-    <div id="exam-execution" className="min-h-screen flex flex-col bg-surface dark:bg-dark transition-colors duration-300">
-      {/* Sticky Top Bar */}
-      <ExamHeader
-        timeLeft={timeLeft}
-        isWarning={isWarning}
-        currentQuestion={currentNumber}
-        totalQuestions={totalQuestions}
-        answeredCount={answeredCount}
-        onToggleNavigator={() => setShowNavigator(true)}
-      />
+    <div id="exam-execution" className="h-screen flex flex-col bg-surface dark:bg-dark transition-colors duration-300 overflow-hidden">
+      <div className="shrink-0">
+        <ExamHeader
+          timeLeft={timeLeft}
+          isWarning={isWarning}
+          currentQuestion={currentNumber}
+          totalQuestions={totalQuestions}
+          answeredCount={answeredCount}
+          onToggleNavigator={() => setShowNavigator(true)}
+        />
+      </div>
 
-      {/* Main Content: Deep scan for dark mode leakages */}
-      <main className="flex-1 px-4 py-8 max-w-3xl mx-auto w-full dark:bg-dark">
-        {/* Question Item Container */}
-        <div key={currentQuestion.id} className="animate-fade-in">
-          <QuestionContent
-            questionNumber={currentNumber}
-            text={currentQuestion.text}
-            image={currentQuestion.image}
-          />
-          
-          {/* Flag Button */}
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={handleToggleFlag}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all border-2 ${
-                flaggedQuestions.has(currentNumber)
-                  ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm'
-                  : 'bg-white dark:bg-dark border-slate-100 dark:border-dark-border text-slate-400 hover:border-slate-200'
-              }`}
-            >
-              <div className={`w-2 h-2 rounded-full ${flaggedQuestions.has(currentNumber) ? 'bg-orange-500 animate-pulse' : 'bg-slate-300'}`} />
-              {flaggedQuestions.has(currentNumber) ? 'Ditandai (Ragu-ragu)' : 'Tandai Soal'}
-            </button>
-          </div>
+      <main className="flex-1 overflow-y-auto px-4 py-6 dark:bg-dark scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+        <div className="max-w-3xl mx-auto w-full">
+          <div key={currentQuestion.id} className="animate-fade-in pb-20">
+            <QuestionContent
+              questionNumber={currentNumber}
+              text={currentQuestion.payload.stem}
+              image={currentQuestion.payload.stem_image}
+            />
 
-          {/* Answer Options Grid */}
-          <div className="flex flex-col gap-3 mt-6">
-            {currentQuestion.options.map((option) => (
-              <OptionCard
-                key={option.label}
-                label={option.label}
-                text={option.text}
-                isSelected={answers[currentNumber] === option.label}
-                onSelect={() => handleSelectOption(option.label)}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleToggleFlag}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all border-2 ${flaggedQuestions.has(currentNumber)
+                    ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm'
+                    : 'bg-white dark:bg-dark border-slate-100 dark:border-dark-border text-slate-400 hover:border-slate-200'
+                  }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${flaggedQuestions.has(currentNumber) ? 'bg-orange-500 animate-pulse' : 'bg-slate-300'}`} />
+                {flaggedQuestions.has(currentNumber) ? 'Ditandai' : 'Tandai Soal'}
+              </button>
+            </div>
+
+            <div className="mt-8">
+              <Renderer 
+                payload={currentQuestion.payload} 
+                selected={currentAnswer} 
+                onSelect={handleAnswerChange} 
               />
-            ))}
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Sticky Bottom Bar */}
       <ExamNavBar
         currentQuestion={currentNumber}
         totalQuestions={totalQuestions}
         onPrevious={handlePrevious}
         onNext={handleNext}
-        onSubmit={handleSubmitClick}
+        onSubmit={() => setShowSubmitDialog(true)}
       />
 
-      {/* Overlays & Dialogs */}
       <QuestionNavigator
         isOpen={showNavigator}
         onClose={() => setShowNavigator(false)}
@@ -177,7 +195,6 @@ export default function ExamExecution() {
         onGoToQuestion={goToQuestion}
       />
 
-      {/* Submission Confirmation Dialog */}
       <ConfirmDialog
         isOpen={showSubmitDialog}
         title="Kumpulkan Ujian?"

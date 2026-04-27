@@ -11,10 +11,16 @@ import {
   History,
   UserCircle,
   Save,
-  X
+  X,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import mockExams from '../../data/mockExams';
+import mockStudents from '../../data/mockStudents';
+import ProfilePicModal from '../components/ProfilePicModal';
+import { saveProfilePic, getProfilePic } from '../utils/profileStorage';
 
 /**
  * Student Setting Page - Overhauled with Modal Pattern
@@ -27,14 +33,55 @@ import mockExams from '../../data/mockExams';
 export default function StudentSetting() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  // Mock User Data
-  const userData = {
+  // Mock User Data (Assume user ID 1 for this demonstration)
+  const [userData, setUserData] = useState({
+    id: 1,
     name: 'Budi Kialang',
     school: 'SD Negeri Muncul 02',
     class: 'Kelas 6-A',
     gender: 'Laki-laki',
-    nisn: '0012345678'
+    nisn: '0012345678',
+    profile_pic: null
+  });
+
+  // Load profile pic from IndexedDB on mount
+  React.useEffect(() => {
+    const loadProfilePic = async () => {
+      try {
+        const savedPic = await getProfilePic(userData.id);
+        if (savedPic) {
+          setUserData(prev => ({ ...prev, profile_pic: savedPic }));
+        }
+      } catch (error) {
+        console.error('Failed to load profile pic from IndexedDB:', error);
+      }
+    };
+    loadProfilePic();
+  }, [userData.id]);
+
+  const handleSaveProfilePic = async (newPic) => {
+    try {
+      // 1. Temporarily update mock user data in memory (for current session)
+      const studentIndex = mockStudents.findIndex(s => s.id === userData.id);
+      if (studentIndex !== -1) {
+        mockStudents[studentIndex].profile_pic = newPic;
+      }
+
+      // 2. Update local state for immediate feedback
+      setUserData(prev => ({ ...prev, profile_pic: newPic }));
+
+      // 3. Store in IndexedDB for offline access
+      await saveProfilePic(userData.id, newPic);
+
+      // 4. Show success feedback
+      toast.success('Foto profil berhasil diperbarui!');
+      setIsProfileModalOpen(false);
+    } catch (error) {
+      toast.error('Gagal menyimpan foto profil.');
+      console.error(error);
+    }
   };
 
   const handleLogout = () => {
@@ -65,26 +112,53 @@ export default function StudentSetting() {
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center">
             
-            {/* Gender-based Avatar */}
-            <div className="relative mb-6">
-              <div className={`w-32 h-32 rounded-3xl border-4 border-white dark:border-slate-700 shadow-xl flex items-center justify-center text-white overflow-hidden ${
-                isMale 
+            {/* Dynamic Profile Picture */}
+            <div className="relative mb-6 group">
+              <div className={`w-32 h-32 rounded-3xl border-4 border-white dark:border-slate-700 shadow-xl flex items-center justify-center text-white overflow-hidden transition-all duration-500 ${
+                !userData.profile_pic && (isMale 
                   ? 'bg-gradient-to-br from-blue-500 to-indigo-600' 
-                  : 'bg-gradient-to-br from-pink-500 to-rose-600'
+                  : 'bg-gradient-to-br from-pink-500 to-rose-600')
               }`}>
-                <UserCircle size={80} className="text-white/90" />
+                {userData.profile_pic ? (
+                  <img 
+                    src={userData.profile_pic} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover animate-in fade-in zoom-in-75 duration-500"
+                  />
+                ) : (
+                  <UserCircle size={80} className="text-white/90" />
+                )}
               </div>
+              
               <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-full shadow-md border border-slate-100 dark:border-slate-600 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-widest">
                 {userData.gender}
               </div>
+
+              {/* Quick Action Overlay */}
+              <button 
+                onClick={() => setIsProfileModalOpen(true)}
+                className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-3xl backdrop-blur-[2px]"
+              >
+                 <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md border border-white/30">
+                    <ImageIcon size={20} className="text-white" />
+                 </div>
+              </button>
             </div>
 
-            <div className="text-center">
+            <div className="text-center mb-6">
               <h3 className="text-xl font-black tracking-tight">{userData.name}</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                 {userData.school} • {userData.class}
               </p>
             </div>
+
+            {/* NEW: Ubah Foto Profil Button */}
+            <button 
+              onClick={() => setIsProfileModalOpen(true)}
+              className="w-full py-3 bg-slate-50 dark:bg-slate-900/50 hover:bg-orange-50 dark:hover:bg-orange-950/30 text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-900/50 transition-all flex items-center justify-center gap-2"
+            >
+              <Upload size={14} /> Ubah Foto Profil
+            </button>
           </div>
 
           <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/50">
@@ -210,7 +284,7 @@ export default function StudentSetting() {
           MODAL: CHANGE PASSWORD
           ========================================== */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
@@ -291,6 +365,16 @@ export default function StudentSetting() {
           </div>
         </div>
       )}
+
+      {/* ==========================================
+          MODAL: PROFILE PICTURE SELECTION
+          ========================================== */}
+      <ProfilePicModal 
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onSave={handleSaveProfilePic}
+        currentPic={userData.profile_pic}
+      />
     </div>
   );
 }

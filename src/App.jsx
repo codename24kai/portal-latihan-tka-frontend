@@ -27,6 +27,24 @@ import AddTryout from './admin/pages/AddTryout';
 import AddModule from './admin/pages/AddModule';
 import AddUser from './admin/pages/AddUser';
 import AddQuestion from './admin/pages/AddQuestion';
+
+/* --- Guru Imports --- */
+import GuruLayout from './guru/layouts/GuruLayout';
+import GuruDashboard from './guru/pages/GuruDashboard';
+import GuruStudentList from './guru/pages/GuruStudentList';
+import GuruScoreReports from './guru/pages/GuruScoreReports';
+import GuruAgenda from './guru/pages/GuruAgenda';
+import GuruManageModules from './guru/pages/GuruManageModules';
+import GuruAddModule from './guru/pages/GuruAddModule';
+import GuruManageQuizzes from './guru/pages/GuruManageQuizzes';
+import GuruAddQuiz from './guru/pages/GuruAddQuiz';
+
+/* --- NEW: Survey Imports --- */
+import SurveyExecution from './student/pages/SurveyExecution';
+import SurveyComplete from './student/pages/SurveyComplete';
+import SurveyReports from './guru/pages/SurveyReports';
+import AdminSurveyReports from './admin/pages/AdminSurveyReports';
+
 import ToastProvider from './components/ui/ToastProvider';
 
 /**
@@ -40,9 +58,11 @@ const RequireAuth = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
-    // Redirect to their respective dashboard if unauthorized
-    if (role === 'admin' || role === 'teacher') return <Navigate to={`/${role}`} replace />;
-    return <Navigate to="/" replace />; // fallback to student dashboard
+    // Prevent redirect loops by checking if the user is already at their default page
+    if (role === 'admin') return <Navigate to="/admin" replace />;
+    if (role === 'guru') return <Navigate to="/guru" replace />;
+    // Students or others fallback to home
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -74,28 +94,35 @@ export default function App() {
         <Route path="/exam/:examId/prepare" element={<RequireAuth allowedRoles={['student']}><PreSimulation /></RequireAuth>} />
         <Route path="/exam/:examId" element={<RequireAuth allowedRoles={['student']}><ExamExecution /></RequireAuth>} />
         <Route path="/exam/:examId/result" element={<RequireAuth allowedRoles={['student']}><ExamResult /></RequireAuth>} />
+        
+        {/* Survey Execution (no layout) */}
+        <Route path="/survey/:surveyId" element={<RequireAuth allowedRoles={['student']}><SurveyExecution /></RequireAuth>} />
+        <Route path="/survey/:surveyId/complete" element={<RequireAuth allowedRoles={['student']}><SurveyComplete /></RequireAuth>} />
 
-        {/* Super Admin Routes (with layout) */}
-        <Route path="/admin" element={<RequireAuth allowedRoles={['admin']}><AdminLayout /></RequireAuth>}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="users/add" element={<AddUser />} />
-          <Route path="users/edit/:id" element={<AddUser />} />
-          <Route path="question-bank" element={<QuestionBank />} />
-          <Route path="question-bank/add" element={<AddQuestion />} />
-          <Route path="question-bank/edit/:id" element={<AddQuestion />} />
-          <Route path="tryout" element={<TryoutManagement />} />
-          <Route path="tryout/add" element={<AddTryout />} />
-          <Route path="tryout/edit/:id" element={<AddTryout />} />
-          <Route path="reports" element={<ScoreReports />} />
-          <Route path="modules" element={<ModuleManagement />} />
-          <Route path="modules/add" element={<AddModule />} />
-          <Route path="modules/edit/:id" element={<AddModule />} />
+        {/* Guru / Teacher Routes (with GuruLayout) */}
+        <Route path="/guru" element={<RequireAuth allowedRoles={['guru']}><GuruLayout /></RequireAuth>}>
+          <Route index element={<GuruDashboard />} />
+          <Route path="students" element={<GuruStudentList />} />
+          <Route path="reports" element={<GuruScoreReports />} />
+          <Route path="agenda" element={<GuruAgenda />} />
+          <Route path="modules" element={<GuruManageModules />} />
+          <Route path="modules/add" element={<GuruAddModule />} />
+          <Route path="modules/edit/:id" element={<GuruAddModule />} />
+          <Route path="quizzes" element={<GuruManageQuizzes />} />
+          <Route path="quizzes/add" element={<GuruAddQuiz />} />
+          <Route path="quizzes/edit/:id" element={<GuruAddQuiz />} />
+          <Route path="reports/survey" element={<SurveyReports />} />
         </Route>
 
-        {/* Teacher Routes (with layout - identical to admin for now, but role is 'teacher') */}
-        <Route path="/teacher" element={<RequireAuth allowedRoles={['teacher']}><AdminLayout /></RequireAuth>}>
+        {/* Administrator Routes (with layout) */}
+        <Route path="/admin" element={<RequireAuth allowedRoles={['admin']}><AdminLayout /></RequireAuth>}>
           <Route index element={<AdminDashboard />} />
+          
+          {/* User Management restricted to Admin Only */}
+          <Route path="users" element={<RequireAuth allowedRoles={['admin']}><UserManagement /></RequireAuth>} />
+          <Route path="users/add" element={<RequireAuth allowedRoles={['admin']}><AddUser /></RequireAuth>} />
+          <Route path="users/edit/:id" element={<RequireAuth allowedRoles={['admin']}><AddUser /></RequireAuth>} />
+          
           <Route path="question-bank" element={<QuestionBank />} />
           <Route path="question-bank/add" element={<AddQuestion />} />
           <Route path="question-bank/edit/:id" element={<AddQuestion />} />
@@ -103,6 +130,7 @@ export default function App() {
           <Route path="tryout/add" element={<AddTryout />} />
           <Route path="tryout/edit/:id" element={<AddTryout />} />
           <Route path="reports" element={<ScoreReports />} />
+          <Route path="reports/survey" element={<AdminSurveyReports />} />
           <Route path="modules" element={<ModuleManagement />} />
           <Route path="modules/add" element={<AddModule />} />
           <Route path="modules/edit/:id" element={<AddModule />} />

@@ -5,13 +5,13 @@ import { AlertTriangle, X } from 'lucide-react';
  * ConfirmDialog: A universal modal for destructive actions.
  * Follows the 'Tinted & Soft' design system with strict dark mode support.
  */
-const ConfirmDialog = ({ 
-  isOpen, 
-  title = "Konfirmasi Tindakan", 
-  message = "Apakah Anda yakin ingin melakukan tindakan ini? Data yang dihapus tidak dapat dikembalikan.", 
-  confirmLabel = "Ya, Hapus", 
-  cancelLabel = "Batal", 
-  onConfirm, 
+const ConfirmDialog = ({
+  isOpen,
+  title = "Konfirmasi Tindakan",
+  message = "Apakah Anda yakin ingin melakukan tindakan ini? Data yang dihapus tidak dapat dikembalikan.",
+  confirmLabel = "Ya, Hapus",
+  cancelLabel = "Batal",
+  onConfirm,
   onCancel,
   variant = "danger" // 'danger' | 'warning' | 'info'
 }) => {
@@ -41,20 +41,20 @@ const ConfirmDialog = ({
   const theme = themes[variant] || themes.danger;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" 
+      <div
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
         onClick={onCancel}
       />
-      
+
       {/* Modal Card */}
       <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-slate-700 overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="px-8 pt-8 pb-4 flex flex-col items-center text-center">
           <div className={`w-16 h-16 ${theme.bg} ${theme.border} border-2 rounded-3xl flex items-center justify-center mb-6`}>
             {theme.icon}
           </div>
-          
+
           <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-2">
             {title}
           </h3>
@@ -64,14 +64,14 @@ const ConfirmDialog = ({
         </div>
 
         <div className="p-8 grid grid-cols-2 gap-3">
-          <button 
+          <button
             type="button"
             onClick={onCancel}
             className="py-4 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-600 transition-all outline-none"
           >
             {cancelLabel}
           </button>
-          <button 
+          <button
             type="button"
             onClick={onConfirm}
             className={`py-4 ${theme.button} text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all outline-none`}

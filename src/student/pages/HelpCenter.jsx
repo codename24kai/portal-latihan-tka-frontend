@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  BookOpen, 
-  Target, 
-  User, 
-  HelpCircle, 
-  ChevronDown, 
+import {
+  BookOpen,
+  Target,
+  User,
+  HelpCircle,
+  ChevronDown,
   Search,
   MessageSquare,
   Sparkles
@@ -68,8 +68,8 @@ export default function HelpCenter() {
   const categories = ['Semua', 'Materi', 'Tryout', 'Akun'];
 
   // Filtering Logic
-  const filteredFaqs = activeCategory === 'Semua' 
-    ? faqData 
+  const filteredFaqs = activeCategory === 'Semua'
+    ? faqData
     : faqData?.filter(faq => faq.category === activeCategory);
 
   const toggleAccordion = (id) => {
@@ -78,7 +78,7 @@ export default function HelpCenter() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20 animate-fade-in">
-      
+
       {/* 1. HERO HEADER */}
       <section className="text-center space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
@@ -101,11 +101,10 @@ export default function HelpCenter() {
               setActiveCategory(cat);
               setExpandedId(null);
             }}
-            className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
-              activeCategory === cat
-                ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20 scale-105'
-                : 'bg-white dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border border-slate-100 dark:border-slate-700'
-            }`}
+            className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${activeCategory === cat
+              ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20 scale-105'
+              : 'bg-white dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border border-slate-100 dark:border-slate-700'
+              }`}
           >
             {cat}
           </button>
@@ -120,31 +119,28 @@ export default function HelpCenter() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className={`overflow-hidden rounded-3xl border transition-all ${
-              expandedId === faq.id 
-                ? 'bg-white dark:bg-slate-800 border-teal-200 dark:border-teal-900/50 shadow-xl shadow-slate-200/50 dark:shadow-none' 
-                : 'bg-white/50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800'
-            }`}
+            className={`overflow-hidden rounded-3xl border transition-all ${expandedId === faq.id
+              ? 'bg-white dark:bg-slate-800 border-teal-200 dark:border-teal-900/50 shadow-xl shadow-slate-200/50 dark:shadow-none'
+              : 'bg-white/50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800'
+              }`}
           >
             <button
               onClick={() => toggleAccordion(faq.id)}
               className="w-full flex items-center justify-between p-6 text-left focus:outline-none group"
             >
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                  expandedId === faq.id ? 'bg-teal-50 dark:bg-teal-900/30' : 'bg-slate-50 dark:bg-slate-900'
-                }`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${expandedId === faq.id ? 'bg-teal-50 dark:bg-teal-900/30' : 'bg-slate-50 dark:bg-slate-900'
+                  }`}>
                   {faq.icon}
                 </div>
-                <span className={`font-black text-sm md:text-base tracking-tight transition-colors ${
-                  expandedId === faq.id ? 'text-teal-600 dark:text-teal-400' : 'text-slate-700 dark:text-slate-300'
-                }`}>
+                <span className={`font-black text-sm md:text-base tracking-tight transition-colors ${expandedId === faq.id ? 'text-teal-600 dark:text-teal-400' : 'text-slate-700 dark:text-slate-300'
+                  }`}>
                   {faq.question}
                 </span>
               </div>
-              <ChevronDown 
-                size={20} 
-                className={`text-slate-300 transition-transform duration-300 ${expandedId === faq.id ? 'rotate-180 text-teal-500' : 'group-hover:text-slate-400'}`} 
+              <ChevronDown
+                size={20}
+                className={`text-slate-300 transition-transform duration-300 ${expandedId === faq.id ? 'rotate-180 text-teal-500' : 'group-hover:text-slate-400'}`}
               />
             </button>
 
@@ -172,7 +168,7 @@ export default function HelpCenter() {
       {/* 4. ESCALATION CARD */}
       <section className="relative overflow-hidden bg-gradient-to-br from-orange-400 to-yellow-500 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl shadow-orange-500/30 group">
         <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000" />
-        
+
         <div className="relative flex flex-col md:flex-row items-center gap-8 md:justify-between text-center md:text-left">
           <div className="space-y-4 max-w-md">
             <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto md:mx-0">
@@ -180,10 +176,10 @@ export default function HelpCenter() {
             </div>
             <h2 className="text-3xl font-black italic leading-tight">Masih bingung?</h2>
             <p className="font-bold text-white/90 leading-relaxed">
-              Jangan khawatir! Kamu bisa bertanya langsung kepada <span className="underline decoration-white/40">Ibu Yulva</span> atau guru kelasmu ya. Kami siap membantumu!
+              Jangan khawatir! Kamu bisa bertanya langsung kepada <span className="underline decoration-white/40">TU (Tata Usaha)</span> atau guru kelasmu ya. Kami siap membantumu!
             </p>
           </div>
-          
+
           <button className="px-10 py-5 bg-white text-orange-600 font-black text-sm uppercase tracking-widest rounded-[2rem] shadow-xl hover:scale-105 active:scale-95 transition-all">
             Hubungi Guru
           </button>

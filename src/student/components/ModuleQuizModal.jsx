@@ -83,7 +83,7 @@ export default function ModuleQuizModal({ isOpen, onClose, moduleTitle, subjectN
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xl transition-all" onClick={onClose} />
       
@@ -132,8 +132,8 @@ export default function ModuleQuizModal({ isOpen, onClose, moduleTitle, subjectN
                 <MathRenderer text={currentQuestion.text} />
               </h3>
 
-              {/* Options Grid */}
-              <div className="grid grid-cols-1 gap-4">
+              {/* Options Grid: Optimized for visibility */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {currentQuestion.options.map((option, index) => {
                   const isSelected = selectedOption === index;
                   const isCorrect = index === currentQuestion.correctIndex;
@@ -144,10 +144,10 @@ export default function ModuleQuizModal({ isOpen, onClose, moduleTitle, subjectN
                   if (feedback && isSelected) {
                     if (isCorrect) {
                       cardStyle = "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 animate-bounce";
-                      icon = <CheckCircle size={20} className="shrink-0" />;
+                      icon = <CheckCircle size={16} className="shrink-0" />;
                     } else {
                       cardStyle = "border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 animate-shake";
-                      icon = <XCircle size={20} className="shrink-0" />;
+                      icon = <XCircle size={16} className="shrink-0" />;
                     }
                   } else if (feedback && isCorrect && !isSelected) {
                     // Show correct answer even if not selected
@@ -159,9 +159,9 @@ export default function ModuleQuizModal({ isOpen, onClose, moduleTitle, subjectN
                       key={index}
                       disabled={feedback !== null}
                       onClick={() => handleOptionClick(index)}
-                      className={`group w-full p-6 sm:p-8 rounded-[2rem] border-2 transition-all flex items-center justify-between text-left ${cardStyle} ${feedback === null ? 'hover:-translate-y-1 active:scale-95' : ''}`}
+                      className={`group w-full p-4 sm:p-5 rounded-2xl border-2 transition-all flex items-center justify-between text-left ${cardStyle} ${feedback === null ? 'hover:-translate-y-1 active:scale-95' : ''}`}
                     >
-                      <span className="text-lg font-bold"><MathRenderer text={option} /></span>
+                      <span className="text-sm font-bold"><MathRenderer text={option} /></span>
                       {icon}
                     </button>
                   );

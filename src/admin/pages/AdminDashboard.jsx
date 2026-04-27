@@ -1,231 +1,188 @@
-import React from 'react';
-import {
-  Users,
-  ClipboardCheck,
-  TrendingUp,
-  BookOpen,
-  Crown,
-  Zap,
-  AlertTriangle,
-  ChevronDown,
-  Download,
-  Search,
-  ArrowRight,
-  MoreHorizontal
-} from 'lucide-react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
-} from 'recharts';
-import StatCard from '../components/StatCard';
-import Badge from '../../components/ui/Badge';
-import ProgressBar from '../../components/ui/ProgressBar';
+import React, { useState, useEffect, useMemo } from 'react';
+import AdminHeader from '../components/dashboard/AdminHeader';
+import StatCards from '../components/dashboard/StatCards';
+import AlertSection from '../components/dashboard/AlertSection';
+import { PerformanceTrendChart, ClassComparisonChart } from '../components/dashboard/DashboardCharts';
+import TryoutStatus from '../components/dashboard/TryoutStatus';
+import SiswaPerhatianTable from '../components/dashboard/SiswaPerhatianTable';
+import ActivityLog from '../components/dashboard/ActivityLog';
+import QuestionBankSummary from '../components/dashboard/QuestionBankSummary';
+import DashboardCalendar from '../components/dashboard/DashboardCalendar';
 
-/**
- * Admin dashboard — advanced analytics overview.
- * Overhauled for professional clarity and actionability.
- */
+
 export default function AdminDashboard() {
-  const stats = [
-    { icon: Users, label: 'Total Siswa', value: '48', trend: 12, color: 'indigo' },
-    { icon: ClipboardCheck, label: 'Tryout Aktif', value: '5', trend: null, color: 'teal' },
-    { icon: TrendingUp, label: 'Rata-rata Nilai', value: '76.4', trend: 8, color: 'orange' },
-    { icon: BookOpen, label: 'Bank Soal', value: '320', trend: 15, color: 'yellow' },
-  ];
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Separated Data: Academic Subjects
-  const academicComparisonData = [
-    { subject: 'B. Indonesia', classA: 85, classB: 88 },
-    { subject: 'Matematika', classA: 78, classB: 72 },
-  ];
-
-  // Separated Data: Survey Data
-  const surveyComparisonData = [
-    { subject: 'Lingkungan', classA: 82, classB: 79 },
-    { subject: 'Karakter', classA: 75, classB: 80 },
-  ];
-
-  // Mock data: Subject Competency (Radar Chart)
-  const radarData = [
-    { subject: 'Matematika', score: 75, fullMark: 100 },
-    { subject: 'B. Indonesia', score: 86, fullMark: 100 },
-    { subject: 'S. Lingkungan', score: 80, fullMark: 100 },
-    { subject: 'S. Karakter', score: 77, fullMark: 100 },
-  ];
-
-  const attentionStudents = [
-    { id: 1, name: 'Andi Wijaya', class: '6B', score: 58, subject: 'Matematika' },
-    { id: 2, name: 'Siti Aminah', class: '6A', score: 55, subject: 'B. Indonesia' },
-    { id: 3, name: 'Fajar Hidayat', class: '6C', score: 52, subject: 'Matematika' },
-  ];
-
-  const topStudents = [
-    { id: 1, name: 'Budi Santoso', class: '6A', score: 95, avatar: 'BS' },
-    { id: 2, name: 'Siti Aminah', class: '6B', score: 93, avatar: 'SA' },
-    { id: 3, name: 'Agus Pratama', class: '6A', score: 91, avatar: 'AP' },
-  ];
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-slate-900 px-4 py-3 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800">
-          <p className="font-black text-slate-800 dark:text-white mb-2 text-xs uppercase tracking-widest">{label}</p>
-          {payload.map((entry, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-              <span className="text-slate-500 dark:text-slate-400">{entry.name}:</span>
-              <span className="font-black text-slate-800 dark:text-white">{entry.value}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
+  const adminData = {
+    name: 'Administrator System',
+    role: 'Super Admin',
   };
 
-  const ChartHeader = ({ title, subtitle }) => (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-      <div>
-        <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">{title}</h2>
-        <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">{subtitle}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-teal-600 transition-colors">
-          Minggu Ini <ChevronDown size={14} />
-        </button>
-      </div>
-    </div>
-  );
+  // Mock Dashboard Data
+  const dashboardData = {
+    metrics: {
+      totalSiswa: '1,284',
+      activeTryouts: '12',
+      avgScore: '78.5',
+      totalQuestions: '4,520',
+      trends: { siswa: 12, tryouts: 5, score: -2, questions: 8 }
+    },
+    alerts: [
+      {
+        id: 1,
+        type: 'warning',
+        title: 'Siswa Belum Selesai',
+        message: '8 siswa belum menyelesaikan Tryout Matematika Batch B yang berakhir hari ini.',
+        action: true,
+        actionText: 'Ingatkan Siswa',
+        onAction: () => console.log('Reminding students...')
+      }
+    ],
+    performanceTrend: [
+      { name: 'Jan', value: 65 },
+      { name: 'Feb', value: 68 },
+      { name: 'Mar', value: 75 },
+      { name: 'Apr', value: 72 },
+      { name: 'Mei', value: 80 },
+      { name: 'Jun', value: 78 },
+    ],
+    classComparison: [
+      { subject: 'Matematika', classA: 85, classB: 78 },
+      { subject: 'B. Indonesia', classA: 88, classB: 92 },
+      { subject: 'S. Karakter', classA: 75, classB: 70 },
+      { subject: 'S. Lingkungan', classA: 82, classB: 85 },
+    ],
+    activeTryouts: [
+      { title: 'Simulasi AKM SD 2026', category: 'Matematika', participants: 42, status: 'Berlangsung', timeLeft: '2j 15m' },
+      { title: 'Kuis Mingguan Ke-4', category: 'B. Indonesia', participants: 28, status: 'Berlangsung', timeLeft: '5j 30m' },
+      { title: 'Tryout Mandiri', category: 'Sains', participants: 15, status: 'Persiapan', timeLeft: '1h' },
+    ],
+    attentionStudents: [
+      { id: 1, name: 'Andi Wijaya', class: '6B', score: 58.5, subject: 'Matematika' },
+      { id: 2, name: 'Siti Aminah', class: '6A', score: 55.2, subject: 'B. Indonesia' },
+      { id: 3, name: 'Fajar Hidayat', class: '6C', score: 52.8, subject: 'Matematika' },
+      { id: 4, name: 'Budi Santoso', class: '6B', score: 59.1, subject: 'Sains' },
+      { id: 5, name: 'Dewi Lestari', class: '6A', score: 57.4, subject: 'Matematika' },
+    ],
+    activities: [
+      { id: 1, user: 'Rina Saputri', type: 'finish', description: 'Menyelesaikan Tryout Matematika', subject: 'Matematika', class: '6A', time: '2 Menit Lalu' },
+      { id: 2, user: 'Ahmad Faisal', type: 'start', description: 'Memulai Kuis B. Indonesia', subject: 'B. Indonesia', class: '6B', time: '5 Menit Lalu' },
+      { id: 3, user: 'Admin System', type: 'login', description: 'Melakukan Update Bank Soal', subject: 'System', class: 'Main', time: '15 Menit Lalu' },
+      { id: 4, user: 'Toni Kroos', type: 'finish', description: 'Menyelesaikan Simulasi AKM', subject: 'Multi', class: '6C', time: '30 Menit Lalu' },
+    ],
+    questionBank: [
+      { subject: 'Matematika', easy: 450, medium: 320, hard: 120, total: 890 },
+      { subject: 'B. Indonesia', easy: 520, medium: 280, hard: 95, total: 895 },
+      { subject: 'S. Karakter', easy: 210, medium: 150, hard: 45, total: 405 },
+    ],
+    events: [
+      {
+        title: 'Tryout Akbar Matematika Batch A',
+        time: '08:00 - 10:00',
+        description: 'Evaluasi kompetensi numerasi dasar untuk seluruh siswa kelas 6.',
+        location: 'Online Portal',
+        status: 'completed',
+        completed: 40,
+        total: 40,
+        topSiswa: [
+          { name: 'Budi Santoso', score: 98 },
+          { name: 'Siti Aminah', score: 95 },
+          { name: 'Agus Pratama', score: 92 },
+          { name: 'Rina Saputri', score: 90 },
+          { name: 'Dewi Lestari', score: 88 }
+        ],
+        bottomSiswa: [
+          { name: 'Andi Wijaya', score: 45 },
+          { name: 'Fajar Hidayat', score: 48 },
+          { name: 'Tono Subagyo', score: 52 },
+          { name: 'Lia Ananda', score: 55 },
+          { name: 'Rudi Hermawan', score: 58 }
+        ]
+      },
+      {
+        title: 'Kuis Literasi Bahasa Indonesia',
+        time: '11:00 - 12:00',
+        description: 'Pemahaman teks narasi dan deskripsi materi semester 2.',
+        location: 'Lab Komputer',
+        status: 'active',
+        completed: 25,
+        total: 40,
+      },
+      {
+        title: 'Pembahasan Soal Sains',
+        time: '14:00 - 15:30',
+        description: 'Sesi tanya jawab interaktif materi energi dan perubahannya.',
+        location: 'Zoom Meeting',
+        status: 'waiting',
+        completed: 0,
+        total: 40,
+      },
+    ]
+  };
+
+  useEffect(() => {
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const scopedData = dashboardData;
+
+  const handleDismissAlert = (index) => {
+    // Logical placeholder for dismissing alerts
+    console.log('Dismissing alert', index);
+  };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 animate-fade-in pb-12">
+    <div className="min-h-screen p-6 md:p-10 space-y-10 animate-fade-in pb-20 bg-slate-45 dark:bg-slate-900">
 
-      {/* 1. ALERT BANNER */}
-      <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/50 rounded-2xl p-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-600">
-            <AlertTriangle size={20} />
-          </div>
-          <div>
-            <h4 className="text-sm font-black text-orange-800 dark:text-orange-400 uppercase tracking-tight">Perhatian Ujian</h4>
-            <p className="text-xs font-bold text-orange-700/60 dark:text-orange-300/60">Ada 5 siswa yang belum mengerjakan Tryout MATEMATIKA minggu ini.</p>
-          </div>
+      {/* ROW 1: Admin Header */}
+      <AdminHeader admin={adminData} />
+
+      {/* ROW 2: Stat Cards */}
+      <StatCards data={scopedData?.metrics} isLoading={isLoading} />
+
+      {/* ROW 3: Alert & Notification Section */}
+      <AlertSection
+        alerts={scopedData?.alerts}
+        onDismiss={handleDismissAlert}
+      />
+
+      {/* ROW 4: Mixed Grid (Line Chart & Active Tryouts) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
+        <div className="lg:col-span-6 h-full">
+          <PerformanceTrendChart data={scopedData?.performanceTrend} />
         </div>
-        <button className="px-4 py-2 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-orange-700 transition-colors shrink-0">
-          Lihat Daftar
-        </button>
-      </div>
-
-      {/* 2. PAGE HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight italic">Dashboard <span className="text-teal-600 text-not-italic">Analytics</span></h1>
-          <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">Wawasan komprehensif performa akademik siswa</p>
-        </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-300 hover:shadow-lg transition-all active:scale-95">
-          <Download size={16} className="text-teal-600 dark:text-teal-400" /> Export Laporan
-        </button>
-      </div>
-
-      {/* 3. STAT CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <StatCard key={i} {...stat} />
-        ))}
-      </div>
-
-      {/* 4. MAIN ANALYTICS ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Academic Comparison - 2/3 Width */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm">
-          <ChartHeader title="Analisis Performa Kelas" subtitle="Perbandingan Nilai Akademik (6A vs 6B)" />
-
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={academicComparisonData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }} barGap={12}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
-                <XAxis dataKey="subject" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94A3B8', fontWeight: 'bold' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94A3B8', fontWeight: 'bold' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                <Bar dataKey="classA" name="Kelas 6A" fill="#14B8A6" radius={[6, 6, 0, 0]} maxBarSize={40} />
-                <Bar dataKey="classB" name="Kelas 6B" fill="#F59E0B" radius={[6, 6, 0, 0]} maxBarSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Competency Radar - 1/3 Width */}
-        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col">
-          <ChartHeader title="Kompetensi" subtitle="Pemetaan Kekuatan Siswa" />
-
-          <div className="h-80 w-full mt-auto">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                <PolarGrid stroke="#E2E8F0" />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 9, fill: '#94A3B8', fontWeight: 'bold' }} />
-                <Radar name="Siswa" dataKey="score" stroke="#14B8A6" fill="#14B8A6" fillOpacity={0.6} />
-                <Tooltip content={<CustomTooltip />} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="lg:col-span-4 h-full">
+          <TryoutStatus data={scopedData?.activeTryouts} />
         </div>
       </div>
 
-      {/* 5. SECONDARY ROW: SURVEYS & ATTENTION */}
+      {/* ROW 5: Mixed Grid (Bar Chart & Siswa Perlu Perhatian) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        {/* Survey Data Section */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-inner">
-          <ChartHeader title="Survei Karakter & Lingkungan" subtitle="Metrik Non-Akademik Siswa" />
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={surveyComparisonData} layout="vertical" margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
-                <XAxis type="number" hide />
-                <YAxis dataKey="subject" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94A3B8', fontWeight: 'bold' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="classA" name="Kelas 6A" fill="#14B8A6" radius={[0, 4, 4, 0]} barSize={12} />
-                <Bar dataKey="classB" name="Kelas 6B" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={12} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="h-full">
+          <ClassComparisonChart data={scopedData?.classComparison} />
         </div>
-
-        {/* Siswa Perlu Perhatian Widget */}
-        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">Siswa Perlu Perhatian</h2>
-              <p className="text-xs font-bold text-rose-500 mt-1 uppercase tracking-widest italic">Di bawah rata-rata ({"<"}60)</p>
-            </div>
-            <button className="text-slate-400 hover:text-teal-600 transition-colors">
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {attentionStudents.map((s) => (
-              <div key={s.id} className="group flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-700 flex items-center justify-center text-xs font-black text-rose-500 shadow-sm border border-rose-100 dark:border-rose-900/30">
-                    {s.score}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-800 dark:text-white group-hover:text-rose-600 transition-colors">{s.name}</h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge text={s.class} variant="Neutral" className="text-[8px]" />
-                      <Badge text={s.subject} variant="Info" className="text-[8px]" />
-                    </div>
-                  </div>
-                </div>
-                <button className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-sm">
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
+        <div className="h-full">
+          <SiswaPerhatianTable data={scopedData?.attentionStudents} />
         </div>
+      </div>
+
+      {/* ROW 6: Mixed Grid (Recent Activity & Question Bank) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
+        <div className="lg:col-span-6 h-full">
+          <ActivityLog activities={scopedData?.activities} />
+        </div>
+        <div className="lg:col-span-4 h-full">
+          <QuestionBankSummary data={scopedData?.questionBank} />
+        </div>
+      </div>
+
+      {/* ROW 7: Calendar / Schedule Section */}
+      <div className="w-full">
+        <DashboardCalendar events={scopedData?.events} />
       </div>
 
     </div>

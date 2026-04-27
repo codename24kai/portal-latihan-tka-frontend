@@ -1,137 +1,87 @@
-// Mock questions for Matematika exam (40 questions)
-const mockQuestions = [
-  {
-    id: 1,
-    text: 'Hasil dari $2.456 + 3.789 - 1.234$ adalah …',
-    image: null,
-    options: [
-      { label: 'A', text: '5.011' },
-      { label: 'B', text: '5.111' },
-      { label: 'C', text: '4.011' },
-      { label: 'D', text: '5.001' },
-    ],
-    correctAnswer: 'A',
+export const mockQuestionBank = [
+  { 
+    id: 1, 
+    subject: 'Matematika', 
+    category: 'Akademik', 
+    text: 'Hasil dari 2.456 + 3.789 − 1.234 adalah …', 
+    options: { A: '5.011', B: '5.111', C: '5.211', D: '5.311' }, 
+    explanation: 'Hitung penjumlahan terlebih dahulu baru pengurangan.', 
+    correctAnswer: 'A', 
+    difficulty: 'Mudah', 
+    usedIn: 'Tryout Mandiri 1', 
+    createdAt: '2026-03-20' 
   },
-  {
-    id: 2,
-    text: 'Sebuah persegi panjang memiliki panjang $12 \\text{ cm}$ dan lebar $8 \\text{ cm}$. Berapakah luas persegi panjang tersebut?',
-    image: null,
-    options: [
-      { label: 'A', text: '$86 \\text{ cm}^2$' },
-      { label: 'B', text: '$96 \\text{ cm}^2$' },
-      { label: 'C', text: '$106 \\text{ cm}^2$' },
-      { label: 'D', text: '$76 \\text{ cm}^2$' },
-    ],
-    correctAnswer: 'B',
+  { 
+    id: 2, 
+    subject: 'Bahasa Indonesia', 
+    category: 'Akademik', 
+    text: 'Ide pokok dari paragraf di atas adalah…', 
+    options: { A: 'Kegemukan pada anak', B: 'Pentingnya sayuran', C: 'Olahraga rutin', D: 'Pola tidur sehat' }, 
+    explanation: 'Ide pokok biasanya terletak di awal paragraf (deduktif).', 
+    correctAnswer: 'B', 
+    difficulty: 'Sedang', 
+    usedIn: null, 
+    createdAt: '2026-03-21' 
   },
-  {
-    id: 3,
-    text: 'Perhatikan gambar berikut! Berapakah volume balok pada gambar di bawah ini jika panjangnya adalah $12 \\text{ cm}$?',
-    imageUrl: 'https://placehold.co/600x400?text=Gambar+Balok',
-    options: [
-      { label: 'A', text: '$120 \\text{ cm}^3$' },
-      { label: 'B', text: '$150 \\text{ cm}^3$' },
-      { label: 'C', text: '$180 \\text{ cm}^3$' },
-      { label: 'D', text: '$200 \\text{ cm}^3$' },
-    ],
-    correctAnswer: 'C',
+  { 
+    id: 3, 
+    subject: 'Survei Lingkungan Belajar', 
+    category: 'Non-Akademik', 
+    text: 'Bagaimana kondisi fasilitas belajar di rumah Anda?', 
+    options: { A: 'Sangat Memadai', B: 'Memadai', C: 'Kurang Memadai', D: 'Tidak Ada' }, 
+    explanation: 'Ini adalah soal survei, tidak ada jawaban benar/salah secara mutlak.', 
+    correctAnswer: 'A', 
+    difficulty: 'Mudah', 
+    usedIn: 'Survei Akhir 2025', 
+    createdAt: '2026-03-22' 
   },
-  {
-    id: 4,
-    text: 'Nilai dari $\\frac{3}{4} + \\frac{2}{5}$ adalah …',
-    imageUrl: null,
-    options: [
-      { label: 'A', text: '$\\frac{5}{9}$' },
-      { label: 'B', text: '$\\frac{23}{20}$' },
-      { label: 'C', text: '$1 \\frac{3}{20}$' },
-      { label: 'D', text: '$\\frac{11}{20}$' },
-    ],
-    correctAnswer: 'B',
+  { 
+    id: 4, 
+    subject: 'Survei Karakter', 
+    category: 'Non-Akademik', 
+    text: 'Bagaimana sikap Anda jika melihat teman sedang diejek?', 
+    options: { A: 'Ikut mengejek', B: 'Diam saja', C: 'Melaporkan ke guru', D: 'Membela teman tersebut' }, 
+    explanation: 'Menunjukkan sikap empati dan tanggung jawab sosial.', 
+    correctAnswer: 'D', 
+    difficulty: 'Sedang', 
+    usedIn: null, 
+    createdAt: '2026-03-22' 
   },
-  {
-    id: 5,
-    text: 'Sebuah mobil menempuh jarak $240 \\text{ km}$ dalam waktu $3 \\text{ jam}$. Berapakah kecepatan rata-rata mobil tersebut?',
-    image: null,
-    options: [
-      { label: 'A', text: '$60 \\text{ km/jam}$' },
-      { label: 'B', text: '$70 \\text{ km/jam}$' },
-      { label: 'C', text: '$80 \\text{ km/jam}$' },
-      { label: 'D', text: '$90 \\text{ km/jam}$' },
-    ],
-    correctAnswer: 'C',
+  { 
+    id: 5, 
+    subject: 'Matematika', 
+    category: 'Akademik', 
+    text: 'Nilai dari 3/4 + 2/5 adalah …', 
+    options: { A: '1 3/20', B: '1 4/20', C: '1 5/20', D: '1 6/20' }, 
+    explanation: 'Samakan penyebut menjadi 20.', 
+    correctAnswer: 'A', 
+    difficulty: 'Sulit', 
+    usedIn: 'Tryout Mandiri 2', 
+    createdAt: '2026-03-22' 
   },
-  {
-    id: 6,
-    text: 'Faktor prima dari $60$ adalah …',
-    image: null,
-    options: [
-      { label: 'A', text: '$2, 3, 5$' },
-      { label: 'B', text: '$2, 3, 10$' },
-      { label: 'C', text: '$2, 5, 6$' },
-      { label: 'D', text: '$3, 4, 5$' },
-    ],
-    correctAnswer: 'A',
+  { 
+    id: 6, 
+    subject: 'Bahasa Indonesia', 
+    category: 'Akademik', 
+    text: 'Sinonim dari kata "Cerdik" adalah...', 
+    options: { A: 'Pintar', B: 'Licik', C: 'Malas', D: 'Lambat' }, 
+    explanation: 'Cerdik berarti tajam pikiran atau pandai.', 
+    correctAnswer: 'A', 
+    difficulty: 'Mudah', 
+    usedIn: null, 
+    createdAt: '2026-03-23' 
   },
-  {
-    id: 7,
-    text: 'Jika suhu di puncak gunung adalah $-5^\\circ\\text{C}$ dan di kaki gunung $28^\\circ\\text{C}$, maka selisih suhu keduanya adalah …',
-    image: null,
-    options: [
-      { label: 'A', text: '$23^\\circ\\text{C}$' },
-      { label: 'B', text: '$33^\\circ\\text{C}$' },
-      { label: 'C', text: '$28^\\circ\\text{C}$' },
-      { label: 'D', text: '$38^\\circ\\text{C}$' },
-    ],
-    correctAnswer: 'B',
-  },
-  {
-    id: 8,
-    text: 'Sebuah lingkaran memiliki jari-jari $14 \\text{ cm}$. Berapakah keliling lingkaran tersebut? ($\\pi = 22/7$)',
-    image: null,
-    options: [
-      { label: 'A', text: '$88 \\text{ cm}$' },
-      { label: 'B', text: '$44 \\text{ cm}$' },
-      { label: 'C', text: '$616 \\text{ cm}$' },
-      { label: 'D', text: '$176 \\text{ cm}$' },
-    ],
-    correctAnswer: 'A',
-  },
-  {
-    id: 9,
-    text: 'Hasil dari $15\\% \\times 400$ adalah …',
-    image: null,
-    options: [
-      { label: 'A', text: '$60$' },
-      { label: 'B', text: '$50$' },
-      { label: 'C', text: '$60$' },
-      { label: 'D', text: '$80$' },
-    ],
-    correctAnswer: 'C',
-  },
-  {
-    id: 10,
-    text: 'Urutan bilangan dari yang terkecil ke terbesar adalah …',
-    image: null,
-    options: [
-      { label: 'A', text: '$0,5 ; \\frac{1}{3} ; 0,25 ; \\frac{3}{8}$' },
-      { label: 'B', text: '$0,25 ; \\frac{1}{3} ; \\frac{3}{8} ; 0,5$' },
-      { label: 'C', text: '$\\frac{1}{3} ; 0,25 ; \\frac{3}{8} ; 0,5$' },
-      { label: 'D', text: '$0,25 ; \\frac{3}{8} ; \\frac{1}{3} ; 0,5$' },
-    ],
-    correctAnswer: 'B',
+  { 
+    id: 7, 
+    subject: 'Matematika', 
+    category: 'Akademik', 
+    text: 'Berapa luas lingkaran dengan jari-jari 7cm?', 
+    options: { A: '154', B: '44', C: '49', D: '22' }, 
+    explanation: 'Gunakan rumus L = π × r² dengan π = 22/7.', 
+    correctAnswer: 'A', 
+    difficulty: 'Sedang', 
+    usedIn: null, 
+    createdAt: '2026-03-23' 
   },
 ];
-
-// Duplicate to make 40 questions with unique IDs
-const fullQuestions = [];
-for (let i = 0; i < 4; i++) {
-  mockQuestions.forEach((q, index) => {
-    fullQuestions.push({
-      ...q,
-      id: i * 10 + index + 1,
-      text: i === 0 ? q.text : `(${i * 10 + index + 1}) ${q.text}`,
-    });
-  });
-}
-
-export default fullQuestions;
+export default mockQuestionBank;

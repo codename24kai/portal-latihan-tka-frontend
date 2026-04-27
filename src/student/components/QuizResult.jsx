@@ -223,24 +223,35 @@ export default function QuizResult({ percentage, score, total, history, timeTake
                       <h4 className="text-lg font-black text-slate-800 dark:text-white leading-snug">
                         <MathRenderer text={item.questionText} />
                       </h4>
+                      {item.questionImage && (
+                        <div className="w-full max-w-sm rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 bg-white">
+                          <img src={item.questionImage} alt="Soal" className="w-full h-auto object-contain max-h-40 p-2" />
+                        </div>
+                      )}
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pilihanmu</span>
-                          <div className={`p-4 rounded-2xl font-bold text-sm border ${
-                            item.isCorrect 
-                              ? 'bg-white dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
-                              : 'bg-white dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400'
-                          }`}>
-                            <MathRenderer text={item.studentAnswer} />
-                          </div>
+                             <div className={`p-4 rounded-2xl font-bold text-sm border flex flex-col gap-2 ${
+                               item.isCorrect 
+                                 ? 'bg-white dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
+                                 : 'bg-white dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400'
+                             }`}>
+                               {item.studentAnswer && <MathRenderer text={item.studentAnswer} />}
+                               {item.studentAnswerImage && (
+                                 <img src={item.studentAnswerImage} alt="Jawabanmu" className="max-h-24 w-full object-contain rounded-lg bg-white p-1" />
+                               )}
+                             </div>
                         </div>
                         {!item.isCorrect && (
                           <div className="space-y-1">
                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jawaban Benar</span>
-                            <div className="p-4 bg-emerald-500 text-white dark:bg-emerald-600 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-500/20">
-                              <MathRenderer text={item.correctAnswer} />
-                            </div>
+                             <div className="p-4 bg-emerald-500 text-white dark:bg-emerald-600 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-500/20 flex flex-col gap-2">
+                               {item.correctAnswer && <MathRenderer text={item.correctAnswer} />}
+                               {item.correctAnswerImage && (
+                                 <img src={item.correctAnswerImage} alt="Kunci Jawaban" className="max-h-24 w-full object-contain rounded-lg bg-white p-1" />
+                               )}
+                             </div>
                           </div>
                         )}
                       </div>

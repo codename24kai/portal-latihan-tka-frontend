@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Calendar, 
   Clock, 
@@ -17,7 +17,8 @@ import {
   Eye
 } from 'lucide-react';
 import { SUBJECTS } from '../../constants/subjects';
-import ConfirmDialog from '../../components/ConfirmDialog';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import FilePreviewUpload from '@/components/ui/FilePreviewUpload';
 
 export default function TryoutForm({ onClose, onSave }) {
   const [step, setStep] = useState(1);
@@ -75,6 +76,22 @@ export default function TryoutForm({ onClose, onSave }) {
     // status: 'active' | 'draft'
     onSave({ ...formData, status });
   };
+
+  const [coverFiles, setCoverFiles] = useState([]);
+
+  const handleRemoveCover = useCallback((id) => {
+    setCoverFiles(prev => {
+      const target = prev.find(p => p.id === id);
+      if (target && target.url) URL.revokeObjectURL(target.url);
+      return prev.filter(p => p.id !== id);
+    });
+  }, []);
+
+  // Cleanup object URLs
+  useEffect(() => {
+    return () => coverFiles.forEach(f => f.url && URL.revokeObjectURL(f.url));
+  }, []);
+    
 
   return (
     <div className="relative">
@@ -275,11 +292,24 @@ export default function TryoutForm({ onClose, onSave }) {
                </div>
             </div>
 
-            <div className="bg-indigo-50/50 dark:bg-indigo-900/10 p-4 rounded-2xl flex gap-3">
-               <Info size={16} className="text-indigo-600 shrink-0" />
-               <p className="text-[9px] font-medium text-indigo-700 dark:text-indigo-300 leading-relaxed italic">
+                   <p className="text-[9px] font-medium text-indigo-700 dark:text-indigo-300 leading-relaxed italic">
                   Dengan metode "Otomatis", sistem akan menarik {formData.questionCount} soal {formData.subject} secara acak yang tersedia di Bank Soal.
                </p>
+            </div>
+
+            <div className="space-y-3 pt-4">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                  <ImageIcon size={14} className="text-orange-500" />
+                  Cover Visual Tryout (Opsional)
+               </label>
+               <FilePreviewUpload 
+                files={coverFiles}
+                onAdd={setCoverFiles}
+                onRemove={handleRemoveCover}
+                multiple={false}
+                label="Unggah Cover Banner"
+                maxSizeMB={2}
+               />
             </div>
           </div>
         )}

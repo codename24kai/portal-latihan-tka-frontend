@@ -10,11 +10,11 @@ import {
   Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { SUBJECTS } from '../../constants/subjects';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import Dropdown from '../../components/ui/Dropdown';
-import Badge from '../../components/ui/Badge';
-import DataTable from '../../components/ui/DataTable';
+import { SUBJECTS } from '@/constants/subjects';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Dropdown from '@/components/ui/Dropdown';
+import Badge from '@/components/ui/Badge';
+import DataTable from '@/components/ui/DataTable';
 
 const mockModules = [
   { id: 1, title: 'Matematika: Pengenalan Aljabar Dasar', type: 'video', subject: 'Matematika', category: 'Akademik', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', status: 'published', hasQuiz: true, questionCount: 5, quizLocked: true, prerequisite: 'video', description: 'Materi ini membahas dasar-dasar aljabar untuk siswa kelas 6.' },
@@ -95,7 +95,7 @@ export default function ModuleManagement() {
             <Dropdown
               value={filterSubject}
               onChange={setFilterSubject}
-              options={[{ value: 'Semua', label: 'Semua Pelajaran' }, ...SUBJECTS.map(s => ({ value: s.name, label: s.name }))]}
+              options={[{ value: 'Semua', label: 'Semua Pelajaran' }, ...SUBJECTS.filter(s => s.category === 'Akademik').map(s => ({ value: s.name, label: s.name }))]}
               className="min-w-[200px]"
             />
             <Dropdown
@@ -160,7 +160,7 @@ export default function ModuleManagement() {
               />
             </td>
             <td className="py-6 px-8 text-right">
-              <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex justify-end gap-2 opacity-100">
                 <button 
                   onClick={() => handleEdit(module?.id)}
                   className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all font-black text-[10px] uppercase"

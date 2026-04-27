@@ -19,12 +19,12 @@ import {
   ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { mockQuestionBank } from './QuestionBank';
-import Dropdown from '../../components/ui/Dropdown';
-import Badge from '../../components/ui/Badge';
-import DataTable from '../../components/ui/DataTable';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import MathRenderer from '../../components/ui/MathRenderer';
+import { mockQuestionBank } from '@/data/mockQuestions';
+import Dropdown from '@/components/ui/Dropdown';
+import Badge from '@/components/ui/Badge';
+import DataTable from '@/components/ui/DataTable';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import MathRenderer from '@/components/ui/MathRenderer';
 
 /**
  * AddTryout Page — Advanced Session Creator
@@ -38,6 +38,7 @@ export default function AddTryout() {
   // 1. DRAFT STATE (Left Panel)
   const [formData, setFormData] = useState({
     title: '',
+    type: 'ujian mapel',
     subject: 'Matematika',
     duration: '90',
     startDate: '',
@@ -48,6 +49,7 @@ export default function AddTryout() {
 
   // 2. CONFIRMED CONFIG (Master state for the whole page)
   const [confirmedConfig, setConfirmedConfig] = useState({
+    type: 'ujian mapel',
     subject: 'Matematika',
     questionCount: 30,
     duration: 90,
@@ -83,6 +85,7 @@ export default function AddTryout() {
     }
 
     setConfirmedConfig({
+      type: formData?.type,
       subject: formData?.subject,
       questionCount: qCount,
       duration: dur,
@@ -213,6 +216,19 @@ export default function AddTryout() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Contoh: Tryout Nasional 1"
                   className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 dark:text-white transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Latihan</label>
+                <Dropdown
+                  value={formData.type}
+                  onChange={(val) => setFormData({ ...formData, type: val })}
+                  options={[
+                    { value: 'ujian mapel', label: 'Ujian Mapel' },
+                    { value: 'latihan tka', label: 'Latihan TKA' }
+                  ]}
+                  fullWidth
                 />
               </div>
 
@@ -351,11 +367,27 @@ export default function AddTryout() {
                       <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                       <input type="text" placeholder="Cari soal..." value={manualFilters.search} onChange={e => setManualFilters({...manualFilters, search: e.target.value})} className="w-full pl-14 pr-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none" />
                     </div>
+                    <div className="w-48">
+                      <Dropdown
+                        value={manualFilters.difficulty}
+                        onChange={(val) => setManualFilters({ ...manualFilters, difficulty: val })}
+                        options={[
+                          { value: 'Semua', label: 'Semua Level' },
+                          { value: 'Mudah', label: 'Mudah' },
+                          { value: 'Sedang', label: 'Sedang' },
+                          { value: 'Sulit', label: 'Sulit' }
+                        ]}
+                        fullWidth
+                      />
+                    </div>
                   </div>
 
                   <DataTable
                     headers={[{ label: 'Pilih', align: 'center' }, { label: 'Deskripsi Soal' }, { label: 'Level', align: 'center' }]}
-                    data={availableQuestions?.filter(q => q.text.toLowerCase().includes(manualFilters.search.toLowerCase()))}
+                    data={availableQuestions?.filter(q => 
+                      q.text.toLowerCase().includes(manualFilters.search.toLowerCase()) &&
+                      (manualFilters.difficulty === 'Semua' || q.difficulty === manualFilters.difficulty)
+                    )}
                     rowsPerPage={5}
                     renderRow={q => (
                       <tr key={q.id} onClick={() => setSelectedQuestionIds(prev => prev.includes(q.id) ? prev.filter(id => id !== q.id) : [...prev, q.id])} className={`cursor-pointer transition-colors ${selectedQuestionIds.includes(q.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50'}`}>
@@ -386,10 +418,14 @@ export default function AddTryout() {
                     <span className="text-[10px] font-black uppercase text-slate-500 mb-1">Butir</span>
                   </div>
                </div>
-               <div>
+                <div>
                   <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Mata Pelajaran</span>
                   <Badge text={confirmedConfig?.subject} variant="Info" className="px-6 py-2" />
-               </div>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Jenis Latihan</span>
+                  <Badge text={confirmedConfig?.type} variant="Success" className="px-6 py-2 uppercase" />
+                </div>
             </div>
 
             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">

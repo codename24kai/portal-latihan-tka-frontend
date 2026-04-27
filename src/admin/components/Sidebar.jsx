@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   X,
   Users,
-  Layers
+  Layers,
+  FileText
 } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -18,11 +19,9 @@ import { useEffect } from 'react';
  * Collapsible on desktop, overlay on mobile.
  */
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, setCollapsed }) {
-  // Get current user role to determine routing prefix and permissions
-  const userRole = localStorage.getItem('userRole') || 'teacher';
-  const basePath = userRole === 'teacher' ? '/teacher' : '/admin';
+  const basePath = '/admin';
 
-  // Grouped menu items
+  // Grouped menu items with role-based visibility
   const menuGroups = [
     {
       label: 'Dashboard',
@@ -41,8 +40,9 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
     {
       label: 'Pengguna & Laporan',
       items: [
-        ...(userRole === 'admin' ? [{ path: `${basePath}/users`, icon: Users, label: 'Manajemen Pengguna' }] : []),
+        { path: `${basePath}/users`, icon: Users, label: 'Manajemen Pengguna' },
         { path: `${basePath}/reports`, icon: BarChart3, label: 'Laporan Nilai' },
+        { path: `${basePath}/reports/survey`, icon: FileText, label: 'Laporan Survei' },
       ]
     }
   ];
@@ -91,7 +91,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
             <div className="overflow-hidden animate-fade-in flex-1">
               <h1 className="text-slate-800 dark:text-white font-black text-sm uppercase tracking-tight">Portal TKA</h1>
               <p className="text-slate-400 text-[10px] uppercase tracking-wider mt-0.5 font-bold">
-                {userRole === 'admin' ? 'Super Admin' : 'Teacher Access'}
+                Administrator
               </p>
             </div>
           )}

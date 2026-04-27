@@ -86,4 +86,14 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 16px);
   }
+
+  /* MathLive Virtual Keyboard Safeguard - DEFCON 1 Nuclear Override */
+  mathlive-keyboard, 
+  .mathlive-keyboard-panel, 
+  .MLK__container, 
+  .ML__keyboard,
+  .MLK__backdrop {
+    z-index: 999999 !important;
+    position: fixed !important;
+  }
 }

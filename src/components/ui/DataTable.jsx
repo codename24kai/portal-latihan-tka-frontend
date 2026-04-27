@@ -7,12 +7,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
  */
 const DataTable = ({ 
   headers = [], 
+  columns = [], // Support both prop names
   data = [], 
   rowsPerPage = 5,
   renderRow,
   className = ""
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const safeHeaders = columns.length > 0 ? columns : headers;
   const safeData = Array.isArray(data) ? data : [];
   const totalPages = Math.ceil(safeData.length / rowsPerPage) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -28,21 +30,33 @@ const DataTable = ({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
-              {headers.map((header, idx) => (
+              {(safeHeaders || []).map((header, idx) => (
                 <th 
                   key={idx} 
-                  className={`py-6 px-8 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ${header.align === 'center' ? 'text-center' : header.align === 'right' ? 'text-right' : ''}`}
+                  className={`py-6 px-8 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ${header?.align === 'center' ? 'text-center' : header?.align === 'right' ? 'text-right' : ''}`}
                 >
-                  {header.label}
+                  {header?.label}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-            {paginatedData.map((row, idx) => renderRow(row, idx))}
+            {(paginatedData || []).map((row, idx) => (
+              typeof renderRow === 'function' 
+                ? renderRow(row, idx) 
+                : (
+                  <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                    {(safeHeaders || []).map((header, hIdx) => (
+                      <td key={hIdx} className="py-5 px-8 text-sm font-bold text-slate-600 dark:text-slate-300">
+                        {header?.render ? header.render(row[header.key], row) : row[header?.key] || '-'}
+                      </td>
+                    ))}
+                  </tr>
+                )
+            ))}
             {paginatedData.length === 0 && (
               <tr>
-                <td colSpan={headers.length} className="py-20 text-center text-xs font-bold text-slate-400 uppercase tracking-widest italic">
+                <td colSpan={safeHeaders.length} className="py-20 text-center text-xs font-bold text-slate-400 uppercase tracking-widest italic">
                   Tidak ada data untuk ditampilkan
                 </td>
               </tr>

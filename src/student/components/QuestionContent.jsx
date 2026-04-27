@@ -29,7 +29,7 @@ export default function QuestionContent({ questionNumber, text, image, imageUrl 
               <img 
                 src={actualImage} 
                 alt={`Soal ${questionNumber}`} 
-                className="max-h-80 w-full object-contain rounded-xl"
+                className="max-h-40 w-full object-contain rounded-xl"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = 'https://placehold.co/600x400?text=Gambar+tidak+ditemukan';

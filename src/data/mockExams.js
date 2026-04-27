@@ -28,34 +28,6 @@ const mockExams = [
     deadline: '2026-04-15',
     type: 'tryout'
   },
-  {
-    id: 3,
-    subject: 'Survei Lingkungan Belajar',
-    icon: 'Globe',
-    color: 'from-emerald-500 to-teal-600',
-    bgLight: 'bg-emerald-50',
-    textColor: 'text-emerald-600',
-    totalQuestions: 30,
-    duration: 3600, // 60 minutes
-    status: 'completed',
-    score: 85,
-    deadline: '2026-04-15',
-    type: 'practice'
-  },
-  {
-    id: 4,
-    subject: 'Survei Karakter',
-    icon: 'Heart',
-    color: 'from-teal-500 to-emerald-600',
-    bgLight: 'bg-teal-50',
-    textColor: 'text-teal-600',
-    totalQuestions: 30,
-    duration: 3600, // 60 minutes
-    status: 'available',
-    score: null,
-    deadline: '2026-04-15',
-    type: 'practice'
-  },
 ];
 
 export default mockExams;
