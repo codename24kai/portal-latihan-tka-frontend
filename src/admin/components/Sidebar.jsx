@@ -12,13 +12,15 @@ import {
   Layers,
   FileText
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 /**
  * Admin sidebar navigation.
  * Collapsible on desktop, overlay on mobile.
  */
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, setCollapsed }) {
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const basePath = '/admin';
 
   // Grouped menu items with role-based visibility
@@ -159,7 +161,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
           </button>
 
           <button
-            onClick={handleLogout}
+            onClick={() => setIsLogoutConfirmOpen(true)}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 text-sm font-bold transition-all duration-200"
           >
             <LogOut size={20} className="flex-shrink-0" />
@@ -167,6 +169,17 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
           </button>
         </div>
       </aside>
+
+      <ConfirmDialog 
+        isOpen={isLogoutConfirmOpen}
+        title="Konfirmasi Keluar"
+        message="Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses portal."
+        confirmLabel="Ya, Keluar"
+        cancelLabel="Batal"
+        onConfirm={handleLogout}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        variant="warning"
+      />
     </>
   );
 }

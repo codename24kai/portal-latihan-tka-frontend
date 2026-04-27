@@ -12,12 +12,14 @@ import {
   FileText
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 /**
  * Guru Sidebar Navigation.
  * Scoped to Teacher role and Orange-Teal theme.
  */
 export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, setCollapsed }) {
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const userClass = localStorage.getItem('assignedClass') ?? '';
 
   const menuGroups = [
@@ -139,7 +141,7 @@ export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collaps
           </button>
 
           <button
-            onClick={handleLogout}
+            onClick={() => setIsLogoutConfirmOpen(true)}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 text-sm font-bold transition-all duration-200"
           >
             <LogOut size={20} className="flex-shrink-0" />
@@ -147,6 +149,17 @@ export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collaps
           </button>
         </div>
       </aside>
+
+      <ConfirmDialog 
+        isOpen={isLogoutConfirmOpen}
+        title="Konfirmasi Keluar"
+        message="Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses portal."
+        confirmLabel="Ya, Keluar"
+        cancelLabel="Batal"
+        onConfirm={handleLogout}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        variant="warning"
+      />
     </>
   );
 }

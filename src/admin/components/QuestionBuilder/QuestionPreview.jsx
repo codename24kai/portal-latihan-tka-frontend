@@ -45,10 +45,32 @@ export default function QuestionPreview({ data }) {
               ))}
             </div>
           ) : question_type === QUESTION_TYPES.TRUE_FALSE ? (
-            <div className="grid grid-cols-2 gap-4">
-               <div className={`p-4 rounded-2xl border text-center font-black uppercase tracking-widest text-[10px] ${payload.correct_value === true ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-300'}`}>Benar</div>
-               <div className={`p-4 rounded-2xl border text-center font-black uppercase tracking-widest text-[10px] ${payload.correct_value === false ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-slate-50 border-slate-100 text-slate-300'}`}>Salah</div>
-            </div>
+            Array.isArray(payload.statements) && payload.statements.length > 0 ? (
+              <div className="space-y-3">
+                {payload.statements.map((stmt, idx) => (
+                  <div key={stmt.id} className="flex items-center justify-between p-4 rounded-2xl border bg-slate-50 border-slate-100 dark:bg-slate-900/50 dark:border-slate-700">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-500 shrink-0">{idx + 1}</span>
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
+                        <MathRenderer text={stmt.text || '...'} />
+                      </span>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ml-3 ${
+                      stmt.correct_answer === true 
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' 
+                        : 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400'
+                    }`}>
+                      {stmt.correct_answer ? 'Benar' : 'Salah'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className={`p-4 rounded-2xl border text-center font-black uppercase tracking-widest text-[10px] ${payload.correct_value === true ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-300'}`}>Benar</div>
+                <div className={`p-4 rounded-2xl border text-center font-black uppercase tracking-widest text-[10px] ${payload.correct_value === false ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-slate-50 border-slate-100 text-slate-300'}`}>Salah</div>
+              </div>
+            )
           ) : (
             <div className="p-8 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-3xl text-center">
                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest italic">Input Esai Siswa</span>

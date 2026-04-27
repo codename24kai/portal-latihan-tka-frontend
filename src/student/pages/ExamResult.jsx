@@ -417,37 +417,79 @@ export default function ExamResult() {
                             </div>
                           )}
 
-                          <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                            <div className="flex-1 space-y-1">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jawabanmu</p>
-                              <div className={`p-3 rounded-xl border text-sm font-bold ${
-                                isCorrect ? 'bg-teal-50 text-teal-700' : 
-                                isPartial ? 'bg-amber-50 text-amber-700' :
-                                'bg-purple-50 text-purple-700'
-                              }`}>
-                                {q.question_type === QUESTION_TYPES.ESSAY 
-                                  ? (userAnswer || 'Tidak Dijawab')
-                                  : q.question_type === QUESTION_TYPES.MULTI_CHOICE
-                                  ? (userAnswer?.join(', ') || 'Tidak Dijawab')
-                                  : q.question_type === QUESTION_TYPES.TRUE_FALSE
-                                  ? (userAnswer === true ? 'Benar' : userAnswer === false ? 'Salah' : 'Tidak Dijawab')
-                                  : (userAnswer || 'Tidak Dijawab')}
+                          {/* Answer Review Section */}
+                          {q.question_type === QUESTION_TYPES.TRUE_FALSE && Array.isArray(q.payload.statements) ? (
+                            /* AKM Complex True/False — Statement Matrix Review */
+                            <div className="space-y-2 pt-2">
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Detail Jawaban Per Pernyataan</p>
+                              <div className="space-y-2">
+                                {q.payload.statements.map((stmt, sIdx) => {
+                                  const studentVal = typeof userAnswer === 'object' && userAnswer !== null ? userAnswer[stmt.id] : undefined;
+                                  const isStatementCorrect = studentVal === stmt.correct_answer;
+                                  const isUnanswered = studentVal === undefined;
+                                  return (
+                                    <div key={stmt.id} className={`flex items-center gap-3 p-3 rounded-xl border text-sm ${
+                                      isUnanswered ? 'bg-slate-50 border-slate-100 dark:bg-slate-900/30 dark:border-slate-700' :
+                                      isStatementCorrect ? 'bg-teal-50 border-teal-200 dark:bg-teal-900/10 dark:border-teal-800' :
+                                      'bg-purple-50 border-purple-200 dark:bg-purple-900/10 dark:border-purple-800'
+                                    }`}>
+                                      <span className="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-500 shrink-0">{sIdx + 1}</span>
+                                      <span className="flex-1 text-xs font-bold text-slate-600 dark:text-slate-300 min-w-0">{stmt.text}</span>
+                                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                                          isUnanswered ? 'bg-slate-200 text-slate-400' :
+                                          studentVal ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
+                                        }`}>
+                                          {isUnanswered ? '—' : studentVal ? 'B' : 'S'}
+                                        </span>
+                                        {!isUnanswered && !isStatementCorrect && (
+                                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-teal-500 text-white`}>
+                                            {stmt.correct_answer ? 'B' : 'S'}
+                                          </span>
+                                        )}
+                                        {isStatementCorrect && !isUnanswered && (
+                                          <span className="text-teal-500 text-[10px]">✓</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
-                            
-                            {q.question_type !== QUESTION_TYPES.ESSAY && !isCorrect && (
+                          ) : (
+                            /* Standard answer display for other types + legacy true/false */
+                            <div className="flex flex-col sm:flex-row gap-4 pt-2">
                               <div className="flex-1 space-y-1">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kunci Jawaban</p>
-                                <div className="p-3 rounded-xl bg-teal-500 text-white text-sm font-bold">
-                                  {q.question_type === QUESTION_TYPES.MULTI_CHOICE 
-                                    ? q.payload.correct_keys.join(', ')
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jawabanmu</p>
+                                <div className={`p-3 rounded-xl border text-sm font-bold ${
+                                  isCorrect ? 'bg-teal-50 text-teal-700' : 
+                                  isPartial ? 'bg-amber-50 text-amber-700' :
+                                  'bg-purple-50 text-purple-700'
+                                }`}>
+                                  {q.question_type === QUESTION_TYPES.ESSAY 
+                                    ? (userAnswer || 'Tidak Dijawab')
+                                    : q.question_type === QUESTION_TYPES.MULTI_CHOICE
+                                    ? (userAnswer?.join(', ') || 'Tidak Dijawab')
                                     : q.question_type === QUESTION_TYPES.TRUE_FALSE
-                                    ? (q.payload.correct_value ? 'Benar' : 'Salah')
-                                    : q.payload.correct_keys[0]}
+                                    ? (userAnswer === true ? 'Benar' : userAnswer === false ? 'Salah' : 'Tidak Dijawab')
+                                    : (userAnswer || 'Tidak Dijawab')}
                                 </div>
                               </div>
-                            )}
-                          </div>
+                              
+                              {q.question_type !== QUESTION_TYPES.ESSAY && !isCorrect && (
+                                <div className="flex-1 space-y-1">
+                                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kunci Jawaban</p>
+                                  <div className="p-3 rounded-xl bg-teal-500 text-white text-sm font-bold">
+                                    {q.question_type === QUESTION_TYPES.MULTI_CHOICE 
+                                      ? q.payload.correct_keys.join(', ')
+                                      : q.question_type === QUESTION_TYPES.TRUE_FALSE
+                                      ? (q.payload.correct_value ? 'Benar' : 'Salah')
+                                      : q.payload.correct_keys[0]}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
 
                           {q.explanation && (
                             <div className="mt-4 p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50">

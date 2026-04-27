@@ -12,7 +12,7 @@ export const QUESTION_TYPES = {
 export const QUESTION_TYPE_LABELS = {
   [QUESTION_TYPES.SINGLE_CHOICE]: 'Pilihan Ganda',
   [QUESTION_TYPES.MULTI_CHOICE]: 'Pilihan Ganda Kompleks',
-  [QUESTION_TYPES.TRUE_FALSE]: 'Benar / Salah',
+  [QUESTION_TYPES.TRUE_FALSE]: 'Benar / Salah Majemuk',
   [QUESTION_TYPES.ESSAY]: 'Esai',
 };
 

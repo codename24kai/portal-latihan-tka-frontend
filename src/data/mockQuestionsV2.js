@@ -57,12 +57,17 @@ export const mockQuestionBankV2 = [
     difficulty: 'easy', 
     cognitive_level: 'C1',
     payload: {
-      stem: 'Antonim dari kata "Cerdas" adalah "Pintar".', 
+      stem: 'Tentukan Benar atau Salah untuk setiap pernyataan berikut tentang antonim dan sinonim.', 
       stem_image: null,
-      correct_value: false
+      statements: [
+        { id: 's1', text: 'Antonim dari kata "Cerdas" adalah "Bodoh"', correct_answer: true },
+        { id: 's2', text: '"Pintar" adalah sinonim dari "Cerdas"', correct_answer: true },
+        { id: 's3', text: 'Antonim dari kata "Cerdas" adalah "Pintar"', correct_answer: false },
+        { id: 's4', text: '"Dungu" merupakan lawan kata dari "Cerdas"', correct_answer: true },
+      ]
     },
-    explanation: 'Antonim adalah lawan kata. Lawan kata "Cerdas" bisa "Bodoh" atau "Dungu". "Pintar" adalah sinonim.', 
-    max_points: 1,
+    explanation: 'Antonim adalah lawan kata. Lawan kata "Cerdas" bisa "Bodoh" atau "Dungu". "Pintar" adalah sinonim, bukan antonim.', 
+    max_points: 4,
     is_active: true,
     createdAt: '2026-03-22' 
   },

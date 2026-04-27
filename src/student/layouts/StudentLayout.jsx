@@ -19,6 +19,7 @@ import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import FloatingGuide from '../components/FloatingGuide';
 import Sidebar from '../components/Sidebar';
 import ProfileHeader from '../components/ProfileHeader';
+import NotificationDropdown from '../components/NotificationDropdown';
 
 const userData = {
   name: 'Budi Kialang',
@@ -86,11 +87,15 @@ export default function StudentLayout() {
           </div>
           <span className="font-bold text-slate-800 dark:text-white text-sm">PORTAL TKA</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <NetworkIndicator isOnline={isOnline} />
+          
+          <NotificationDropdown />
+
           <button
             onClick={toggleDarkMode}
-            className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300"
+            className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"
+            title={isDark ? 'Mode Terang' : 'Mode Gelap'}
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -112,6 +117,8 @@ export default function StudentLayout() {
           toggleSidebar={toggleSidebar}
           isOnline={isOnline}
           userData={userData}
+          isDark={isDark}
+          toggleDarkMode={toggleDarkMode}
         />
 
         {/* PDOTLE WRAPPER - SCROLLABLE AREA */}

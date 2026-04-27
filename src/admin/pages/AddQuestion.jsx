@@ -99,9 +99,12 @@ export default function AddQuestion() {
           newData.payload = { 
             stem: prev.payload.stem, 
             stem_image: prev.payload.stem_image,
-            correct_value: true 
+            statements: [
+              { id: 's1', text: '', correct_answer: true },
+              { id: 's2', text: '', correct_answer: false },
+            ]
           };
-          newData.max_points = 1;
+          newData.max_points = 2;
         } else if (value === QUESTION_TYPES.ESSAY) {
           newData.payload = { 
             stem: prev.payload.stem, 

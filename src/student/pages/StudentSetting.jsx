@@ -21,6 +21,7 @@ import mockExams from '../../data/mockExams';
 import mockStudents from '../../data/mockStudents';
 import ProfilePicModal from '../components/ProfilePicModal';
 import { saveProfilePic, getProfilePic } from '../utils/profileStorage';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 /**
  * Student Setting Page - Overhauled with Modal Pattern
@@ -34,6 +35,7 @@ export default function StudentSetting() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   // Mock User Data (Assume user ID 1 for this demonstration)
   const [userData, setUserData] = useState({
@@ -262,7 +264,7 @@ export default function StudentSetting() {
 
           {/* 4. LOGOUT SECTION - Mobile Only */}
           <button 
-            onClick={handleLogout}
+            onClick={() => setIsLogoutConfirmOpen(true)}
             className="md:hidden w-full flex items-center justify-between p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group text-red-600 dark:text-red-400"
           >
             <div className="flex items-center gap-4">
@@ -292,7 +294,7 @@ export default function StudentSetting() {
           />
           
           {/* Modal Content */}
-          <div className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-slate-700 animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="relative w-full max-lg bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-slate-700 animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
               <h3 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">Ganti Password</h3>
               <button 
@@ -374,6 +376,17 @@ export default function StudentSetting() {
         onClose={() => setIsProfileModalOpen(false)}
         onSave={handleSaveProfilePic}
         currentPic={userData.profile_pic}
+      />
+
+      <ConfirmDialog 
+        isOpen={isLogoutConfirmOpen}
+        title="Konfirmasi Keluar"
+        message="Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses portal."
+        confirmLabel="Ya, Keluar"
+        cancelLabel="Batal"
+        onConfirm={handleLogout}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        variant="warning"
       />
     </div>
   );
