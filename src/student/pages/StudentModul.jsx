@@ -4,19 +4,11 @@ import {
   FileText,
   Download,
   ChevronRight,
-  Calculator,
-  Globe,
-  Heart,
-  Book,
-  PenTool,
-  Trees,
   Lock,
   Play,
   CheckCircle2,
   Gamepad2,
-  AlertCircle,
   Clock,
-  Star,
   Info,
   RotateCcw
 } from 'lucide-react';
@@ -37,7 +29,7 @@ export default function StudentModul() {
       subject: 'Bahasa Indonesia',
       pages: 45,
       size: '2.4 MB',
-      icon: Book,
+      heroImage: '/assets/hero/bahasa-background-hero.jpg',
       color: 'from-orange-400 to-orange-600',
       bgLight: 'bg-orange-50',
       textColor: 'text-orange-600',
@@ -55,7 +47,7 @@ export default function StudentModul() {
       subject: 'Matematika',
       pages: 32,
       size: '1.8 MB',
-      icon: Calculator,
+      heroImage: '/assets/hero/math-background-hero.jpg',
       color: 'from-teal-400 to-teal-600',
       bgLight: 'bg-teal-50',
       textColor: 'text-teal-600',
@@ -72,7 +64,7 @@ export default function StudentModul() {
       subject: 'Umum',
       pages: 20,
       size: '1.2 MB',
-      icon: Trees,
+      heroImage: '/assets/hero/kids-school.jpg',
       color: 'from-slate-400 to-slate-600',
       bgLight: 'bg-slate-50',
       textColor: 'text-slate-600',
@@ -87,7 +79,7 @@ export default function StudentModul() {
       subject: 'Bahasa Indonesia',
       pages: 28,
       size: '1.5 MB',
-      icon: PenTool,
+      heroImage: '/assets/hero/bahasa-background-hero-2.jpg',
       color: 'from-orange-400 to-orange-600',
       bgLight: 'bg-orange-50',
       textColor: 'text-orange-600',
@@ -104,7 +96,7 @@ export default function StudentModul() {
       subject: 'Matematika',
       pages: 40,
       size: '3.1 MB',
-      icon: Calculator,
+      heroImage: '/assets/hero/math-background-hero-3.jpg',
       color: 'from-teal-400 to-teal-600',
       bgLight: 'bg-teal-50',
       textColor: 'text-teal-600',
@@ -159,61 +151,65 @@ export default function StudentModul() {
   const ModuleCard = ({ mod }) => (
     <div
       key={mod.id}
-      className={`group relative bg-white dark:bg-slate-800 border-2 rounded-[3rem] p-8 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 ${
+      className={`group relative bg-white dark:bg-slate-800 border-2 rounded-[3rem] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 ${
         mod.progressStatus === 'selesai' 
           ? 'border-teal-100 dark:border-teal-900/30 bg-slate-50/50 dark:bg-slate-900/40' 
           : 'border-white dark:border-slate-800'
       }`}
     >
       <div>
-        <div className="flex justify-between items-start mb-10">
-          {/* Enhanced & Enlarged Icon */}
-          <div className={`w-20 h-20 rounded-[2rem] bg-gradient-to-br ${mod.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 text-white ${mod.progressStatus === 'selesai' ? 'grayscale-[0.5] opacity-80' : ''}`}>
-            {React.createElement(mod.icon, { size: 40 })}
-          </div>
+        {/* Hero Image Section */}
+        <div className="relative h-44 overflow-hidden">
+          <img 
+            src={mod.heroImage} 
+            alt={mod.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           
-          <div className="flex flex-col items-end gap-2">
-            {/* Learning Path Badge */}
+          {/* Status Badges on Image */}
+          <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
             {mod.isFirst && mod.progressStatus !== 'selesai' && (
-              <div className="px-3 py-1 bg-teal-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse">
+              <div className="px-3 py-1 bg-teal-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse shadow-lg">
                 Mulai di sini
               </div>
             )}
-            {/* Progress Badge Container - Updated to prevent overlap */}
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ${
+            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all shadow-lg ${
               mod.progressStatus === 'selesai' 
-                ? 'bg-teal-50 text-teal-600 border-teal-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 shadow-sm' 
+                ? 'bg-teal-50 text-teal-600 border-teal-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
                 : mod.progressStatus === 'sedang'
                   ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
                   : 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-900 dark:text-slate-500 dark:border-slate-700'
             }`}>
-              {mod.progressStatus === 'selesai' && <Star size={12} fill="currentColor" className="text-teal-500" />}
               {mod.progressStatus === 'selesai' ? 'Selesai' : mod.progressStatus === 'sedang' ? 'Sedang Belajar' : 'Belum Dibaca'}
             </div>
           </div>
-        </div>
-        
-        <h3 className={`text-2xl font-black leading-tight mb-2 pr-6 transition-colors uppercase tracking-tight ${mod.progressStatus === 'selesai' ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-white group-hover:text-indigo-600'}`}>
-          {mod.title}
-        </h3>
-        
-        <div className="flex items-center gap-2 mb-6 uppercase">
-           <span className={`text-[10px] font-black px-3 py-1 rounded-lg ${mod.bgLight} ${mod.textColor} dark:bg-white/5 ${mod.progressStatus === 'selesai' ? 'opacity-50' : ''}`}>
-             {mod.subject}
-           </span>
+
+          <div className="absolute bottom-0 left-0 p-6 w-full">
+            <h3 className={`text-2xl font-black leading-tight pr-6 transition-colors uppercase tracking-tight drop-shadow-lg ${mod.progressStatus === 'selesai' ? 'text-white/60' : 'text-white'}`}>
+              {mod.title}
+            </h3>
+            <div className="flex items-center gap-2 mt-2 uppercase">
+               <span className={`text-[10px] font-black px-3 py-1 rounded-lg bg-white/20 backdrop-blur-md text-white border border-white/30 ${mod.progressStatus === 'selesai' ? 'opacity-50' : ''}`}>
+                 {mod.subject}
+               </span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 mb-10 uppercase tracking-widest">
-          <span className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded-xl">
-            <Clock size={14} className="text-indigo-400" /> {mod.estimasiWaktu}
-          </span>
-          <span className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-xl">
-             {mod.pages} hal
-          </span>
+        <div className="p-8 pb-4">
+          <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <span className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded-xl">
+              <Clock size={14} className="text-indigo-400" /> {mod.estimasiWaktu}
+            </span>
+            <span className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-xl">
+               {mod.pages} hal
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="p-8 pt-0 space-y-4">
         {mod.progressStatus === 'selesai' ? (
            <button 
              onClick={() => handleContentAccess(mod.id)}
@@ -279,7 +275,7 @@ export default function StudentModul() {
             Katalog <span className="text-indigo-600">Modul</span> Belajar
           </h1>
           <p className="text-base font-bold text-slate-400 tracking-wide mt-2">
-            Pilih materimu dan kumpulkan <span className="text-teal-600">Bintang Emas</span> dari kuis game!
+            Pilih materimu dan selesaikan tantangan kuis game!
           </p>
         </div>
 
@@ -360,11 +356,11 @@ export default function StudentModul() {
             {/* Explore More Card Moved here only if listing general modules else where or stayed empty */}
              <div className="border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem] p-8 flex flex-col items-center justify-center text-center gap-6 opacity-40">
               <div className="w-20 h-20 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-300">
-                <Star size={40} />
+                <BookOpen size={40} />
               </div>
               <div>
                 <span className="block font-black text-slate-400 text-sm uppercase tracking-widest">Selesaikan Lebih Banyak</span>
-                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Kumpulkan semua bintang!</p>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Ayo kuasai semua materi!</p>
               </div>
             </div>
           </div>
@@ -381,7 +377,7 @@ export default function StudentModul() {
             </div>
             <div className="space-y-3">
               <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight italic">Siap <span className="text-indigo-600">Main?</span></h3>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Pastikan kamu sudah memahami materi agar kumpulkan <span className="text-teal-600">Bintang Maksimal!</span></p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Pastikan kamu sudah memahami materi agar kumpulkan <span className="text-teal-600">Skor Maksimal!</span></p>
             </div>
             <div className="flex flex-col gap-3">
               <button 

@@ -9,77 +9,62 @@ import {
   CheckCircle2,
   Trophy,
   Book,
-  Calculator,
-  Globe,
-  Heart,
   Lock,
-  Star,
   RotateCcw
 } from 'lucide-react';
 import { formatDuration } from '../../utils/formatTime';
 
 /**
  * Gamified Mission/Exam card for students.
- * Features large icons, status rewards, and clear action calls.
+ * Features large hero images, large titles, and clear action calls.
  */
 export default function MissionCard({ exam, onStart, isPractice = false }) {
   const navigate = useNavigate();
   const isCompleted = exam.status === 'completed';
   const isLocked = exam.status === 'locked';
 
-  // Icon mapping with larger default
-  const getIcon = (iconName) => {
-    const size = 36;
-    switch (iconName) {
-      case 'Calculator': return <Calculator size={size} />;
-      case 'Book': return <Book size={size} />;
-      case 'Globe': return <Globe size={size} />;
-      case 'Heart': return <Heart size={size} />;
-      default: return <Book size={size} />;
-    }
+  // Hero image mapping
+  const getHeroImage = (subject) => {
+    const s = subject.toLowerCase();
+    if (s.includes('matematika')) return '/assets/hero/math-background-hero.jpg';
+    if (s.includes('bahasa') || s.includes('indonesia')) return '/assets/hero/bahasa-background-hero.jpg';
+    return '/assets/hero/kids-school.jpg';
   };
 
   return (
     <div
       id={`mission-card-${exam.id}`}
       className={`relative bg-white dark:bg-dark-surface rounded-[2.5rem] shadow-card dark:shadow-black/40 border-2 overflow-hidden transition-all duration-300 group ${isLocked
-          ? 'opacity-70 border-slate-100 grayscale-[0.5]'
-          : isCompleted
-            ? 'border-teal-100 dark:border-teal-900/30'
-            : 'border-white dark:border-slate-800 hover:shadow-2xl hover:-translate-y-2'
+        ? 'opacity-70 border-slate-100 grayscale-[0.5]'
+        : isCompleted
+          ? 'border-teal-100 dark:border-teal-900/30'
+          : 'border-white dark:border-slate-800 hover:shadow-2xl hover:-translate-y-2'
         } animate-slide-up`}
       style={{ animationDelay: `${exam.id * 80}ms` }}
     >
-      {/* Top color accent bar */}
-      <div className={`h-2 bg-gradient-to-r ${exam.color}`} />
 
-      {/* Gamification Badge: Star */}
-      {!isCompleted && !isLocked && (
-        <div className="absolute top-4 right-6 flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
-          <Star size={12} fill="currentColor" />
-          Bintang Emas
+      {/* Hero Banner Section */}
+      <div className="relative h-44 md:h-52 overflow-hidden">
+        <img
+          src={getHeroImage(exam.subject)}
+          alt={exam.subject}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+        {/* Large Subject Title on Hero */}
+        <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
+          <h3 className="font-black text-white text-3xl md:text-4xl tracking-tight leading-none uppercase drop-shadow-lg">
+            {isPractice ? `BAB ${exam.id}: ${exam.subject}` : exam.subject}
+          </h3>
+          <p className="text-white/80 text-[10px] md:text-xs font-bold mt-2 uppercase tracking-widest drop-shadow-md">
+            {exam.type === 'tryout' ? 'Simulasi Resmi TKA' : 'Latihan Mandiri • Topik Utama'}
+          </p>
         </div>
-      )}
+      </div>
 
       <div className="p-8">
-        {/* Header row: Icon + Subject + Status */}
-        <div className="flex items-center gap-6 mb-8">
-          {/* Subject icon - Enlarged and Styled */}
-          <div className={`w-20 h-20 rounded-3xl ${exam.bgLight} dark:bg-white/5 flex items-center justify-center text-4xl shadow-inner group-hover:scale-110 transition-transform duration-500`}>
-            <span className={`${exam.textColor} dark:text-white`}>
-              {getIcon(exam.icon)}
-            </span>
-          </div>
-          <div>
-            <h3 className="font-black text-slate-800 dark:text-white text-xl tracking-tight leading-tight uppercase">
-              {isPractice ? `BAB ${exam.id}: ${exam.subject}` : exam.subject}
-            </h3>
-            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">
-              {exam.type === 'tryout' ? 'Simulasi Resmi TKA' : 'Latihan Mandiri • Topik Utama'}
-            </p>
-          </div>
-        </div>
-
         {/* Info Area */}
         <div className="flex flex-wrap items-center gap-6 mb-8">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">

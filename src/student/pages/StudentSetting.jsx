@@ -20,7 +20,7 @@ import toast from 'react-hot-toast';
 import mockExams from '../../data/mockExams';
 import mockStudents from '../../data/mockStudents';
 import ProfilePicModal from '../components/ProfilePicModal';
-import { saveProfilePic, getProfilePic } from '../utils/profileStorage';
+import { useUser } from '../../context/UserContext';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 /**
@@ -33,51 +33,17 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog';
  */
 export default function StudentSetting() {
   const navigate = useNavigate();
+  const { currentUser, updateProfilePic } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
-  // Mock User Data (Assume user ID 1 for this demonstration)
-  const [userData, setUserData] = useState({
-    id: 1,
-    name: 'Budi Kialang',
-    school: 'SD Negeri Muncul 02',
-    class: 'Kelas 6-A',
-    gender: 'Laki-laki',
-    nisn: '0012345678',
-    profile_pic: null
-  });
-
-  // Load profile pic from IndexedDB on mount
-  React.useEffect(() => {
-    const loadProfilePic = async () => {
-      try {
-        const savedPic = await getProfilePic(userData.id);
-        if (savedPic) {
-          setUserData(prev => ({ ...prev, profile_pic: savedPic }));
-        }
-      } catch (error) {
-        console.error('Failed to load profile pic from IndexedDB:', error);
-      }
-    };
-    loadProfilePic();
-  }, [userData.id]);
-
   const handleSaveProfilePic = async (newPic) => {
     try {
-      // 1. Temporarily update mock user data in memory (for current session)
-      const studentIndex = mockStudents.findIndex(s => s.id === userData.id);
-      if (studentIndex !== -1) {
-        mockStudents[studentIndex].profile_pic = newPic;
-      }
+      // Update global context (handles persistence to IndexedDB too)
+      await updateProfilePic(newPic);
 
-      // 2. Update local state for immediate feedback
-      setUserData(prev => ({ ...prev, profile_pic: newPic }));
-
-      // 3. Store in IndexedDB for offline access
-      await saveProfilePic(userData.id, newPic);
-
-      // 4. Show success feedback
+      // Show success feedback
       toast.success('Foto profil berhasil diperbarui!');
       setIsProfileModalOpen(false);
     } catch (error) {
@@ -93,7 +59,7 @@ export default function StudentSetting() {
 
   // Filter completed exams for "Riwayat Belajar"
   const historyExams = mockExams.filter(exam => exam.status === 'completed');
-  const isMale = userData.gender === 'Laki-laki';
+  const isMale = currentUser?.gender === 'Laki-laki';
 
   return (
     <div className="space-y-8 animate-fade-in text-slate-900 dark:text-white pb-10">
@@ -117,13 +83,13 @@ export default function StudentSetting() {
             {/* Dynamic Profile Picture */}
             <div className="relative mb-6 group">
               <div className={`w-32 h-32 rounded-3xl border-4 border-white dark:border-slate-700 shadow-xl flex items-center justify-center text-white overflow-hidden transition-all duration-500 ${
-                !userData.profile_pic && (isMale 
+                !currentUser?.profile_pic && (isMale 
                   ? 'bg-gradient-to-br from-blue-500 to-indigo-600' 
                   : 'bg-gradient-to-br from-pink-500 to-rose-600')
               }`}>
-                {userData.profile_pic ? (
+                {currentUser?.profile_pic ? (
                   <img 
-                    src={userData.profile_pic} 
+                    src={currentUser.profile_pic} 
                     alt="Profile" 
                     className="w-full h-full object-cover animate-in fade-in zoom-in-75 duration-500"
                   />
@@ -133,7 +99,7 @@ export default function StudentSetting() {
               </div>
               
               <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-full shadow-md border border-slate-100 dark:border-slate-600 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-widest">
-                {userData.gender}
+                {currentUser?.gender}
               </div>
 
               {/* Quick Action Overlay */}
@@ -148,9 +114,9 @@ export default function StudentSetting() {
             </div>
 
             <div className="text-center mb-6">
-              <h3 className="text-xl font-black tracking-tight">{userData.name}</h3>
+              <h3 className="text-xl font-black tracking-tight">{currentUser?.name}</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                {userData.school} • {userData.class}
+                {currentUser?.school} • {currentUser?.class}
               </p>
             </div>
 
@@ -188,14 +154,14 @@ export default function StudentSetting() {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
                 <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm">
-                   {userData.name}
+                   {currentUser?.name}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">NISN</label>
                 <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm">
-                   {userData.nisn}
+                   {currentUser?.nisn}
                 </div>
               </div>
             </div>
@@ -375,7 +341,7 @@ export default function StudentSetting() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         onSave={handleSaveProfilePic}
-        currentPic={userData.profile_pic}
+        currentPic={currentUser?.profile_pic}
       />
 
       <ConfirmDialog 

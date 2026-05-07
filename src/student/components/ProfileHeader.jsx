@@ -3,6 +3,8 @@ import { ChevronLeft, Menu, Sun, Moon } from 'lucide-react';
 import NetworkIndicator from '../../components/NetworkIndicator';
 import NotificationDropdown from './NotificationDropdown';
 
+import { useUser } from '../../context/UserContext';
+
 /**
  * ProfileHeader Component for Student Portal
  * extracted from StudentLayout for better maintainability.
@@ -11,12 +13,12 @@ export default function ProfileHeader({
   isSidebarOpen, 
   toggleSidebar, 
   isOnline, 
-  userData,
   isDark,
   toggleDarkMode
 }) {
+  const { currentUser } = useUser();
   // Avatar logic: Default to boy-1 if not specified
-  const avatarSrc = `/avatar/avatar-${userData?.avatarId || 'boy-1'}.svg`;
+  const avatarSrc = currentUser?.profile_pic || `/avatar/avatar-${currentUser?.avatarId || 'boy-1'}.svg`;
 
   return (
     <div className="hidden md:flex h-16 px-8 items-center justify-between bg-transparent shrink-0">
@@ -36,7 +38,7 @@ export default function ProfileHeader({
           </div>
 
           <NotificationDropdown />
-
+ 
           <button
             onClick={toggleDarkMode}
             className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-teal-600 transition-all hover:shadow-md active:scale-90"
@@ -53,7 +55,7 @@ export default function ProfileHeader({
           <div className="text-right">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-0.5">Siswa</p>
             <p className="text-sm font-black text-slate-800 dark:text-white whitespace-nowrap">
-              {userData?.name || 'Siswa TKA'}
+              {currentUser?.name || 'Siswa TKA'}
             </p>
           </div>
           

@@ -20,12 +20,7 @@ import FloatingGuide from '../components/FloatingGuide';
 import Sidebar from '../components/Sidebar';
 import ProfileHeader from '../components/ProfileHeader';
 import NotificationDropdown from '../components/NotificationDropdown';
-
-const userData = {
-  name: 'Budi Kialang',
-  gender: 'Laki-laki',
-  avatarId: 'boy-2' // Example avatar
-};
+import { useUser } from '../../context/UserContext';
 
 /**
  * StudentLayout — The "Bulletproof Shell"
@@ -42,6 +37,7 @@ const userData = {
 export default function StudentLayout() {
   const isOnline = useNetworkStatus();
   const { isDark, toggleDarkMode } = useDarkMode();
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -66,14 +62,11 @@ export default function StudentLayout() {
           1. DESKTOP SIDEBAR (Visible md+)
           Fixed left column, full height, collapsible width
           ============================================================ */}
-      <Sidebar 
+      <Sidebar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
         navItems={navItems}
         handleLogout={handleLogout}
-        isDark={isDark}
-        toggleDarkMode={toggleDarkMode}
-        userData={userData}
       />
 
       {/* ============================================================
@@ -89,7 +82,7 @@ export default function StudentLayout() {
         </div>
         <div className="flex items-center gap-2">
           <NetworkIndicator isOnline={isOnline} />
-          
+
           <NotificationDropdown />
 
           <button
@@ -112,11 +105,10 @@ export default function StudentLayout() {
         ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}
       `}>
 
-        <ProfileHeader 
+        <ProfileHeader
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
           isOnline={isOnline}
-          userData={userData}
           isDark={isDark}
           toggleDarkMode={toggleDarkMode}
         />

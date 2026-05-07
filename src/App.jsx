@@ -46,6 +46,8 @@ import SurveyReports from './guru/pages/SurveyReports';
 import AdminSurveyReports from './admin/pages/AdminSurveyReports';
 
 import ToastProvider from './components/ui/ToastProvider';
+import { UserProvider } from './context/UserContext';
+
 
 /**
  * Mock Auth Guard: Protects routes and acts as the router entry logic.
@@ -75,8 +77,9 @@ const RequireAuth = ({ children, allowedRoles }) => {
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider />
-      <Routes>
+      <UserProvider>
+        <ToastProvider />
+        <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
 
@@ -136,6 +139,7 @@ export default function App() {
           <Route path="modules/edit/:id" element={<AddModule />} />
         </Route>
       </Routes>
+      </UserProvider>
     </BrowserRouter>
   );
 }

@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { 
   LogOut, 
-  Moon, 
-  Sun, 
   HelpCircle,
   ChevronLeft,
   Menu
 } from 'lucide-react';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+
+import { useUser } from '../../context/UserContext';
 
 /**
  * Sidebar Component for Student Portal
@@ -18,14 +18,12 @@ export default function Sidebar({
   isSidebarOpen, 
   toggleSidebar, 
   navItems, 
-  handleLogout, 
-  isDark, 
-  toggleDarkMode,
-  userData 
+  handleLogout
 }) {
+  const { currentUser } = useUser();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   // Avatar logic: Default to boy-1 if not specified
-  const avatarSrc = `/avatar/avatar-${userData?.avatarId || 'boy-1'}.svg`;
+  const avatarSrc = currentUser?.profile_pic || `/avatar/avatar-${currentUser?.avatarId || 'boy-1'}.svg`;
 
   return (
     <>
@@ -94,18 +92,7 @@ export default function Sidebar({
             {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">Bantuan</span>}
           </Link>
 
-          <button
-            onClick={toggleDarkMode}
-            title={!isSidebarOpen ? 'Toggle Dark Mode' : ''}
-            className={`
-              flex items-center rounded-xl font-bold text-sm transition-all w-full
-              ${isSidebarOpen ? 'px-4 py-3 gap-3' : 'p-3 justify-center'}
-              text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50
-            `}
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            {isSidebarOpen && <span className="whitespace-nowrap animate-in fade-in duration-300">{isDark ? 'Mode Terang' : 'Mode Gelap'}</span>}
-          </button>
+
 
           <button
             onClick={() => setIsLogoutConfirmOpen(true)}

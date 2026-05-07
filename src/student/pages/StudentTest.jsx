@@ -102,7 +102,7 @@ export default function StudentTest() {
       <div className="relative overflow-hidden bg-white dark:bg-dark-surface rounded-[2.5rem] p-6 md:p-10 border border-slate-100 dark:border-slate-800 shadow-sm">
         {/* Background abstract elements */}
         <div className="absolute top-[-10%] right-[-5%] w-64 h-64 bg-orange-100/50 dark:bg-orange-900/10 rounded-full blur-3xl text-orange-200" />
-        
+
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
           <div className="max-w-xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -112,7 +112,7 @@ export default function StudentTest() {
               Pusat <span className="text-orange-600 italic-none not-italic">Ujian</span> & Latihan
             </h1>
             <p className="text-sm text-slate-500 font-bold dark:text-slate-400">
-              Selesaikan tantangan dan kumpulkan bintang emasmu!
+              Kerjakan dengan sungguh-sungguh agar mendapatkan hasil terbaik!
             </p>
           </div>
 
