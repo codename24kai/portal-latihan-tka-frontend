@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import { useDarkMode } from '../../hooks/useDarkMode';
+import Sidebar from '@/komponen/admin/SidebarAdmin';
+import { useDarkMode } from '@/hooks/useModGelap';
 import { Moon, Sun, Menu, Search, Bell, CheckCircle, Info, AlertCircle } from 'lucide-react';
 
-import AdminHeader from '../components/dashboard/AdminHeader';
+import AdminHeader from '@/komponen/admin/dasbor/HeaderAdmin';
 
 /**
  * Admin layout with sidebar + main content area.

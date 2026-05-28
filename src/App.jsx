@@ -1,52 +1,53 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 /* --- Auth Imports --- */
-import Login from './auth/Login';
+import Login from '@/autentikasi/Masuk';
+import LupaPassword from '@/autentikasi/LupaPassword';
 
 /* --- Student Imports --- */
-import StudentLayout from './student/layouts/StudentLayout';
-import StudentDashboard from './student/pages/StudentDashboard';
-import StudentTest from './student/pages/StudentTest';
-import StudentModul from './student/pages/StudentModul';
-import StudentSetting from './student/pages/StudentSetting';
-import ModuleQuiz from './student/pages/ModuleQuiz';
-import ExamExecution from './student/pages/ExamExecution';
-import ExamResult from './student/pages/ExamResult';
-import PreSimulation from './student/pages/PreSimulation';
-import HelpCenter from './student/pages/HelpCenter';
+import StudentLayout from '@/siswa/tata-letak/LayoutSiswa';
+import StudentDashboard from '@/siswa/halaman/DashboardSiswa';
+import StudentTest from '@/siswa/halaman/TesSiswa';
+import StudentModul from '@/siswa/halaman/ModulSiswa';
+import StudentSetting from '@/siswa/halaman/PengaturanSiswa';
+import ModuleQuiz from '@/siswa/halaman/KuisModul';
+import ExamExecution from '@/siswa/halaman/EksekusiUjian';
+import ExamResult from '@/siswa/halaman/HasilUjian';
+import PreSimulation from '@/siswa/halaman/PraSimulasi';
+import HelpCenter from '@/siswa/halaman/PusatBantuan';
 
 /* --- Admin Imports --- */
-import AdminLayout from './admin/layouts/AdminLayout';
-import AdminDashboard from './admin/pages/AdminDashboard';
-import QuestionBank from './admin/pages/QuestionBank';
-import TryoutManagement from './admin/pages/TryoutManagement';
-import ScoreReports from './admin/pages/ScoreReports';
-import UserManagement from './admin/pages/UserManagement';
-import ModuleManagement from './admin/pages/ModuleManagement';
-import AddTryout from './admin/pages/AddTryout';
-import AddModule from './admin/pages/AddModule';
-import AddUser from './admin/pages/AddUser';
-import AddQuestion from './admin/pages/AddQuestion';
+import AdminLayout from '@/admin/layouts/AdminLayout';
+import AdminDashboard from '@/admin/halaman/DashboardAdmin';
+import QuestionBank from '@/admin/halaman/BankSoal';
+import TryoutManagement from '@/admin/halaman/ManajemenTryout';
+import ScoreReports from '@/admin/halaman/LaporanNilai';
+import UserManagement from '@/admin/halaman/ManajemenPengguna';
+import ModuleManagement from '@/admin/halaman/ManajemenModul';
+import AddTryout from '@/admin/halaman/TambahTryout';
+import AddModule from '@/admin/halaman/TambahModul';
+import AddUser from '@/admin/halaman/TambahPengguna';
+import AddQuestion from '@/admin/halaman/TambahSoal';
 
 /* --- Guru Imports --- */
-import GuruLayout from './guru/layouts/GuruLayout';
-import GuruDashboard from './guru/pages/GuruDashboard';
-import GuruStudentList from './guru/pages/GuruStudentList';
-import GuruScoreReports from './guru/pages/GuruScoreReports';
-import GuruAgenda from './guru/pages/GuruAgenda';
-import GuruManageModules from './guru/pages/GuruManageModules';
-import GuruAddModule from './guru/pages/GuruAddModule';
-import GuruManageQuizzes from './guru/pages/GuruManageQuizzes';
-import GuruAddQuiz from './guru/pages/GuruAddQuiz';
+import GuruLayout from '@/guru/tata-letak/TataLetakGuru';
+import GuruDashboard from '@/guru/halaman/DashboardGuru';
+import GuruStudentList from '@/guru/halaman/DaftarSiswaGuru';
+import GuruScoreReports from '@/guru/halaman/LaporanNilaiGuru';
+import GuruManageModules from '@/guru/halaman/KelolaModulGuru';
+import GuruAddModule from '@/guru/halaman/TambahModulGuru';
+import GuruManageQuizzes from '@/guru/halaman/KelolaKuisGuru';
+import GuruAddQuiz from '@/guru/halaman/TambahKuisGuru';
+import GuruAgendaKelas from '@/guru/halaman/AgendaKelas';
 
 /* --- NEW: Survey Imports --- */
-import SurveyExecution from './student/pages/SurveyExecution';
-import SurveyComplete from './student/pages/SurveyComplete';
-import SurveyReports from './guru/pages/SurveyReports';
-import AdminSurveyReports from './admin/pages/AdminSurveyReports';
+import SurveyExecution from '@/siswa/halaman/EksekusiSurvei';
+import SurveyComplete from '@/siswa/halaman/SurveiSelesai';
+import SurveyReports from '@/guru/halaman/LaporanSurvei';
+import AdminSurveyReports from '@/admin/halaman/LaporanSurveiAdmin';
 
-import ToastProvider from './components/ui/ToastProvider';
-import { UserProvider } from './context/UserContext';
+import ToastProvider from '@/komponen/ui/PenyediaToast';
+import { UserProvider } from '@/konteks/KonteksPengguna';
 
 
 /**
@@ -82,6 +83,7 @@ export default function App() {
         <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<LupaPassword />} />
 
         {/* Student Routes (with layout) */}
         <Route element={<RequireAuth allowedRoles={['student']}><StudentLayout /></RequireAuth>}>
@@ -105,9 +107,9 @@ export default function App() {
         {/* Guru / Teacher Routes (with GuruLayout) */}
         <Route path="/guru" element={<RequireAuth allowedRoles={['guru']}><GuruLayout /></RequireAuth>}>
           <Route index element={<GuruDashboard />} />
+          <Route path="agenda" element={<GuruAgendaKelas />} />
           <Route path="students" element={<GuruStudentList />} />
           <Route path="reports" element={<GuruScoreReports />} />
-          <Route path="agenda" element={<GuruAgenda />} />
           <Route path="modules" element={<GuruManageModules />} />
           <Route path="modules/add" element={<GuruAddModule />} />
           <Route path="modules/edit/:id" element={<GuruAddModule />} />
