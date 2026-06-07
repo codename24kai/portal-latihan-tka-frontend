@@ -10,7 +10,9 @@ import {
   ChevronRight,
   HelpCircle,
   Filter,
-  History
+  History,
+  X,
+  Info
 } from 'lucide-react';
 import {
   LineChart,
@@ -27,6 +29,7 @@ import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import ProgressBar from '@/komponen/ui/BarProgres';
 import Dropdown from '@/komponen/ui/Dropdown';
+import ExportOptions from '@/komponen/guru/ExportOptions';
 import mockStudents from '@/data/mockSiswa';
 
 export default function GuruScoreReports() {
@@ -35,6 +38,18 @@ export default function GuruScoreReports() {
   const [subjectFilter, setSubjectFilter] = useState('Semua Mapel');
   const [selectedChartFilter, setSelectedChartFilter] = useState('Semua Tipe');
   const [selectedSessionId, setSelectedSessionId] = useState('');
+  
+  // T2: Custom Export States
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState('PDF'); // 'PDF' | 'Excel'
+  const [exportScope, setExportScope] = useState('Semua'); // 'Semua' | 'Lulus' | 'Remedial'
+  const [exportColumns, setExportColumns] = useState({
+    matematika: true,
+    bahasa: true,
+    progress: true
+  });
+  const [isExporting, setIsExporting] = useState(false);
+
   const { isDark } = useDarkMode();
   const assignedClass = localStorage.getItem('assignedClass') ?? '';
 
@@ -73,8 +88,6 @@ export default function GuruScoreReports() {
       .filter(s => (s?.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()))
       .filter(s => {
         if (subjectFilter === 'Semua Mapel') return true;
-        // Logic: if filtering by Math, show only those with math scores in focus
-        // For now, since table shows both, we'll just return true or filter based on a threshold
         return true; 
       });
   }, [assignedClass, searchQuery, subjectFilter]);
@@ -180,7 +193,7 @@ export default function GuruScoreReports() {
         {exam?.date}
       </td>
       <td className="py-6 px-4 text-center">
-        <Badge text={(exam?.avgScore ?? 0).toString()} variant={scoreBadgeVariant(exam?.avgScore)} />
+        <Badge text={(exam?.avgScore ?? 0).toFixed(1)} variant={scoreBadgeVariant(exam?.avgScore)} />
       </td>
     </tr>
   );
@@ -220,6 +233,26 @@ export default function GuruScoreReports() {
     </tr>
   );
 
+  const handleStartExport = (e) => {
+    e.preventDefault();
+    setIsExporting(true);
+    setTimeout(() => {
+      setIsExporting(false);
+      setExportModalOpen(false);
+      toast.success(`Laporan berhasil diekspor ke format ${exportFormat}!`, {
+        duration: 3000,
+        style: {
+          borderRadius: '1rem',
+          background: '#0d9488',
+          color: '#fff',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          textTransform: 'uppercase'
+        }
+      });
+    }, 1500);
+  };
+
   const gridColor = isDark ? '#1E293B' : '#F1F5F9';
   const tickColor = isDark ? '#64748B' : '#94A3B8';
 
@@ -237,13 +270,13 @@ export default function GuruScoreReports() {
 
         <div className="flex flex-wrap items-center gap-3">
           <button 
-            onClick={() => toast.success('Mengekspor laporan PDF...')}
+            onClick={() => { setExportFormat('PDF'); setExportModalOpen(true); }}
             className="h-12 px-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:shadow-lg transition-all active:scale-95"
           >
             <FileText size={18} className="text-rose-500" /> Export PDF
           </button>
           <button 
-            onClick={() => toast.success('Mengekspor data Excel...')}
+            onClick={() => { setExportFormat('Excel'); setExportModalOpen(true); }}
             className="h-12 px-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:shadow-lg transition-all active:scale-95"
           >
             <TableIcon size={18} className="text-teal-600" /> Export Excel
@@ -395,7 +428,7 @@ export default function GuruScoreReports() {
                 options={[
                   { value: 'Semua Mapel', label: 'Semua Mapel' },
                   { value: 'Matematika', label: 'Matematika' },
-                  { value: 'Bahasa Indonesia', label: 'B. Indonesia' }
+                  { value: 'Bahasa Indonesia', label: 'Bahasa Indonesia' }
                 ]}
                 className="min-w-[160px]"
               />
@@ -409,6 +442,22 @@ export default function GuruScoreReports() {
           renderRow={renderRow}
         />
       </div>
+
+      {exportModalOpen && (
+  <ExportOptions
+    isOpen={exportModalOpen}
+    onClose={() => setExportModalOpen(false)}
+    exportFormat={exportFormat}
+    setExportFormat={setExportFormat}
+    exportScope={exportScope}
+    setExportScope={setExportScope}
+    exportColumns={exportColumns}
+    setExportColumns={setExportColumns}
+    isExporting={isExporting}
+    setIsExporting={setIsExporting}
+    onExport={handleStartExport}
+  />
+      )}
     </div>
   );
 }

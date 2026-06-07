@@ -24,44 +24,30 @@ export default function HelpCenter() {
     {
       id: 1,
       category: 'Materi',
-      question: 'Kenapa materi belajarku masih terkunci? 🔒',
-      answer: "Jangan sedih ya! Kamu harus menyelesaikan kuis di materi sebelumnya dulu agar materi berikutnya terbuka. Ayo, selesaikan kuisnya dan kumpulkan bintangmu!",
-      icon: <BookOpen className="text-teal-500" size={20} />
-    },
-    {
-      id: 2,
-      category: 'Materi',
       question: 'Bolehkah aku mengulang kuis yang sudah selesai? 🔄',
       answer: "Tentu saja boleh! Kamu bisa mengulang kuis kapan saja untuk melatih ingatanmu biar makin pintar. Klik saja tombol 'Kerjakan Ulang' di halaman modul.",
       icon: <BookOpen className="text-teal-500" size={20} />
     },
     {
-      id: 3,
+      id: 2,
       category: 'Tryout',
       question: 'Gimana kalau internetku mati saat lagi ujian? 🔌',
       answer: "Tetap tenang ya! Hubungkan kembali internetmu, lalu buka lagi halamannya. Jawaban yang sudah kamu pilih tadi akan tersimpan otomatis kok.",
       icon: <Target className="text-orange-500" size={20} />
     },
     {
-      id: 4,
+      id: 3,
       category: 'Tryout',
       question: 'Apakah aku bisa mengganti jawaban jika masih ragu? 🤔',
       answer: "Bisa banget! Selama waktu ujian belum habis, kamu bebas mengganti jawaban. Jangan lupa periksa lagi soal-soal yang kamu tandai 'Ragu-ragu' ya.",
       icon: <Target className="text-orange-500" size={20} />
     },
     {
-      id: 5,
+      id: 4,
       category: 'Tryout',
-      question: 'Kapan nilai tryout aku akan keluar? 📈',
+      question: 'Kapan hasil simulasi tka aku akan keluar? 📈',
       answer: "Biasanya nilaimu akan muncul setelah semua teman-temanmu selesai mengerjakan ujian. Kamu bisa cek di tab 'Riwayat' nanti ya!",
       icon: <Target className="text-orange-500" size={20} />
-    },
-    {
-      id: 6,
-      category: 'Akun',
-      question: 'Gimana cara ganti foto avatar yang lucu? 🎨',
-      answer: "Gampang kok! Masuk ke menu 'Pengaturan', lalu klik bagian foto profil. Di sana ada banyak pilihan avatar seru yang bisa kamu pilih!",
-      icon: <User className="text-yellow-500" size={20} />
     }
   ];
 
@@ -164,28 +150,6 @@ export default function HelpCenter() {
           </motion.div>
         ))}
       </div>
-
-      {/* 4. ESCALATION CARD */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-400 to-yellow-500 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl shadow-orange-500/30 group">
-        <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000" />
-
-        <div className="relative flex flex-col md:flex-row items-center gap-8 md:justify-between text-center md:text-left">
-          <div className="space-y-4 max-w-md">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto md:mx-0">
-              <MessageSquare size={32} />
-            </div>
-            <h2 className="text-3xl font-black italic leading-tight">Masih bingung?</h2>
-            <p className="font-bold text-white/90 leading-relaxed">
-              Jangan khawatir! Kamu bisa bertanya langsung kepada <span className="underline decoration-white/40">TU (Tata Usaha)</span> atau guru kelasmu ya. Kami siap membantumu!
-            </p>
-          </div>
-
-          <button className="px-10 py-5 bg-white text-orange-600 font-black text-sm uppercase tracking-widest rounded-[2rem] shadow-xl hover:scale-105 active:scale-95 transition-all">
-            Hubungi Guru
-          </button>
-        </div>
-      </section>
-
     </div>
   );
 }

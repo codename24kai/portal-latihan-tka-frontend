@@ -16,6 +16,25 @@ export default function QuestionMetaPanel({ data, onChange }) {
       </div>
 
       <div className="space-y-6">
+        {/* Tipe Kebutuhan Soal (Field Baru) */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 ml-1">
+            <Target size={12} className="text-emerald-500" />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tipe Kebutuhan Soal</label>
+          </div>
+          <Dropdown
+            value={data.kebutuhan_soal}
+            onChange={(val) => onChange('kebutuhan_soal', val)}
+            options={[
+              { value: 'Latihan Mandiri', label: 'Latihan Mandiri' },
+              { value: 'Simulasi TKA', label: 'Simulasi TKA' },
+              { value: 'Survei', label: 'Survei' }
+            ]}
+            fullWidth
+            placeholder="Pilih Kebutuhan..."
+          />
+        </div>
+
         {/* Question Type */}
         <div className="space-y-2">
           <div className="flex items-center gap-2 ml-1">
@@ -25,9 +44,9 @@ export default function QuestionMetaPanel({ data, onChange }) {
           <Dropdown
             value={data.question_type}
             onChange={(val) => onChange('question_type', val)}
-            options={Object.values(QUESTION_TYPES).map(type => ({ 
-              value: type, 
-              label: QUESTION_TYPE_LABELS[type] 
+            options={Object.values(QUESTION_TYPES).map(type => ({
+              value: type,
+              label: QUESTION_TYPE_LABELS[type]
             }))}
             fullWidth
           />
@@ -47,33 +66,6 @@ export default function QuestionMetaPanel({ data, onChange }) {
           />
         </div>
 
-        {/* Difficulty */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 ml-1">
-            <Target size={12} className="text-rose-500" />
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tingkat Kesulitan</label>
-          </div>
-          <Dropdown
-            value={data.difficulty}
-            onChange={(val) => onChange('difficulty', val)}
-            options={DIFFICULTY_LEVELS.map(d => ({ value: d.value, label: d.label }))}
-            fullWidth
-          />
-        </div>
-
-        {/* Cognitive Level */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 ml-1">
-            <Zap size={12} className="text-amber-500" />
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Level Kognitif</label>
-          </div>
-          <Dropdown
-            value={data.cognitive_level}
-            onChange={(val) => onChange('cognitive_level', val)}
-            options={COGNITIVE_LEVELS}
-            fullWidth
-          />
-        </div>
       </div>
     </div>
   );

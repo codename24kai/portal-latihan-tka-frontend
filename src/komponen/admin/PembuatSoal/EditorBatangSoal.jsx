@@ -1,6 +1,8 @@
 import React from 'react';
 import { Type, Calculator, ImageIcon, X } from 'lucide-react';
 import MathRenderer from '@/komponen/ui/RendererMatematika';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 export default function QuestionStemEditor({ stem, image, onChange, onOpenMath }) {
   return (
@@ -12,7 +14,7 @@ export default function QuestionStemEditor({ stem, image, onChange, onOpenMath }
           </div>
           <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Pertanyaan</h3>
         </div>
-        <button 
+        <button
           type="button"
           onClick={() => onOpenMath('stem')}
           className="flex items-center gap-2 text-[9px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-4 py-2 rounded-xl transition-all uppercase tracking-widest border border-indigo-100 dark:border-indigo-900/40"
@@ -23,19 +25,19 @@ export default function QuestionStemEditor({ stem, image, onChange, onOpenMath }
 
       <div className="space-y-6">
         <div className="relative">
-          <textarea
+          <ReactQuill
             value={stem || ''}
-            onChange={(e) => onChange('stem', e.target.value)}
+            onChange={(val) => onChange('stem', val)}
             placeholder="Tuliskan pertanyaan di sini..."
-            rows={6}
-            className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-[2rem] text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all dark:text-white resize-none"
+            theme="snow"
+            className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-[2.5rem] overflow-hidden border border-slate-100 dark:border-slate-700"
           />
-          <label className="absolute right-6 bottom-4 cursor-pointer text-slate-300 hover:text-indigo-600 transition-colors">
+          <label className="absolute right-6 bottom-4 cursor-pointer text-slate-300 hover:text-indigo-600 transition-colors z-10">
             <ImageIcon size={20} />
-            <input 
-              type="file" 
-              className="hidden" 
-              accept="image/*" 
+            <input
+              type="file"
+              className="hidden"
+              accept="image/*"
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
@@ -43,7 +45,7 @@ export default function QuestionStemEditor({ stem, image, onChange, onOpenMath }
                   reader.onloadend = () => onChange('stem_image', reader.result);
                   reader.readAsDataURL(file);
                 }
-              }} 
+              }}
             />
           </label>
         </div>
@@ -51,7 +53,7 @@ export default function QuestionStemEditor({ stem, image, onChange, onOpenMath }
         {image && (
           <div className="relative w-full max-w-lg rounded-3xl overflow-hidden border-2 border-slate-100 dark:border-slate-700 group/qimg shadow-sm">
             <img src={image} alt="Question" className="w-full h-auto object-contain bg-white" />
-            <button 
+            <button
               onClick={() => onChange('stem_image', null)}
               className="absolute top-4 right-4 p-2 bg-rose-500 text-white rounded-xl opacity-0 group-hover/qimg:opacity-100 transition-opacity"
             >

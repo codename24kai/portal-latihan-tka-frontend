@@ -1,7 +1,10 @@
 import React from 'react';
 import { AlertTriangle, ChevronRight, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SiswaPerhatianTable({ data }) {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col transition-colors duration-300">
       <div className="flex items-center justify-between mb-8">
@@ -45,7 +48,10 @@ export default function SiswaPerhatianTable({ data }) {
                     </span>
                   </td>
                   <td className="py-4 text-right">
-                    <button className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-teal-600 hover:border-teal-200 dark:hover:text-teal-400 dark:hover:border-teal-900 transition-all active:scale-90">
+                    <button
+                      onClick={() => navigate('/admin/laporan')}
+                      className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-teal-600 hover:border-teal-200 dark:hover:text-teal-400 dark:hover:border-teal-900 transition-all active:scale-90"
+                    >
                       <ChevronRight size={16} />
                     </button>
                   </td>
@@ -62,7 +68,10 @@ export default function SiswaPerhatianTable({ data }) {
         </table>
       </div>
 
-      <button className="mt-8 py-3.5 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-rose-100 dark:hover:bg-rose-500/10 transition-all italic border border-transparent hover:border-rose-100 dark:hover:border-rose-900/30">
+      <button
+        onClick={() => navigate('/admin/laporan')}
+        className="mt-8 py-3.5 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-rose-100 dark:hover:bg-rose-500/10 transition-all italic border border-transparent hover:border-rose-100 dark:hover:border-rose-900/30"
+      >
         Lihat Laporan Detail Peringatan
       </button>
     </div>

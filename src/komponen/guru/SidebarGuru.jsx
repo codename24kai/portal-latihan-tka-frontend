@@ -28,16 +28,16 @@ export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collaps
       items: [
         { path: '/guru', icon: LayoutDashboard, label: 'Beranda', end: true },
         { path: '/guru/agenda', icon: CalendarDays, label: 'Agenda Kelas' },
-        { path: '/guru/students', icon: Users, label: 'Daftar Siswa' },
-        { path: '/guru/reports', icon: BarChart3, label: 'Laporan Nilai', end: true },
-        { path: '/guru/reports/survey', icon: FileText, label: 'Laporan Survei' },
+        { path: '/guru/siswa', icon: Users, label: 'Daftar Siswa' },
+        { path: '/guru/laporan', icon: BarChart3, label: 'Laporan Nilai', end: true },
+        { path: '/guru/laporan/survey', icon: FileText, label: 'Laporan Survei' },
       ]
     },
     {
       label: 'Manajemen Pembelajaran',
       items: [
-        { path: '/guru/modules', icon: Layers, label: 'Kelola Modul' },
-        { path: '/guru/quizzes', icon: Zap, label: 'Kelola Latihan' },
+        { path: '/guru/modul', icon: Layers, label: 'Kelola Modul' },
+        { path: '/guru/kuis', icon: Zap, label: 'Kelola Latihan' },
       ]
     }
   ];
@@ -150,7 +150,7 @@ export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collaps
         </div>
       </aside>
 
-      <ConfirmDialog 
+      <ConfirmDialog
         isOpen={isLogoutConfirmOpen}
         title="Konfirmasi Keluar"
         message="Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses portal."

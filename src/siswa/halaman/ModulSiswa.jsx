@@ -1,27 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import {
   BookOpen,
-  FileText,
   Download,
-  ChevronRight,
   Lock,
   Play,
   CheckCircle2,
   Gamepad2,
   Clock,
   Info,
-  RotateCcw
+  RotateCcw,
+  Calculator,
+  Library,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-/**
- * Student Modul Page — Tailored for 6th Grade Engagement
- * Features visual filters, progress rewards, and structured learning paths.
- */
 export default function StudentModul() {
   const navigate = useNavigate();
-  
-  // Enhanced Mock Data with Gamification Metadata
+
   const initialModules = [
     {
       id: 1,
@@ -38,8 +34,8 @@ export default function StudentModul() {
       prerequisiteType: 'download',
       type: 'pdf',
       estimasiWaktu: '± 25 menit',
-      progressStatus: 'sedang', // 'belum', 'sedang', 'selesai'
-      isFirst: true // Start here indicator
+      progressStatus: 'sedang',
+      isFirst: true
     },
     {
       id: 2,
@@ -114,12 +110,34 @@ export default function StudentModul() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [activeModule, setActiveModule] = useState(null);
 
-  // Tab Filtering Logic: Separate Academic from Umum
-  const academicModules = useMemo(() => {
-    const list = modules.filter(m => m.subject !== 'Umum' && m.progressStatus !== 'selesai');
-    if (activeTab === 'Semua') return list;
-    return list.filter(m => m.subject === activeTab);
-  }, [modules, activeTab]);
+  // Synchronize progress status from Learning Viewer
+  React.useEffect(() => {
+    try {
+      const storedProgress = JSON.parse(localStorage.getItem('materi_progress') || '{}');
+      setModules(prev => prev.map(mod => {
+        const progress = storedProgress[mod.id];
+        if (progress) {
+          return {
+            ...mod,
+            progressStatus: progress,
+            quizLocked: progress === 'selesai' ? false : mod.quizLocked
+          };
+        }
+        return mod;
+      }));
+    } catch (e) {
+      console.error('Gagal memuat sinkronisasi progres modul', e);
+    }
+  }, []);
+
+  // Segmentasi Data Berdasarkan Mata Pelajaran
+  const mathModules = useMemo(() => {
+    return modules.filter(m => m.subject === 'Matematika' && m.progressStatus !== 'selesai');
+  }, [modules]);
+
+  const bahasaModules = useMemo(() => {
+    return modules.filter(m => m.subject === 'Bahasa Indonesia' && m.progressStatus !== 'selesai');
+  }, [modules]);
 
   const generalModules = useMemo(() => {
     return modules.filter(m => m.subject === 'Umum' && m.progressStatus !== 'selesai');
@@ -135,128 +153,108 @@ export default function StudentModul() {
   };
 
   const handleContentAccess = (moduleId) => {
-    setModules(prev => prev.map(mod => {
-      if (mod.id === moduleId) {
-        return { 
-          ...mod, 
-          quizLocked: mod.hasQuiz ? false : mod.quizLocked,
-          progressStatus: mod.progressStatus === 'belum' ? 'sedang' : mod.progressStatus
-        };
-      }
-      return mod;
-    }));
+    navigate(`/modul/materi/${moduleId}`);
   };
 
-  // Internal Card Component for consistency
   const ModuleCard = ({ mod }) => (
     <div
       key={mod.id}
-      className={`group relative bg-white dark:bg-slate-800 border-2 rounded-[3rem] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 ${
-        mod.progressStatus === 'selesai' 
-          ? 'border-teal-100 dark:border-teal-900/30 bg-slate-50/50 dark:bg-slate-900/40' 
-          : 'border-white dark:border-slate-800'
-      }`}
+      className={`group relative bg-white dark:bg-slate-800 border-2 rounded-[2.5rem] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 ${mod.progressStatus === 'selesai'
+          ? 'border-emerald-100 dark:border-emerald-900/30 bg-slate-50/50 dark:bg-slate-900/40'
+          : 'border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-700'
+        }`}
     >
       <div>
-        {/* Hero Image Section */}
-        <div className="relative h-44 overflow-hidden">
-          <img 
-            src={mod.heroImage} 
+        <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-800">
+          <img
+            src={mod.heroImage}
             alt={mod.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={(e) => {
+              e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Ilustrasi+Modul'; // Fallback image
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          
-          {/* Status Badges on Image */}
-          <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+
+          {/* Status Badge */}
+          <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
             {mod.isFirst && mod.progressStatus !== 'selesai' && (
-              <div className="px-3 py-1 bg-teal-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse shadow-lg">
-                Mulai di sini
+              <div className="px-3 py-1 bg-amber-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse shadow-lg flex items-center gap-1">
+                <Gamepad2 size={10} /> Mulai di sini
               </div>
             )}
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all shadow-lg ${
-              mod.progressStatus === 'selesai' 
-                ? 'bg-teal-50 text-teal-600 border-teal-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md backdrop-blur-md ${mod.progressStatus === 'selesai'
+                ? 'bg-emerald-500/90 text-white border border-emerald-400'
                 : mod.progressStatus === 'sedang'
-                  ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
-                  : 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-900 dark:text-slate-500 dark:border-slate-700'
-            }`}>
-              {mod.progressStatus === 'selesai' ? 'Selesai' : mod.progressStatus === 'sedang' ? 'Sedang Belajar' : 'Belum Dibaca'}
+                  ? 'bg-blue-500/90 text-white border border-blue-400'
+                  : 'bg-white/90 text-slate-600 border border-white/50'
+              }`}>
+              {mod.progressStatus === 'selesai' && <CheckCircle2 size={12} />}
+              {mod.progressStatus === 'selesai' ? 'Tuntas' : mod.progressStatus === 'sedang' ? 'Sedang Belajar' : 'Belum Dibaca'}
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 p-6 w-full">
-            <h3 className={`text-2xl font-black leading-tight pr-6 transition-colors uppercase tracking-tight drop-shadow-lg ${mod.progressStatus === 'selesai' ? 'text-white/60' : 'text-white'}`}>
+          <div className="absolute bottom-0 left-0 p-5 w-full z-10">
+            <Badge subject={mod.subject} />
+            <h3 className={`text-xl md:text-2xl font-black leading-tight mt-2 transition-colors uppercase tracking-tight drop-shadow-md ${mod.progressStatus === 'selesai' ? 'text-white/70' : 'text-white'}`}>
               {mod.title}
             </h3>
-            <div className="flex items-center gap-2 mt-2 uppercase">
-               <span className={`text-[10px] font-black px-3 py-1 rounded-lg bg-white/20 backdrop-blur-md text-white border border-white/30 ${mod.progressStatus === 'selesai' ? 'opacity-50' : ''}`}>
-                 {mod.subject}
-               </span>
-            </div>
           </div>
         </div>
 
-        <div className="p-8 pb-4">
-          <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            <span className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded-xl">
-              <Clock size={14} className="text-indigo-400" /> {mod.estimasiWaktu}
-            </span>
-            <span className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-xl">
-               {mod.pages} hal
-            </span>
+        {/* Info Strip */}
+        <div className="grid grid-cols-2 gap-px bg-slate-100 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-800 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+            <Clock size={14} className="text-indigo-400" /> {mod.estimasiWaktu}
+          </div>
+          <div className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-800 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+            <FileText size={14} className="text-teal-400" /> {mod.pages} Halaman
           </div>
         </div>
       </div>
 
-      <div className="p-8 pt-0 space-y-4">
+      <div className="p-6 space-y-3 bg-white dark:bg-slate-800">
         {mod.progressStatus === 'selesai' ? (
-           <button 
-             onClick={() => handleContentAccess(mod.id)}
-             className="w-full h-14 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-black text-[10px] uppercase tracking-[0.15em] rounded-2xl transition-all flex items-center justify-center gap-3 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 shadow-inner"
-           >
-             <RotateCcw size={16} />
-             Belajar Lagi
-           </button>
+          <button
+            onClick={() => handleContentAccess(mod.id)}
+            className="w-full py-4 bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-300 font-black text-[10px] uppercase tracking-[0.15em] rounded-2xl transition-all flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95"
+          >
+            <RotateCcw size={16} /> Belajar Ulang
+          </button>
         ) : (
           <>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => handleContentAccess(mod.id)}
-                className="flex-1 h-14 bg-white dark:bg-slate-700 border-2 border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-600 active:scale-95 shadow-sm"
-              >
-                {mod.type === 'video' ? <Play size={16} /> : <Download size={16} />}
-                {mod.type === 'video' ? 'Tonton' : 'Unduh PDF'}
-              </button>
-            </div>
+            <button
+              onClick={() => handleContentAccess(mod.id)}
+              className="w-full py-4 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95"
+            >
+              {mod.type === 'video' ? <Play size={16} /> : <Download size={16} />}
+              {mod.type === 'video' ? 'Tonton Materi' : 'Buka Modul PDF'}
+            </button>
 
             {mod.hasQuiz ? (
               <div className="relative group/quiz">
-                <button 
+                <button
                   disabled={mod.quizLocked}
                   onClick={() => handleQuizStart(mod)}
-                  className={`w-full h-14 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95 ${
-                    mod.quizLocked 
-                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 cursor-not-allowed shadow-none border-2 border-slate-100 dark:border-slate-700' 
-                      : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20'
-                  }`}
+                  className={`w-full py-4 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95 ${mod.quizLocked
+                      ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400'
+                    }`}
                 >
-                  <Gamepad2 size={16} />
-                  Mulai Kuis Game
+                  {mod.quizLocked ? <Lock size={14} /> : <Gamepad2 size={16} />}
+                  {mod.quizLocked ? 'Kuis Terkunci' : 'Mulai Kuis Game'}
                 </button>
-                
+
                 {mod.quizLocked && (
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-xl whitespace-nowrap shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                     <div className="flex items-center gap-2">
-                       <Lock size={12} /> Baca dulu, lalu kuis terbuka!
-                     </div>
-                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-orange-500 rotate-45" />
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-800 text-white text-[9px] font-bold uppercase tracking-widest rounded-lg whitespace-nowrap shadow-xl opacity-0 group-hover/quiz:opacity-100 transition-opacity pointer-events-none z-20">
+                    Buka modul dulu untuk main!
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45" />
                   </div>
                 )}
               </div>
             ) : (
-              <div className="h-14 flex items-center justify-center text-[10px] font-black text-slate-300 dark:text-slate-600 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl uppercase tracking-widest">
-                Tidak ada kuis
+              <div className="py-4 flex items-center justify-center text-[10px] font-black text-slate-300 dark:text-slate-600 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-2xl uppercase tracking-widest">
+                Tidak Ada Kuis
               </div>
             )}
           </>
@@ -265,31 +263,46 @@ export default function StudentModul() {
     </div>
   );
 
+  // Helper component for uniform subject tags
+  const Badge = ({ subject }) => {
+    const isMath = subject === 'Matematika';
+    return (
+      <span className={`inline-flex items-center gap-1.5 text-[9px] font-black px-3 py-1.5 rounded-lg border backdrop-blur-md uppercase tracking-widest ${isMath
+          ? 'bg-teal-500/20 text-teal-100 border-teal-400/30'
+          : subject === 'Bahasa Indonesia'
+            ? 'bg-orange-500/20 text-orange-100 border-orange-400/30'
+            : 'bg-slate-500/20 text-slate-100 border-slate-400/30'
+        }`}>
+        {isMath ? <Calculator size={10} /> : subject === 'Bahasa Indonesia' ? <Library size={10} /> : <BookOpen size={10} />}
+        {subject}
+      </span>
+    );
+  };
+
   return (
-    <div className="space-y-12 animate-fade-in text-slate-900 dark:text-white pb-20">
+    <div className="space-y-12 animate-in fade-in duration-500 text-slate-900 dark:text-white pb-20">
 
       {/* Hero / Filter Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white dark:bg-slate-800 p-8 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700">
         <div>
-          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight italic">
-            Katalog <span className="text-indigo-600">Modul</span> Belajar
+          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight italic">
+            Katalog <span className="text-indigo-600">Modul</span>
           </h1>
-          <p className="text-base font-bold text-slate-400 tracking-wide mt-2">
-            Pilih materimu dan selesaikan tantangan kuis game!
+          <p className="text-sm font-bold text-slate-500 tracking-wide mt-1 uppercase">
+            Pilih materimu dan selesaikan tantangan kuisnya!
           </p>
         </div>
 
         {/* Visual Filter Tabs */}
-        <div className="flex p-2 bg-white dark:bg-slate-800 rounded-[2rem] w-full md:w-fit shadow-sm border border-slate-100 dark:border-slate-700">
+        <div className="flex p-1.5 bg-slate-100 dark:bg-slate-900 rounded-[2rem] w-full md:w-fit border border-slate-200 dark:border-slate-800">
           {['Semua', 'Matematika', 'Bahasa Indonesia'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 md:flex-none flex items-center justify-center px-6 py-4 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase transition-all whitespace-nowrap ${
-                activeTab === tab
-                  ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-              }`}
+              className={`flex-1 md:flex-none flex items-center justify-center px-6 py-3.5 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === tab
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
             >
               {tab === 'Bahasa Indonesia' ? 'B. Indonesia' : tab}
             </button>
@@ -297,101 +310,125 @@ export default function StudentModul() {
         </div>
       </div>
 
-      {/* Main Academic Modules Section */}
-      {academicModules.length > 0 && (
-        <div className="space-y-8">
-          <div className="flex items-center gap-4">
-             <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-indigo-600">
-               <BookOpen size={20} />
-             </div>
-             <h2 className="text-2xl font-black uppercase tracking-tight">Materi <span className="text-indigo-600">Pelajaran</span></h2>
+      {/* ========================================= */}
+      {/* SECTION: MATEMATIKA                       */}
+      {/* ========================================= */}
+      {(activeTab === 'Semua' || activeTab === 'Matematika') && mathModules.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-4 pl-2">
+            <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-2xl flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-inner">
+              <Calculator size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black uppercase tracking-tight italic">Misi <span className="text-teal-600 dark:text-teal-400">Matematika</span></h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kuasai angka dan logika ruang</p>
+            </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {academicModules.map((mod) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {mathModules.map((mod) => (
               <ModuleCard key={mod.id} mod={mod} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Separate Section for Umum/Panduan (Only if active) */}
-      {generalModules.length > 0 && (
-        <div className="bg-white dark:bg-slate-800/10 rounded-[3rem] p-4 md:p-8 space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 dark:border-slate-700">
-                <Info size={24} />
-              </div>
-              <h2 className="text-2xl font-black uppercase tracking-tight">Informasi & <span className="text-slate-400">Panduan Umum</span></h2>
+      {/* ========================================= */}
+      {/* SECTION: BAHASA INDONESIA                 */}
+      {/* ========================================= */}
+      {(activeTab === 'Semua' || activeTab === 'Bahasa Indonesia') && bahasaModules.length > 0 && (
+        <div className="space-y-6 pt-6">
+          <div className="flex items-center gap-4 pl-2">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400 shadow-inner">
+              <Library size={24} />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {generalModules.map((mod) => (
-                <ModuleCard key={mod.id} mod={mod} />
-              ))}
-            </div>
-        </div>
-      )}
-
-      {/* NEW: Completed Modules Section (Gray Theme) */}
-      {completedModules.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[3rem] p-10 md:p-14 border border-slate-100 dark:border-slate-800">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-teal-500 shadow-sm border border-teal-100 dark:border-emerald-500/20">
-                 <CheckCircle2 size={24} />
-               </div>
-               <div>
-                 <h2 className="text-2xl font-black uppercase tracking-tight">Modul <span className="text-slate-400">Selesai</span></h2>
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5 italic text-teal-600/80">Kamu hebat! Materi ini sudah kamu kuasai.</p>
-               </div>
+            <div>
+              <h2 className="text-2xl font-black uppercase tracking-tight italic">Misi <span className="text-orange-600 dark:text-orange-400">Bahasa Indonesia</span></h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pahami literasi dan karya sastra</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {completedModules.map((mod) => (
-               <ModuleCard key={mod.id} mod={mod} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {bahasaModules.map((mod) => (
+              <ModuleCard key={mod.id} mod={mod} />
             ))}
-            
-            {/* Explore More Card Moved here only if listing general modules else where or stayed empty */}
-             <div className="border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem] p-8 flex flex-col items-center justify-center text-center gap-6 opacity-40">
-              <div className="w-20 h-20 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-300">
-                <BookOpen size={40} />
-              </div>
-              <div>
-                <span className="block font-black text-slate-400 text-sm uppercase tracking-widest">Selesaikan Lebih Banyak</span>
-                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Ayo kuasai semua materi!</p>
-              </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================= */}
+      {/* SECTION: UMUM / PANDUAN                   */}
+      {/* ========================================= */}
+      {generalModules.length > 0 && activeTab === 'Semua' && (
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[3rem] p-8 md:p-10 space-y-8 border border-slate-200 dark:border-slate-800 mt-12">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-500 shadow-sm border border-slate-200 dark:border-slate-600">
+              <Info size={24} />
             </div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-tight italic">Materi <span className="text-slate-500">Pendukung</span></h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Informasi umum & panduan belajar</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {generalModules.map((mod) => (
+              <ModuleCard key={mod.id} mod={mod} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================= */}
+      {/* SECTION: MODUL SELESAI                    */}
+      {/* ========================================= */}
+      {completedModules.length > 0 && activeTab === 'Semua' && (
+        <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-[3rem] p-8 md:p-12 border border-emerald-100 dark:border-emerald-900/30 mt-12">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-200 dark:border-emerald-800">
+              <CheckCircle2 size={28} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black uppercase tracking-tight italic">Modul <span className="text-emerald-600 dark:text-emerald-400">Tuntas!</span></h2>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5 italic">Hebat! Kamu sudah menyelesaikan materi ini.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {completedModules.map((mod) => (
+              <ModuleCard key={mod.id} mod={mod} />
+            ))}
           </div>
         </div>
       )}
 
       {/* Verification Popup */}
-      {isConfirmOpen && (
+      {isConfirmOpen && activeModule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsConfirmOpen(false)} />
-          <div className="relative bg-white dark:bg-slate-800 p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center space-y-8 animate-in zoom-in-95 duration-200 border border-white/20 dark:border-slate-700">
-            <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
-              <Gamepad2 size={40} fill="currentColor" />
+          <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm animate-in fade-in" onClick={() => setIsConfirmOpen(false)} />
+          <div className="relative bg-white dark:bg-slate-800 p-8 md:p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center space-y-8 animate-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-700">
+            <div className="w-24 h-24 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner border border-emerald-100 dark:border-emerald-800">
+              <Gamepad2 size={48} fill="currentColor" />
             </div>
             <div className="space-y-3">
-              <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight italic">Siap <span className="text-indigo-600">Main?</span></h3>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Pastikan kamu sudah memahami materi agar kumpulkan <span className="text-teal-600">Skor Maksimal!</span></p>
+              <h3 className="text-2xl font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight italic">Siap <span className="text-emerald-500">Mulai Kuis?</span></h3>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+                Pastikan kamu sudah memahami materi <strong className="text-slate-700 dark:text-slate-200">{activeModule.title}</strong> agar dapat skor sempurna!
+              </p>
             </div>
             <div className="flex flex-col gap-3">
-              <button 
+              <button
                 onClick={() => {
                   setIsConfirmOpen(false);
-                  navigate(`/modules/quiz/${activeModule.id}`);
+                  navigate(`/modul/kuis/${activeModule.id}`);
                 }}
-                className="w-full py-5 bg-indigo-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20"
+                className="w-full py-5 bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest rounded-2xl hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/30 active:scale-95"
               >
                 Ya, Main Sekarang!
               </button>
-              <button 
+              <button
                 onClick={() => setIsConfirmOpen(false)}
-                className="w-full py-5 bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-300 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all"
+                className="w-full py-5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-black text-[11px] uppercase tracking-widest rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-all active:scale-95"
               >
                 Nanti Dulu
               </button>

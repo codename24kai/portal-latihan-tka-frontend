@@ -3,17 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { Key, User, ArrowRight, AlertCircle, Info, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useUser } from '@/konteks/KonteksPengguna';
+
 /**
  * Premium Login Component
  * Refactored with Live Slider Background and Clean UI
  */
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const images = [
@@ -31,35 +35,35 @@ export default function Login() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // Fetch dynamic reset password from localStorage or fallback to default '123'
-    const getValidPassword = (usr) => {
-      const resetPwd = localStorage.getItem('reset_pwd_' + usr);
-      return resetPwd || '123';
-    };
+    try {
+      // Backend expects email, so we map username to email if it doesn't contain '@'
+      const email = username.includes('@') ? username : `${username}@sekolah.id`;
+      const user = await login(email, password);
 
-    const isStudent = (username === 'student' || username === 'student1' || username === 'student2' || username === 'student3') && password === getValidPassword(username);
-    const isGuru = username === 'guru' && password === getValidPassword(username);
-    const isAdmin = (username === 'admin' || username === 'admin1') && password === getValidPassword(username);
-
-    // Mock Login Logic
-    if (isStudent) {
-      localStorage.setItem('userRole', 'student');
-      localStorage.setItem('assignedClass', '6A');
-      navigate('/');
-    } else if (isGuru) {
-      localStorage.setItem('userRole', 'guru');
-      localStorage.setItem('assignedClass', '6A');
-      navigate('/guru');
-    } else if (isAdmin) {
-      localStorage.setItem('userRole', 'admin');
-      localStorage.removeItem('assignedClass');
-      navigate('/admin');
-    } else {
-      setError('Username atau password tidak valid. Silakan coba lagi.');
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else if (user.role === 'guru') {
+        navigate('/guru');
+      } else {
+        navigate('/beranda');
+      }
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else if (err.response && err.response.data && err.response.data.errors) {
+        const errors = err.response.data.errors;
+        const firstErrorKey = Object.keys(errors)[0];
+        setError(errors[firstErrorKey][0]);
+      } else {
+        setError('Koneksi internet bermasalah atau server tidak aktif.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -213,10 +217,11 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-orange-100 hover:scale-[1.02] transition-all active:scale-[0.98] mt-2 group"
+              disabled={loading}
+              className={`w-full bg-orange-600 hover:bg-orange-700 text-white font-black text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-orange-100 hover:scale-[1.02] transition-all active:scale-[0.98] mt-2 group ${loading ? 'opacity-70 cursor-wait' : ''}`}
             >
-              Masuk Sekarang
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {loading ? 'Memproses...' : 'Masuk Sekarang'}
+              {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
             </button>
 
             <div className="text-center mt-4">
@@ -229,28 +234,6 @@ export default function Login() {
               </button>
             </div>
           </form>
-
-          {/* Premium Demo Hint Box */}
-          <div className="mt-6 p-4 rounded-xl bg-orange-50/50 border border-orange-100">
-            <h3 className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2 mb-2.5">
-              <Info className="w-3 h-3" /> Demo Access Credentials
-            </h3>
-            <div className="grid grid-cols-1 gap-2">
-              {[
-                { label: 'Siswa', creds: 'student / 123' },
-                { label: 'Guru', creds: 'guru / 123' },
-                { label: 'Admin', creds: 'admin / 123' }
-              ].map((role) => (
-                <div key={role.label} className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-600 font-semibold">{role.label}</span>
-                  <span className="bg-white px-2 py-0.5 rounded border border-orange-100 text-orange-700 font-mono font-bold shadow-sm">
-                    {role.creds}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

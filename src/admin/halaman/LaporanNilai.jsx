@@ -12,6 +12,7 @@ import {
 import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import ProgressBar from '@/komponen/ui/BarProgres';
+import Dropdown from '@/komponen/ui/Dropdown';
 import mockStudents from '@/data/mockSiswa';
 
 /**
@@ -22,14 +23,14 @@ export default function ScoreReports() {
   const [activeTab, setActiveTab] = useState('academic'); // 'academic' | 'survey'
   const [selectedClass, setSelectedClass] = useState('Semua Kelas');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState('Tryout 1');
+  const [selectedPeriod, setSelectedPeriod] = useState('Simulasi TKA Tahap 1');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(true);
 
   // Export States
   const [exportConfig, setExportConfig] = useState(null); // { type: 'PDF' | 'Excel' }
 
   const classes = ['Semua Kelas', '6A', '6B', '6C'];
-  const periods = ['Tryout 1', 'Tryout 2', 'Ujian Sekolah'];
+  const periods = ['Simulasi TKA Tahap 1', 'Simulasi TKA Tahap 2'];
 
   // Generate counts for class tabs
   const classCounts = useMemo(() => {
@@ -81,15 +82,11 @@ export default function ScoreReports() {
     return "Danger";
   };
 
-  const headers = activeTab === 'academic' ? [
+  const headers = [
     { label: 'Siswa' },
     { label: 'Matematika', align: 'center' },
     { label: 'B. Indonesia', align: 'center' },
     { label: 'Rata-rata', align: 'center' }
-  ] : [
-    { label: 'Siswa' },
-    { label: 'Lingkungan Belajar', align: 'center' },
-    { label: 'Survey Karakter', align: 'center' }
   ];
 
   const renderRow = (student) => (
@@ -105,33 +102,20 @@ export default function ScoreReports() {
           </div>
         </div>
       </td>
-      {activeTab === 'academic' ? (
-        <>
-          <td className="py-6 px-4 text-center">
-            <Badge text={student.matematika.toString()} variant={scoreBadgeVariant(student.matematika)} />
-          </td>
-          <td className="py-6 px-4 text-center">
-            <Badge text={student.bahasa.toString()} variant={scoreBadgeVariant(student.bahasa)} />
-          </td>
-          <td className="py-6 px-4">
-            <div className="min-w-[140px] px-4">
-              <ProgressBar
-                progress={student.avgScore}
-                color={student.avgScore >= 80 ? "bg-teal-500" : student.avgScore >= 60 ? "bg-amber-500" : "bg-rose-500"}
-              />
-            </div>
-          </td>
-        </>
-      ) : (
-        <>
-          <td className="py-6 px-4 text-center">
-            <Badge text={student.slb.toString()} variant={scoreBadgeVariant(student.slb)} />
-          </td>
-          <td className="py-6 px-4 text-center">
-            <Badge text={student.sk.toString()} variant={scoreBadgeVariant(student.sk)} />
-          </td>
-        </>
-      )}
+      <td className="py-6 px-4 text-center">
+            <Badge text={(student?.avgScore ?? 0).toString()} variant={scoreBadgeVariant(student?.avgScore)} />
+      </td>
+      <td className="py-6 px-4 text-center">
+        <Badge text={(student?.bahasa ?? 0).toString()} variant={scoreBadgeVariant(student?.bahasa)} />
+      </td>
+      <td className="py-6 px-4">
+        <div className="min-w-[140px] px-4">
+          <ProgressBar
+            progress={student.avgScore}
+            color={student.avgScore >= 80 ? "bg-teal-500" : student.avgScore >= 60 ? "bg-amber-500" : "bg-rose-500"}
+          />
+        </div>
+      </td>
     </tr>
   );
 
@@ -166,27 +150,19 @@ export default function ScoreReports() {
       {/* NAVIGATION & TABS */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-100 dark:border-slate-800 pb-2">
         <div className="flex items-center gap-8">
-          <button
-            onClick={() => setActiveTab('academic')}
-            className={`pb-4 text-sm font-black uppercase tracking-widest transition-all relative ${activeTab === 'academic' ? 'text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
+          <h2 className="pb-4 text-sm font-black uppercase tracking-widest text-teal-600 relative">
             Skor Akademik
-            {activeTab === 'academic' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-teal-600 rounded-t-full" />}
-          </button>
-          <button
-            onClick={() => setActiveTab('survey')}
-            className={`pb-4 text-sm font-black uppercase tracking-widest transition-all relative ${activeTab === 'survey' ? 'text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            Survei & Karakter
-            {activeTab === 'survey' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-teal-600 rounded-t-full" />}
-          </button>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-teal-600 rounded-t-full" />
+          </h2>
         </div>
 
         <div className="flex items-center gap-3 mb-2 lg:mb-0">
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Periode:</span>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
-            {selectedPeriod} <ChevronDown size={14} />
-          </button>
+          <Dropdown
+            value={selectedPeriod}
+            onChange={setSelectedPeriod}
+            options={periods.map(p => ({ value: p, label: p }))}
+          />
         </div>
       </div>
 

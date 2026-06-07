@@ -8,7 +8,7 @@ export const mockQuestionBank = [
     explanation: 'Hitung penjumlahan terlebih dahulu baru pengurangan.', 
     correctAnswer: 'A', 
     difficulty: 'Mudah', 
-    usedIn: 'Tryout Mandiri 1', 
+    usedIn: 'Tryout Mandiri 1, Simulasi TKA 1', 
     createdAt: '2026-03-20' 
   },
   { 

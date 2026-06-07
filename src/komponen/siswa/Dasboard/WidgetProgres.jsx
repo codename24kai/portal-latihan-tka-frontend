@@ -2,28 +2,40 @@ import React from 'react';
 import { TrendingUp, Trees, Heart } from 'lucide-react';
 import ProgressBar from '@/komponen/ui/BarProgres';
 
-export const AcademicProgress = ({ exams, averageScore }) => (
+export const AcademicProgress = () => (
   <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white">Kemampuan Akademik</h3>
-        <p className="text-xs font-bold text-slate-400 tracking-widest mt-0.5">Skor Rata-rata: {averageScore}%</p>
+        <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-white">Progres Aktivitas Belajar</h3>
+        <p className="text-xs font-bold text-slate-400 tracking-widest mt-0.5">Pantau penyelesaian aktivitas belajar Anda</p>
       </div>
       <div className="flex items-center gap-1 text-teal-600 bg-teal-50 dark:bg-teal-500/10 px-3 py-1.5 rounded-lg text-xs font-black">
-        <TrendingUp size={14} /> +5%
+        <TrendingUp size={14} /> Stabil
       </div>
     </div>
 
     <div className="space-y-6">
-      {exams.map((exam, idx) => (
-        <div key={idx} className="space-y-2">
-          <ProgressBar 
-            progress={exam.score || 0} 
-            label={exam.subject.includes('Matematika') ? 'Matematika' : 'B. Indonesia'}
-            color={exam.subject.includes('Matematika') ? 'bg-teal-500' : 'bg-orange-400'}
-          />
-        </div>
-      ))}
+      <div className="space-y-2">
+        <ProgressBar 
+          progress={71} 
+          label="Simulasi TKA (10/14 Ujian)"
+          color="bg-teal-500"
+        />
+      </div>
+      <div className="space-y-2">
+        <ProgressBar 
+          progress={92} 
+          label="Modul Pembelajaran (11/12 Modul)"
+          color="bg-orange-400"
+        />
+      </div>
+      <div className="space-y-2">
+        <ProgressBar 
+          progress={80} 
+          label="Latihan Mandiri (8/10 Latihan)"
+          color="bg-indigo-500"
+        />
+      </div>
     </div>
   </div>
 );

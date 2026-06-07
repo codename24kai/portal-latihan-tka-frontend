@@ -70,7 +70,7 @@ export default function ModuleManagement() {
           </p>
         </div>
         <button
-          onClick={() => navigate('/admin/modules/add')}
+          onClick={() => navigate('/admin/modul/tambah')}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95 flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -161,7 +161,7 @@ export default function ModuleManagement() {
             </td>
             <td className="py-6 px-8 text-right">
               <div className="flex justify-end gap-2 opacity-100">
-                <button 
+                <button
                   onClick={() => handleEdit(module?.id)}
                   className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all font-black text-[10px] uppercase"
                 >

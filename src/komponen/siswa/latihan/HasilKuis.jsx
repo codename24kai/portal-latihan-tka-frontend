@@ -1,0 +1,265 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Trophy,
+  Award,
+  CheckCircle,
+  MessageCircle,
+  BookOpen,
+  Smile,
+  Zap,
+  LayoutDashboard,
+  TrendingUp,
+  ThumbsUp
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import MathRenderer from '@/komponen/ui/RendererMatematika';
+
+/**
+ * QuizResult — Child-Friendly Performance Summary
+ * Features a dynamic reward system (Tier-based) and actionable feedback.
+ */
+export default function QuizResult({ percentage, score, total, history, timeTaken, onBack }) {
+  const [showReview, setShowReview] = useState(false);
+
+  // Helper: Determine Result Tier (Child-Friendly Logic & Fix Tailwind Dynamic Classes)
+  const tier = useMemo(() => {
+    const s = Math.round(percentage || 0);
+    if (s >= 85) return {
+      id: 'gold',
+      color: 'from-amber-400 to-yellow-500',
+      bgLight: 'bg-amber-50 dark:bg-amber-900/30',
+      text: 'text-amber-600 dark:text-amber-400',
+      borderColor: 'border-l-amber-400 dark:border-l-amber-500', // FIXED
+      icon: <Trophy size={64} />, // Menggunakan Lucide Icon agar seragam
+      title: "Luar Biasa! 🌟",
+      message: "Kamu jenius! Berhasil menjawab hampir semua dengan benar. Pertahankan prestasimu ya!",
+      recommendation: "Kamu sudah siap untuk materi tantangan berikutnya. Ayo lanjut!"
+    };
+    if (s >= 70) return {
+      id: 'blue',
+      color: 'from-blue-400 to-indigo-500',
+      bgLight: 'bg-blue-50 dark:bg-blue-900/30',
+      text: 'text-blue-600 dark:text-blue-400',
+      borderColor: 'border-l-blue-400 dark:border-l-blue-500', // FIXED
+      icon: <ThumbsUp size={64} />,
+      title: "Bagus Sekali! 👍",
+      message: "Hebat! Kamu sudah paham banyak hal. Sedikit lagi kamu akan jadi juara sempurna!",
+      recommendation: "Coba tinjau soal yang salah supaya nilaimu jadi 100 di kuis berikutnya!"
+    };
+    if (s >= 55) return {
+      id: 'green',
+      color: 'from-teal-400 to-emerald-500',
+      bgLight: 'bg-teal-50 dark:bg-teal-900/30',
+      text: 'text-teal-600 dark:text-teal-400',
+      borderColor: 'border-l-teal-400 dark:border-l-teal-500', // FIXED
+      icon: <BookOpen size={64} />,
+      title: "Terus Semangat! 📚",
+      message: "Bagus! Kamu sudah berusaha keras. Yuk, pelajari lagi sedikit bagian yang masih sulit.",
+      recommendation: "Baca lagi modul penjelasannya pelan-pelan ya, kamu pasti bisa!"
+    };
+    return {
+      id: 'purple',
+      color: 'from-purple-400 to-fuchsia-500',
+      bgLight: 'bg-purple-50 dark:bg-purple-900/30',
+      text: 'text-purple-600 dark:text-purple-400',
+      borderColor: 'border-l-purple-400 dark:border-l-purple-500', // FIXED
+      icon: <Smile size={64} />,
+      title: "Jangan Menyerah! 💪",
+      message: "Tidak apa-apa, belajar itu proses! Setiap kesalahan membuatmu makin pintar.",
+      recommendation: "Jangan ragu untuk bertanya pada guru atau temanmu jika ada yang bingung."
+    };
+  }, [percentage]);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m === 0) return `${s} dtk`;
+    return `${m}m ${s}s`;
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-8 animate-in fade-in duration-500 flex flex-col items-center">
+      <div className="max-w-4xl w-full space-y-8">
+
+        {/* 1. SCORE HERO CARD (Tier-Based) */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative bg-white dark:bg-slate-800 rounded-[3rem] md:rounded-[4rem] p-8 md:p-14 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden text-center"
+        >
+          {/* Animated Background Glow */}
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-br ${tier.color} opacity-[0.04] blur-[80px] rounded-full pointer-events-none`} />
+
+          <div className="relative z-10 space-y-8">
+            <motion.div
+              animate={{
+                scale: [1, 1.05, 1],
+                rotate: [0, 3, -3, 0]
+              }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className={`w-32 h-32 ${tier.bgLight} ${tier.text} rounded-[2.5rem] flex items-center justify-center mx-auto shadow-xl`}
+            >
+              {tier.icon}
+            </motion.div>
+
+            <div className="space-y-3">
+              <h2 className={`text-4xl md:text-5xl font-black uppercase tracking-tight italic ${tier.text}`}>
+                {tier.title}
+              </h2>
+              <p className="text-sm md:text-base font-bold text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                {tier.message}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-2xl mx-auto">
+              <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 hover:scale-105 transition-transform">
+                <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Skor</span>
+                <span className={`text-2xl md:text-4xl font-black italic ${tier.text}`}>{percentage}%</span>
+              </div>
+              <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 hover:scale-105 transition-transform">
+                <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Benar</span>
+                <span className="text-2xl md:text-4xl font-black text-teal-500 dark:text-teal-400 italic">
+                  {score}<span className="text-sm text-slate-300 font-bold tracking-normal ml-1">/{total}</span>
+                </span>
+              </div>
+              <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 hover:scale-105 transition-transform">
+                <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Waktu</span>
+                <span className="text-xl md:text-3xl font-black text-orange-500 italic mt-1 block">
+                  {formatTime(timeTaken)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* 2. SMART RECOMMENDATION BOX */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={`p-6 bg-white dark:bg-slate-800 rounded-[2rem] border-l-8 ${tier.borderColor} shadow-lg flex flex-col md:flex-row items-center gap-6`}
+        >
+          <div className={`p-4 rounded-2xl ${tier.bgLight} ${tier.text} shrink-0`}>
+            <Zap size={28} />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h4 className="font-black text-slate-800 dark:text-white uppercase tracking-tight text-sm">Saran Belajar Buat Kamu:</h4>
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">{tier.recommendation}</p>
+          </div>
+          <div className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-widest shrink-0">
+            <TrendingUp size={14} /> +10 Poin Progres
+          </div>
+        </motion.div>
+
+        {/* 3. NAVIGATION ACTIONS */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-4">
+          <button
+            onClick={() => setShowReview(!showReview)}
+            className={`w-full sm:w-auto px-8 py-4 md:py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 ${showReview
+                ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-800'
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+              }`}
+          >
+            <MessageCircle size={18} />
+            {showReview ? 'Tutup Pembahasan' : 'Lihat Pembahasan'}
+          </button>
+
+          <button
+            onClick={onBack}
+            className="w-full sm:w-auto px-12 py-4 md:py-5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-black rounded-[2.5rem] transition-all shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-3 active:scale-95 uppercase tracking-widest text-xs"
+          >
+            <LayoutDashboard size={18} />
+            Kembali ke Dashboard
+          </button>
+        </div>
+
+        {/* 4. DETAILED REVIEW SECTION (Toggleable) */}
+        <AnimatePresence>
+          {showReview && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-6 overflow-hidden pt-6"
+            >
+              <div className="flex items-center gap-4 px-4">
+                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
+                  <MessageCircle size={24} />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white uppercase tracking-tight italic">
+                  Analisis <span className="text-indigo-600">Jawabanmu</span>
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 pb-20">
+                {history?.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className={`group p-6 md:p-8 rounded-[2.5rem] border-2 transition-all ${item.isCorrect
+                        ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-500/20 shadow-sm'
+                        : 'bg-rose-50/50 dark:bg-rose-900/10 border-rose-200 dark:border-rose-500/20 shadow-sm'
+                      }`}
+                  >
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Soal #{index + 1}</span>
+                        {item.isCorrect ? (
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
+                            <CheckCircle size={12} strokeWidth={3} /> Tepat
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-rose-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
+                            <Smile size={12} strokeWidth={3} /> Coba Lagi
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-base md:text-lg font-bold text-slate-800 dark:text-white leading-relaxed">
+                        <MathRenderer text={item.questionText} />
+                      </div>
+
+                      {item.questionImage && (
+                        <div className="w-full max-w-md rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white">
+                          <img src={item.questionImage} alt="Soal" className="w-full h-auto object-contain max-h-48 p-2" />
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 gap-4 pt-2">
+                        {/* Pilihan Siswa */}
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Jawabanmu</span>
+                          <div className={`p-4 rounded-2xl font-bold text-sm border-2 flex flex-col gap-3 h-full ${item.isCorrect
+                              ? 'bg-white dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-white dark:bg-rose-900/20 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400'
+                            }`}>
+                            {item.studentAnswer ? <MathRenderer text={item.studentAnswer} /> : <span className="italic opacity-60">Tidak dijawab</span>}
+                            {item.studentAnswerImage && (
+                              <img src={item.studentAnswerImage} alt="Jawabanmu" className="max-h-24 w-auto object-contain rounded-lg bg-white/50 p-1 mt-auto" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Pembahasan & Konsep Kunci */}
+                        {(item.explanation || item.correctAnswer) && (
+                          <div className="mt-2 p-4 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100/80 dark:border-indigo-900/40">
+                            <p className="text-[9px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1">Pembahasan & Konsep Kunci:</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic">
+                              {item.explanation || `Konsep yang benar adalah: ${item.correctAnswer}. Silakan ulas kembali materi pada modul terkait untuk memperdalam pemahaman.`}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

@@ -18,7 +18,9 @@ import {
   ShieldCheck,
   ChevronRight,
   Zap,
-  Calculator
+  Calculator,
+  HelpCircle,
+  Shuffle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { mockQuestionBank } from '@/data/mockSoal';
@@ -45,7 +47,15 @@ export default function GuruAddQuiz() {
     startDate: '',
     endDate: '',
     questionCount: '15',
-    selectionMethod: 'manual' // 'auto' (Bank) | 'manual' (Create Own)
+    selectionMethod: 'auto' // 'auto' | 'bank_manual' | 'manual'
+  });
+
+  // Confirmed config
+  const [confirmedConfig, setConfirmedConfig] = useState({
+    subject: 'Matematika',
+    questionCount: 15,
+    duration: 45,
+    selectionMethod: 'auto'
   });
 
   // 2. QUIZ DATA (For Manual Mode)
@@ -55,13 +65,6 @@ export default function GuruAddQuiz() {
     questions: []
   });
 
-  // 3. AUTO DISTRIBUTION (For Auto Mode)
-  const [autoDistribution, setAutoDistribution] = useState({
-    Mudah: '5',
-    Sedang: '5',
-    Sulit: '5'
-  });
-
   // Math Editor State
   const [isMathOpen, setIsMathOpen] = useState(false);
   const [mathTarget, setMathTarget] = useState(null);
@@ -69,7 +72,6 @@ export default function GuruAddQuiz() {
 
   const [selectedBankQuestionIds, setSelectedBankQuestionIds] = useState([]);
   const [bankSearch, setBankSearch] = useState('');
-  const [bankLevel, setBankLevel] = useState('Semua');
 
   const openMathEditor = (qIndex, type, oIndex = null) => {
     setMathTarget({ qIndex, type, oIndex });
@@ -90,44 +92,86 @@ export default function GuruAddQuiz() {
     setQuizData({ ...quizData, questions: newQuestions });
   };
 
-  const currentTotalQuestions = useMemo(() => {
-    if (formData.selectionMethod === 'auto') {
-      return Object.values(autoDistribution).reduce((a, b) => a + (parseInt(b) || 0), 0);
-    }
-    if (formData.selectionMethod === 'bank_manual') {
-      return selectedBankQuestionIds.length;
-    }
-    return quizData.questions.length;
-  }, [formData.selectionMethod, autoDistribution, selectedBankQuestionIds, quizData.questions]);
+  const handleApplyConfig = () => {
+    const qCount = parseInt(formData.questionCount) || 0;
+    const dur = parseInt(formData.duration) || 0;
 
-  const filteredBankQuestions = useMemo(() => {
-    return (mockQuestionBank ?? [])
-      .filter(q => q.subject === formData.subject)
-      .filter(q => {
-        const matchesSearch = (q.text ?? '').toLowerCase().includes(bankSearch.toLowerCase());
-        const matchesLevel = bankLevel === 'Semua' || q.difficulty === bankLevel;
-        return matchesSearch && matchesLevel;
-      });
-  }, [formData.subject, bankSearch, bankLevel]);
+    if (qCount < 1) {
+      toast.error('Jumlah soal minimal 1!');
+      return;
+    }
+    if (dur < 5) {
+      toast.error('Durasi minimal 5 menit!');
+      return;
+    }
 
-  const toggleBankQuestion = (id) => {
-    setSelectedBankQuestionIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id) 
-        : [...prev, id]
-    );
+    setConfirmedConfig({
+      subject: formData.subject,
+      questionCount: qCount,
+      duration: dur,
+      selectionMethod: formData.selectionMethod
+    });
+
+    // Reset selected questions on config change
+    setSelectedBankQuestionIds([]);
+    toast.success('Konfigurasi diterapkan!');
   };
 
-  const targetCount = parseInt(formData.questionCount) || 0;
-  const isValid = currentTotalQuestions === targetCount && targetCount > 0;
-  const isOver = currentTotalQuestions > targetCount;
+  // Reset selection when confirmed subject or selection method changes
+  useEffect(() => {
+    setSelectedBankQuestionIds([]);
+  }, [confirmedConfig.subject, confirmedConfig.selectionMethod]);
+
+  const availableQuestions = useMemo(() => {
+    return (mockQuestionBank ?? [])
+      .filter(q => q.subject === confirmedConfig.subject && q.category === 'Akademik');
+  }, [confirmedConfig.subject]);
+
+  const filteredBankQuestions = useMemo(() => {
+    return availableQuestions.filter(q => {
+      return (q.text ?? '').toLowerCase().includes(bankSearch.toLowerCase());
+    });
+  }, [availableQuestions, bankSearch]);
+
+  // Auto Randomize Handler
+  const handleAutoRandomize = () => {
+    const targetCount = confirmedConfig.questionCount;
+    if (!targetCount || targetCount <= 0) {
+      toast.error('Terapkan konfigurasi terlebih dahulu!');
+      return;
+    }
+
+    if (availableQuestions.length < targetCount) {
+      toast.error(`Stok Bank Soal tidak mencukupi! Hanya tersedia ${availableQuestions.length} soal.`);
+      return;
+    }
+
+    // Shuffle and pick targetCount questions
+    const shuffled = [...availableQuestions].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, targetCount).map(q => q.id);
+    setSelectedBankQuestionIds(selected);
+    toast.success(`Berhasil mengacak ${targetCount} soal dari Bank Soal.`);
+  };
+
+  const currentTotalQuestions = useMemo(() => {
+    if (confirmedConfig.selectionMethod === 'manual') {
+      return quizData.questions.length;
+    }
+    return selectedBankQuestionIds.length;
+  }, [confirmedConfig.selectionMethod, selectedBankQuestionIds, quizData.questions]);
+
+  const targetCount = confirmedConfig.questionCount;
+  const isValid = confirmedConfig.selectionMethod === 'manual' 
+    ? quizData.questions.length > 0
+    : currentTotalQuestions === targetCount;
+
+  const isOver = confirmedConfig.selectionMethod !== 'manual' && currentTotalQuestions > targetCount;
 
   const handleSave = (status) => {
     if (!formData.title) return toast.error('Judul kuis harus diisi!');
-    if (!isValid && (formData.selectionMethod === 'auto' || formData.selectionMethod === 'bank_manual')) {
+    if (!isValid) {
       return toast.error('Jumlah soal belum sesuai dengan target!');
     }
-    if (formData.selectionMethod === 'manual' && quizData.questions.length === 0) return toast.error('Buat setidaknya satu pertanyaan!');
     
     if (status === 'active') {
       setIsConfirmOpen(true);
@@ -142,8 +186,21 @@ export default function GuruAddQuiz() {
     setTimeout(() => navigate('/guru/quizzes'), 1500);
   };
 
+  const toggleBankQuestion = (id) => {
+    setSelectedBankQuestionIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id) 
+        : [...prev, id]
+    );
+  };
+
+  // Get details of randomized questions
+  const randomizedQuestionsList = useMemo(() => {
+    return availableQuestions.filter(q => selectedBankQuestionIds.includes(q.id));
+  }, [availableQuestions, selectedBankQuestionIds]);
+
   return (
-    <div className="animate-fade-in space-y-8 pb-32">
+    <div className="animate-fade-in space-y-8 pb-32 max-w-5xl mx-auto">
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -161,297 +218,283 @@ export default function GuruAddQuiz() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT PANEL: CONFIGURATION */}
-        <div className="lg:col-span-1 space-y-8">
-          <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <Settings size={60} />
+      {/* VERTICAL FORM FLOW */}
+      <div className="space-y-8">
+        
+        {/* STEP 1: INFORMASI DASAR */}
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Settings size={60} />
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-teal-600">
+              <Layers size={20} />
+            </div>
+            <div>
+              <span className="text-[9px] font-black uppercase text-teal-500 tracking-wider">Langkah 1 dari 3</span>
+              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Informasi Dasar & Konfigurasi</h3>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Kuis / Latihan</label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Contoh: Kuis Harian Matematika"
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-teal-500/10 dark:text-white transition-all"
+              />
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-teal-600">
-                <Layers size={20} />
-              </div>
-              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Informasi Dasar</h3>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mata Pelajaran</label>
+              <Dropdown
+                value={formData.subject}
+                onChange={(val) => setFormData({ ...formData, subject: val })}
+                options={SUBJECTS.filter(s => s.category === 'Akademik').map(s => ({ value: s.name, label: s.name }))}
+                fullWidth
+              />
             </div>
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Kuis / Latihan</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Soal</label>
                 <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Contoh: Kuis Harian Matematika"
-                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-teal-500/10 dark:text-white transition-all"
+                  type="number"
+                  value={formData.questionCount}
+                  onChange={(e) => setFormData({ ...formData, questionCount: e.target.value })}
+                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-sm font-black outline-none dark:text-white"
                 />
               </div>
-
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mata Pelajaran</label>
-                <Dropdown
-                  value={formData.subject}
-                  onChange={(val) => setFormData({ ...formData, subject: val })}
-                  options={SUBJECTS.filter(s => s.category === 'Akademik').map(s => ({ value: s.name, label: s.name }))}
-                  fullWidth
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-slate-400">Durasi (m)</label>
+                <input
+                  type="number"
+                  value={formData.duration}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-sm font-black outline-none dark:text-white"
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Soal</label>
-                  <input
-                    type="number"
-                    value={formData.questionCount}
-                    onChange={(e) => setFormData({ ...formData, questionCount: e.target.value })}
-                    className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-sm font-black outline-none dark:text-white"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-slate-400">Durasi (m)</label>
-                  <input
-                    type="number"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-sm font-black outline-none dark:text-white"
-                  />
-                </div>
-              </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Buka Akses</label>
+              <input type="datetime-local" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-[10px] font-bold outline-none dark:text-white" />
+            </div>
 
-              {/* DATE FIELDS */}
-              <div className="pt-6 border-t border-slate-50 dark:border-slate-700/50 space-y-4">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Buka Akses</label>
-                    <input type="datetime-local" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-[10px] font-bold outline-none dark:text-white" />
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tutup Akses</label>
-                    <input type="datetime-local" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-[10px] font-bold outline-none dark:text-white" />
-                 </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tutup Akses</label>
+              <input type="datetime-local" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-[10px] font-bold outline-none dark:text-white" />
+            </div>
+          </div>
+
+          <div className="pt-4 flex justify-end">
+            <button
+              onClick={handleApplyConfig}
+              className="py-4 px-8 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-teal-600/20 active:scale-95 group"
+            >
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Terapkan Konfigurasi</span>
+              <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+
+        {/* STEP 2: METODE PENGAMBILAN SOAL */}
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600">
+                <ShieldCheck size={20} />
               </div>
+              <div>
+                <span className="text-[9px] font-black uppercase text-emerald-500 tracking-wider">Langkah 2 dari 3</span>
+                <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Metode Pengambilan Soal</h3>
+              </div>
+            </div>
+
+            <div className="flex bg-slate-100 dark:bg-slate-900/50 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 self-start md:self-auto">
+              {[
+                { id: 'auto', label: 'Bank (Otomatis)' },
+                { id: 'bank_manual', label: 'Bank (Manual)' },
+                { id: 'manual', label: 'Buat Sendiri' }
+              ].map(method => (
+                <button
+                  key={method.id}
+                  onClick={() => setFormData({ ...formData, selectionMethod: method.id })}
+                  className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${formData.selectionMethod === method.id
+                    ? 'bg-teal-600 text-white shadow-xl shadow-teal-600/20'
+                    : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                >
+                  {method.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* RIGHT PANEL: QUESTION BUILDER OR AUTO SELECT */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white dark:bg-slate-800 rounded-[3rem] p-10 border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-10 min-h-[700px]">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-orange-600">
-                  <ShieldCheck size={20} />
-                </div>
-                <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Pengaturan Soal</h3>
-              </div>
-
-              <div className="flex bg-slate-100 dark:bg-slate-900/50 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
-                {[
-                  { id: 'auto', label: 'Bank (Otomatis)' },
-                  { id: 'bank_manual', label: 'Bank (Manual)' },
-                  { id: 'manual', label: 'Buat Sendiri' }
-                ].map(method => (
-                  <button
-                    key={method.id}
-                    onClick={() => setFormData({ ...formData, selectionMethod: method.id })}
-                    className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${formData.selectionMethod === method.id
-                      ? 'bg-orange-600 text-white shadow-xl shadow-orange-600/20'
-                      : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    {method.label}
-                  </button>
-                ))}
-              </div>
+        {/* STEP 3: DETAIL / DAFTAR SOAL */}
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm min-h-[400px]">
+          <div className="flex items-center gap-4 border-b border-slate-50 dark:border-slate-700/50 pb-6">
+            <div className="w-10 h-10 bg-amber-50 dark:bg-amber-900/30 rounded-xl flex items-center justify-center text-amber-600">
+              <FileText size={20} />
             </div>
+            <div>
+              <span className="text-[9px] font-black uppercase text-amber-500 tracking-wider">Langkah 3 dari 3</span>
+              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Daftar & Pemilihan Soal</h3>
+            </div>
+          </div>
 
-            {formData.selectionMethod === 'auto' && (
-              <div className="flex-1 space-y-10">
-                <div className={`p-6 rounded-3xl border-2 flex items-center justify-between transition-all ${
-                  isValid ? 'bg-emerald-50/50 border-emerald-100 text-emerald-600' : 
-                  isOver ? 'bg-rose-50/50 border-rose-100 text-rose-600' : 
-                  'bg-amber-50/50 border-amber-100 text-amber-600'
-                }`}>
-                   <div className="flex items-center gap-4">
-                      {isValid ? <CheckCircle2 size={24} /> : <AlertTriangle size={24} />}
-                      <span className="text-sm font-black uppercase tracking-tight">
-                         {isValid ? 'Distribusi soal sudah sesuai!' : 
-                          isOver ? `Terlalu banyak (${currentTotalQuestions}/${targetCount})` : 
-                          `Belum cukup (${currentTotalQuestions}/${targetCount})`}
-                      </span>
-                   </div>
-                   <div className="text-[10px] font-black uppercase opacity-60 italic">Target: {targetCount} Butir</div>
+          {formData.selectionMethod === 'auto' && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Pengacakan Soal Otomatis</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Sistem akan memilih secara acak dari total {availableQuestions.length} stok soal {confirmedConfig.subject}.</p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {['Mudah', 'Sedang', 'Sulit'].map(level => (
-                    <div key={level} className="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 space-y-6 group hover:border-orange-200 transition-all">
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">{level}</span>
-                       <input
-                         type="number"
-                         value={autoDistribution[level]}
-                         onChange={e => setAutoDistribution({...autoDistribution, [level]: e.target.value})}
-                         className="w-full bg-transparent text-4xl font-black text-slate-800 dark:text-white outline-none italic"
-                       />
-                       <p className="text-[9px] font-bold text-slate-400 uppercase italic">Assign dari bank</p>
-                    </div>
-                  ))}
-                </div>
+                <button
+                  onClick={handleAutoRandomize}
+                  className="px-6 py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md shadow-teal-600/10 text-xs font-black uppercase tracking-wider"
+                >
+                  <Shuffle size={16} /> Acak Soal Otomatis
+                </button>
               </div>
-            )}
 
-            {formData.selectionMethod === 'bank_manual' && (
-              <div className="flex-1 flex flex-col gap-6">
-                <div className={`p-6 rounded-3xl border-2 flex items-center justify-between transition-all ${
-                  isValid ? 'bg-emerald-50/50 border-emerald-100 text-emerald-600' : 
-                  isOver ? 'bg-rose-50/50 border-rose-100 text-rose-600' : 
-                  'bg-amber-50/50 border-amber-100 text-amber-600'
+              {/* VALIDATION STATUS */}
+              <div className={`p-6 rounded-3xl border-2 flex items-center justify-between transition-all ${isValid ? 'bg-emerald-50/50 border-emerald-100 text-emerald-600' :
+                  isOver ? 'bg-rose-50/50 border-rose-100 text-rose-600' :
+                    'bg-amber-50/50 border-amber-100 text-amber-600'
                 }`}>
-                   <div className="flex items-center gap-4">
-                      {isValid ? <CheckCircle2 size={24} /> : <AlertTriangle size={24} />}
-                      <span className="text-sm font-black uppercase tracking-tight">
-                         {isValid ? 'Jumlah soal pilihan sudah sesuai!' : 
-                          isOver ? `Pilihan melebihi target (${currentTotalQuestions}/${targetCount})` : 
-                          `Pilih soal lagi (${currentTotalQuestions}/${targetCount} terpilih)`}
-                      </span>
-                   </div>
-                   <div className="text-[10px] font-black uppercase opacity-60 italic">Target: {targetCount} Butir</div>
+                <div className="flex items-center gap-4">
+                  {isValid ? <CheckCircle2 size={24} /> : <AlertTriangle size={24} />}
+                  <span className="text-sm font-black uppercase tracking-tight">
+                    {isValid ? 'Acak otomatis berhasil & jumlah sesuai!' :
+                      isOver ? `Terlalu banyak (${currentTotalQuestions}/${targetCount})` :
+                        `Soal belum diacak atau belum cukup (${currentTotalQuestions}/${targetCount})`}
+                  </span>
                 </div>
+                <div className="text-[10px] font-black uppercase opacity-60 italic">Target: {targetCount} Butir</div>
+              </div>
 
-                {/* Filter and Search Bar for Bank Soal */}
-                <div className="flex flex-wrap gap-4 items-center bg-slate-50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <div className="flex-1 min-w-[200px] relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                    <input
-                      type="text"
-                      placeholder="Cari kata kunci soal..."
-                      value={bankSearch}
-                      onChange={(e) => setBankSearch(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none dark:text-white"
-                    />
-                  </div>
-                  <Dropdown
-                    value={bankLevel}
-                    onChange={setBankLevel}
-                    options={[
-                      { value: 'Semua', label: 'Semua Kesulitan' },
-                      { value: 'Mudah', label: 'Mudah' },
-                      { value: 'Sedang', label: 'Sedang' },
-                      { value: 'Sulit', label: 'Sulit' }
-                    ]}
-                    className="min-w-[150px]"
+              {randomizedQuestionsList.length > 0 && (
+                <div className="space-y-4">
+                  <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Pratinjau Soal Hasil Acakan:</h5>
+                  <DataTable
+                    headers={[{ label: 'No', align: 'center' }, { label: 'Deskripsi Soal' }, { label: 'Level', align: 'center' }]}
+                    data={randomizedQuestionsList}
+                    rowsPerPage={5}
+                    renderRow={(q, idx) => (
+                      <tr key={q.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-4 text-center text-xs font-bold text-slate-500">{idx + 1}</td>
+                        <td className="py-4 text-xs font-bold text-slate-700"><MathRenderer latex={q.text} /></td>
+                        <td className="py-4 text-center"><Badge text={q.difficulty} variant={q.difficulty === 'Mudah' ? 'Success' : 'Danger'} /></td>
+                      </tr>
+                    )}
                   />
                 </div>
+              )}
+            </div>
+          )}
 
-                {/* Question List */}
-                <div className="space-y-4 max-h-[450px] overflow-y-auto pr-1">
-                   {filteredBankQuestions.length === 0 ? (
-                      <div className="py-12 text-center bg-slate-50 dark:bg-slate-900/20 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                         <HelpCircle className="mx-auto mb-3 text-slate-300 dark:text-slate-700" size={32} />
-                         <p className="text-xs font-bold text-slate-400 uppercase">Tidak ada soal yang cocok</p>
-                      </div>
-                   ) : (
-                      filteredBankQuestions.map((q) => {
-                         const isSelected = selectedBankQuestionIds.includes(q.id);
-                         return (
-                            <div 
-                              key={q.id}
-                              onClick={() => toggleBankQuestion(q.id)}
-                              className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex gap-4 ${
-                                isSelected 
-                                  ? 'bg-orange-50/50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900/50' 
-                                  : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                              }`}
-                            >
-                               <div className="mt-1">
-                                  <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                                     isSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'
-                                  }`}>
-                                     {isSelected && <span className="text-[10px] font-black leading-none">✓</span>}
-                                  </div>
-                               </div>
+          {formData.selectionMethod === 'bank_manual' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className={`p-4 rounded-2xl border-2 flex items-center justify-between ${isValid ? 'bg-emerald-50/50 border-emerald-100 text-emerald-600' : 'bg-amber-50/50 border-amber-100 text-amber-600'
+                }`}>
+                <span className="text-xs font-black uppercase">Pilih Manual Soal ({selectedBankQuestionIds.length}/{targetCount})</span>
+              </div>
 
-                               <div className="flex-1 space-y-3">
-                                  <div className="flex items-center gap-3">
-                                     <span className="text-[10px] font-bold text-slate-400">SOAL #{q.id}</span>
-                                     <Badge 
-                                       text={q.difficulty}
-                                       variant={q.difficulty === 'Mudah' ? 'Success' : q.difficulty === 'Sedang' ? 'Warning' : 'Danger'} 
-                                     />
-                                     {q.usedIn && (
-                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                                           Digunakan di: {q.usedIn}
-                                        </span>
-                                     )}
-                                  </div>
-                                  
-                                  <div className="text-xs font-black text-slate-800 dark:text-white leading-relaxed">
-                                     <MathRenderer latex={q.text} />
-                                  </div>
-
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                                     {Object.entries(q.options || {}).map(([key, val]) => (
-                                        <div key={key} className={`flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-lg text-[10px] font-bold border border-transparent ${key === q.correctAnswer ? 'text-teal-600 dark:text-teal-400 font-black border-teal-100 dark:border-teal-900/30' : 'text-slate-500 dark:text-slate-400'}`}>
-                                           <span className="w-5 h-5 rounded-md bg-white dark:bg-slate-800 flex items-center justify-center border font-black">{key}</span>
-                                           <span className="truncate">{val}</span>
-                                        </div>
-                                     ))}
-                                  </div>
-                               </div>
-                            </div>
-                         );
-                      })
-                   )}
+              <div className="flex gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                  <input type="text" placeholder="Cari soal..." value={bankSearch} onChange={e => setBankSearch(e.target.value)} className="w-full pl-14 pr-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none" />
                 </div>
               </div>
-            )}
 
-            {formData.selectionMethod === 'manual' && (
-                 <div className="flex-1">
-                    <GuruQuizBuilder quizData={quizData} setQuizData={setQuizData} openMathEditor={openMathEditor} hideHeader={true} />
-                 </div>
-            )}
-          </div>
+              <DataTable
+                headers={[
+                  { label: 'Pilih', align: 'center' },
+                  { label: 'Deskripsi Soal' },
+                  { label: 'Status Penggunaan', align: 'center' },
+                  { label: 'Level', align: 'center' }
+                ]}
+                data={filteredBankQuestions}
+                rowsPerPage={5}
+                renderRow={q => {
+                  const isSelected = selectedBankQuestionIds.includes(q.id);
+                  return (
+                    <tr key={q.id} onClick={() => toggleBankQuestion(q.id)} className={`cursor-pointer transition-colors ${isSelected ? 'bg-teal-50/30' : 'hover:bg-slate-50'}`}>
+                      <td className="py-4 text-center">
+                        <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-teal-600 border-teal-600 text-white' : 'border-slate-200'}`}>
+                          {isSelected && <CheckCircle2 size={12} />}
+                        </div>
+                      </td>
+                      <td className="py-4 text-xs font-bold text-slate-700"><MathRenderer latex={q.text} /></td>
+                      <td className="py-4 text-center">
+                        <Badge 
+                          text={q.usedIn ? 'Sudah Pernah Digunakan' : 'Belum Pernah Digunakan'} 
+                          variant={q.usedIn ? 'Neutral' : 'Success'} 
+                        />
+                      </td>
+                      <td className="py-4 text-center"><Badge text={q.difficulty} variant={q.difficulty === 'Mudah' ? 'Success' : 'Danger'} /></td>
+                    </tr>
+                  );
+                }}
+              />
+            </div>
+          )}
+
+          {formData.selectionMethod === 'manual' && (
+            <div className="animate-fade-in">
+              <GuruQuizBuilder quizData={quizData} setQuizData={setQuizData} openMathEditor={openMathEditor} hideHeader={true} />
+            </div>
+          )}
         </div>
       </div>
 
       {/* SUMMARY BAR */}
       <div className="w-full">
-         <div className="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 border-t-4 border-teal-500 relative overflow-hidden">
-            <div className="flex flex-wrap gap-12 relative z-10">
-               <div>
-                  <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Total Soal</span>
-                  <div className="flex items-end gap-2 text-white">
-                    <span className="text-5xl font-black italic leading-none">{currentTotalQuestions}</span>
-                    <span className="text-[10px] font-black uppercase text-slate-500 mb-1">Butir</span>
-                  </div>
-               </div>
-                <div>
-                  <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Mata Pelajaran</span>
-                  <Badge text={formData.subject} variant="Info" className="px-6 py-2" />
-                </div>
-                <div>
-                  <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Scope Kelas</span>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck size={14} className="text-teal-500" />
-                    <span className="text-sm font-black text-white italic">Kelas {assignedClass}</span>
-                  </div>
-                </div>
+        <div className="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 border-t-4 border-teal-500 relative overflow-hidden">
+          <div className="flex flex-wrap gap-12 relative z-10">
+            <div>
+              <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Total Soal</span>
+              <div className="flex items-end gap-2 text-white">
+                <span className="text-5xl font-black italic leading-none">{currentTotalQuestions}</span>
+                <span className="text-[10px] font-black uppercase text-slate-500 mb-1">Butir</span>
+              </div>
             </div>
+            <div>
+              <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Mata Pelajaran</span>
+              <Badge text={formData.subject} variant="Info" className="px-6 py-2" />
+            </div>
+            <div>
+              <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Scope Kelas</span>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={14} className="text-teal-500" />
+                <span className="text-sm font-black text-white italic">Kelas {assignedClass}</span>
+              </div>
+            </div>
+          </div>
 
-            <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
-               <button onClick={() => navigate('/guru/quizzes')} className="text-slate-500 hover:text-white font-black text-xs uppercase tracking-widest px-6 transition-all">Batal</button>
-               <div className="flex gap-4 w-full md:w-auto">
-                 <button onClick={() => handleSave('draft')} className="flex-1 md:flex-none px-10 py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg transition-all border border-white/5">Draft</button>
-                 <button 
-                   onClick={() => handleSave('active')} 
-                   className="flex-1 md:flex-none px-12 py-5 bg-white text-slate-900 hover:bg-slate-50 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95"
-                 >
-                   {isEdit ? 'Perbarui Kuis' : 'Simpan & Rilis'}
-                 </button>
-               </div>
+          <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
+            <button onClick={() => navigate('/guru/quizzes')} className="text-slate-500 hover:text-white font-black text-xs uppercase tracking-widest px-6 transition-all">Batal</button>
+            <div className="flex gap-4 w-full md:w-auto">
+              <button onClick={() => handleSave('draft')} className="flex-1 md:flex-none px-10 py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg transition-all border border-white/5">Draft</button>
+              <button
+                disabled={!isValid}
+                onClick={() => handleSave('active')}
+                className={`flex-1 md:flex-none px-12 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl transition-all ${isValid
+                    ? 'bg-white text-slate-900 hover:bg-slate-50 active:scale-95'
+                    : 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50'
+                  }`}
+              >
+                {isEdit ? 'Perbarui Kuis' : 'Simpan & Rilis'}
+              </button>
             </div>
-         </div>
+          </div>
+        </div>
       </div>
 
       <ConfirmDialog

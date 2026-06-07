@@ -102,7 +102,7 @@ export default function MissionCard({ exam, onStart, isPractice = false }) {
         ) : (
           <button
             id={`btn-start-exam-${exam.id}`}
-            onClick={() => onStart ? onStart(exam) : navigate(`/exam/${exam.id}/prepare`)}
+            onClick={() => onStart ? onStart(exam) : navigate(`/ujian/${exam.id}/persiapan`)}
             className={`w-full h-16 flex items-center justify-center gap-3 py-4 bg-gradient-to-r ${exam.color} text-white font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-indigo-200 dark:shadow-none transition-all duration-300 hover:scale-[1.02] active:scale-95`}
           >
             <Play size={20} fill="white" />

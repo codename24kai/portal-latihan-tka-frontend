@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { 
   FileText, 
   Users, 
@@ -43,6 +44,10 @@ export default function SurveyReports() {
   const selectedSurvey = useMemo(() => 
     (mockSurveyDefinitions || []).find(s => s?.id === selectedSurveyId),
   [selectedSurveyId]);
+
+  const handleDownload = () => {
+    toast.success(`Berhasil mengunduh laporan survei "${selectedSurvey?.title || 'Survei'}" untuk Kelas ${assignedClass}`);
+  };
 
   const classResponses = useMemo(() => 
     (mockSurveyResponses || []).filter(r => r?.student_class === assignedClass && r?.survey_id === selectedSurveyId),
@@ -134,7 +139,10 @@ export default function SurveyReports() {
             onChange={setSelectedSurveyId}
             options={(mockSurveyDefinitions || []).map(s => ({ value: s?.id, label: s?.title }))}
           />
-          <button className="p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-400 hover:text-teal-600 transition-colors shadow-sm">
+          <button 
+            onClick={handleDownload}
+            className="p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-400 hover:text-teal-600 transition-colors shadow-sm"
+          >
             <Download size={20} />
           </button>
         </div>

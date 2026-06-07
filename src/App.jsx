@@ -7,20 +7,24 @@ import LupaPassword from '@/autentikasi/LupaPassword';
 /* --- Student Imports --- */
 import StudentLayout from '@/siswa/tata-letak/LayoutSiswa';
 import StudentDashboard from '@/siswa/halaman/DashboardSiswa';
-import StudentTest from '@/siswa/halaman/TesSiswa';
+import StudentTest from '@/siswa/halaman/LatihanSiswa';
 import StudentModul from '@/siswa/halaman/ModulSiswa';
 import StudentSetting from '@/siswa/halaman/PengaturanSiswa';
-import ModuleQuiz from '@/siswa/halaman/KuisModul';
-import ExamExecution from '@/siswa/halaman/EksekusiUjian';
-import ExamResult from '@/siswa/halaman/HasilUjian';
-import PreSimulation from '@/siswa/halaman/PraSimulasi';
+import ModuleQuiz from '@/komponen/siswa/latihan/KuisModul';
+import ExamExecution from '@/komponen/siswa/latihan/EksekusiSimulasi';
+import ExamResult from '@/komponen/siswa/latihan/HasilSimulasi';
+import HasilLatihan from '@/komponen/siswa/latihan/HasilLatihan';
+import PreSimulation from '@/komponen/siswa/latihan/PraSimulasi';
+import LearningViewer from '@/komponen/siswa/LearningViewer';
+
+import NotifikasiHalaman from '@/komponen/ui/NotifikasiHalaman';
 import HelpCenter from '@/siswa/halaman/PusatBantuan';
 
 /* --- Admin Imports --- */
 import AdminLayout from '@/admin/layouts/AdminLayout';
 import AdminDashboard from '@/admin/halaman/DashboardAdmin';
 import QuestionBank from '@/admin/halaman/BankSoal';
-import TryoutManagement from '@/admin/halaman/ManajemenTryout';
+import TryoutManagement from '@/admin/halaman/ManajemenSimulasi';
 import ScoreReports from '@/admin/halaman/LaporanNilai';
 import UserManagement from '@/admin/halaman/ManajemenPengguna';
 import ModuleManagement from '@/admin/halaman/ManajemenModul';
@@ -28,6 +32,7 @@ import AddTryout from '@/admin/halaman/TambahTryout';
 import AddModule from '@/admin/halaman/TambahModul';
 import AddUser from '@/admin/halaman/TambahPengguna';
 import AddQuestion from '@/admin/halaman/TambahSoal';
+import LogAktivitasAdmin from '@/admin/halaman/LogAktivitasAdmin';
 
 /* --- Guru Imports --- */
 import GuruLayout from '@/guru/tata-letak/TataLetakGuru';
@@ -41,10 +46,13 @@ import GuruAddQuiz from '@/guru/halaman/TambahKuisGuru';
 import GuruAgendaKelas from '@/guru/halaman/AgendaKelas';
 
 /* --- NEW: Survey Imports --- */
-import SurveyExecution from '@/siswa/halaman/EksekusiSurvei';
-import SurveyComplete from '@/siswa/halaman/SurveiSelesai';
+import SurveyExecution from '@/komponen/siswa/Survei/EksekusiSurvei';
+import SurveyComplete from '@/komponen/siswa/Survei/SurveiSelesai';
 import SurveyReports from '@/guru/halaman/LaporanSurvei';
 import AdminSurveyReports from '@/admin/halaman/LaporanSurveiAdmin';
+import ManajemenSurvei from '@/admin/halaman/ManajemenSurvei';
+import TambahSurvei from '@/admin/halaman/TambahSurvei';
+
 
 import ToastProvider from '@/komponen/ui/PenyediaToast';
 import { UserProvider } from '@/konteks/KonteksPengguna';
@@ -81,66 +89,77 @@ export default function App() {
       <UserProvider>
         <ToastProvider />
         <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<LupaPassword />} />
+          {/* Public Routes */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<LupaPassword />} />
 
-        {/* Student Routes (with layout) */}
-        <Route element={<RequireAuth allowedRoles={['student']}><StudentLayout /></RequireAuth>}>
-          <Route path="/" element={<StudentDashboard />} />
-          <Route path="/test" element={<StudentTest />} />
-          <Route path="/modules" element={<StudentModul />} />
-          <Route path="/settings" element={<StudentSetting />} />
-          <Route path="/help" element={<HelpCenter />} />
-        </Route>
+          {/* Student Routes (with layout) */}
+          <Route element={<RequireAuth allowedRoles={['student']}><StudentLayout /></RequireAuth>}>
+            <Route path="/beranda" element={<StudentDashboard />} />
+            <Route path="/ujian" element={<StudentTest />} />
+            <Route path="/modul" element={<StudentModul />} />
+            <Route path="/pengaturan" element={<StudentSetting />} />
+            <Route path="/bantuan" element={<HelpCenter />} />
+            <Route path="/notifikasi" element={<NotifikasiHalaman />} />
+          </Route>
 
-        {/* Exam & Quiz Routes (no layout — distraction-free) */}
-        <Route path="/modules/quiz/:moduleId" element={<RequireAuth allowedRoles={['student']}><ModuleQuiz /></RequireAuth>} />
-        <Route path="/exam/:examId/prepare" element={<RequireAuth allowedRoles={['student']}><PreSimulation /></RequireAuth>} />
-        <Route path="/exam/:examId" element={<RequireAuth allowedRoles={['student']}><ExamExecution /></RequireAuth>} />
-        <Route path="/exam/:examId/result" element={<RequireAuth allowedRoles={['student']}><ExamResult /></RequireAuth>} />
-        
-        {/* Survey Execution (no layout) */}
-        <Route path="/survey/:surveyId" element={<RequireAuth allowedRoles={['student']}><SurveyExecution /></RequireAuth>} />
-        <Route path="/survey/:surveyId/complete" element={<RequireAuth allowedRoles={['student']}><SurveyComplete /></RequireAuth>} />
+          {/* Exam & Quiz Routes (no layout — distraction-free) */}
+          <Route path="/modul/materi/:materiId" element={<RequireAuth allowedRoles={['student']}><LearningViewer /></RequireAuth>} />
+          <Route path="/modul/kuis/:modulId" element={<RequireAuth allowedRoles={['student']}><ModuleQuiz /></RequireAuth>} />
+          <Route path="/ujian/:ujianId/persiapan" element={<RequireAuth allowedRoles={['student']}><PreSimulation /></RequireAuth>} />
+          <Route path="/ujian/:ujianId" element={<RequireAuth allowedRoles={['student']}><ExamExecution /></RequireAuth>} />
+          <Route path="/ujian/:ujianId/hasil" element={<RequireAuth allowedRoles={['student']}><ExamResult /></RequireAuth>} />
+          <Route path="/latihan/:ujianId/hasil" element={<RequireAuth allowedRoles={['student']}><HasilLatihan /></RequireAuth>} />
 
-        {/* Guru / Teacher Routes (with GuruLayout) */}
-        <Route path="/guru" element={<RequireAuth allowedRoles={['guru']}><GuruLayout /></RequireAuth>}>
-          <Route index element={<GuruDashboard />} />
-          <Route path="agenda" element={<GuruAgendaKelas />} />
-          <Route path="students" element={<GuruStudentList />} />
-          <Route path="reports" element={<GuruScoreReports />} />
-          <Route path="modules" element={<GuruManageModules />} />
-          <Route path="modules/add" element={<GuruAddModule />} />
-          <Route path="modules/edit/:id" element={<GuruAddModule />} />
-          <Route path="quizzes" element={<GuruManageQuizzes />} />
-          <Route path="quizzes/add" element={<GuruAddQuiz />} />
-          <Route path="quizzes/edit/:id" element={<GuruAddQuiz />} />
-          <Route path="reports/survey" element={<SurveyReports />} />
-        </Route>
 
-        {/* Administrator Routes (with layout) */}
-        <Route path="/admin" element={<RequireAuth allowedRoles={['admin']}><AdminLayout /></RequireAuth>}>
-          <Route index element={<AdminDashboard />} />
-          
-          {/* User Management restricted to Admin Only */}
-          <Route path="users" element={<RequireAuth allowedRoles={['admin']}><UserManagement /></RequireAuth>} />
-          <Route path="users/add" element={<RequireAuth allowedRoles={['admin']}><AddUser /></RequireAuth>} />
-          <Route path="users/edit/:id" element={<RequireAuth allowedRoles={['admin']}><AddUser /></RequireAuth>} />
-          
-          <Route path="question-bank" element={<QuestionBank />} />
-          <Route path="question-bank/add" element={<AddQuestion />} />
-          <Route path="question-bank/edit/:id" element={<AddQuestion />} />
-          <Route path="tryout" element={<TryoutManagement />} />
-          <Route path="tryout/add" element={<AddTryout />} />
-          <Route path="tryout/edit/:id" element={<AddTryout />} />
-          <Route path="reports" element={<ScoreReports />} />
-          <Route path="reports/survey" element={<AdminSurveyReports />} />
-          <Route path="modules" element={<ModuleManagement />} />
-          <Route path="modules/add" element={<AddModule />} />
-          <Route path="modules/edit/:id" element={<AddModule />} />
-        </Route>
-      </Routes>
+          {/* Survey Execution (no layout) */}
+          <Route path="/survey/:surveyId" element={<RequireAuth allowedRoles={['student']}><SurveyExecution /></RequireAuth>} />
+          <Route path="/survey/:surveyId/selesai" element={<RequireAuth allowedRoles={['student']}><SurveyComplete /></RequireAuth>} />
+
+          {/* Guru / Teacher Routes (with GuruLayout) */}
+          <Route path="/guru" element={<RequireAuth allowedRoles={['guru']}><GuruLayout /></RequireAuth>}>
+            <Route index element={<GuruDashboard />} />
+            <Route path="agenda" element={<GuruAgendaKelas />} />
+            <Route path="siswa" element={<GuruStudentList />} />
+            <Route path="laporan" element={<GuruScoreReports />} />
+            <Route path="modul" element={<GuruManageModules />} />
+            <Route path="modul/tambah" element={<GuruAddModule />} />
+            <Route path="modul/edit/:id" element={<GuruAddModule />} />
+            <Route path="kuis" element={<GuruManageQuizzes />} />
+            <Route path="kuis/tambah" element={<GuruAddQuiz />} />
+            <Route path="kuis/edit/:id" element={<GuruAddQuiz />} />
+            <Route path="laporan/survey" element={<SurveyReports />} />
+            <Route path="notifikasi" element={<NotifikasiHalaman />} />
+          </Route>
+
+          {/* Administrator Routes (with layout) */}
+          <Route path="/admin" element={<RequireAuth allowedRoles={['admin']}><AdminLayout /></RequireAuth>}>
+            <Route index element={<AdminDashboard />} />
+
+            {/* User Management restricted to Admin Only */}
+            <Route path="pengguna" element={<RequireAuth allowedRoles={['admin']}><UserManagement /></RequireAuth>} />
+            <Route path="pengguna/tambah" element={<RequireAuth allowedRoles={['admin']}><AddUser /></RequireAuth>} />
+            <Route path="pengguna/edit/:id" element={<RequireAuth allowedRoles={['admin']}><AddUser /></RequireAuth>} />
+
+            <Route path="bank-soal" element={<QuestionBank />} />
+            <Route path="bank-soal/tambah" element={<AddQuestion />} />
+            <Route path="bank-soal/edit/:id" element={<AddQuestion />} />
+            <Route path="simulasi" element={<TryoutManagement />} />
+            <Route path="simulasi/tambah" element={<AddTryout />} />
+            <Route path="simulasi/edit/:id" element={<AddTryout />} />
+            <Route path="laporan" element={<ScoreReports />} />
+            <Route path="laporan/survey" element={<AdminSurveyReports />} />
+            <Route path="modul" element={<ModuleManagement />} />
+            <Route path="modul/tambah" element={<AddModule />} />
+            <Route path="modul/edit/:id" element={<AddModule />} />
+            <Route path="notifikasi" element={<NotifikasiHalaman />} />
+            <Route path="log-aktivitas" element={<LogAktivitasAdmin />} />
+            <Route path="survei" element={<ManajemenSurvei />} />
+            <Route path="survei/tambah" element={<TambahSurvei />} />
+            <Route path="survei/edit/:id" element={<TambahSurvei />} />
+          </Route>
+        </Routes>
       </UserProvider>
     </BrowserRouter>
   );

@@ -31,8 +31,7 @@ const ImportModal = ({ isOpen, importData, onClose, onConfirm }) => {
                 headers={[
                   { label: 'No', align: 'center' },
                   { label: 'Pertanyaan' },
-                  { label: 'Mata Pelajaran', align: 'center' },
-                  { label: 'Kesulitan', align: 'center' }
+                  { label: 'Mata Pelajaran', align: 'center' }
                 ]}
                 data={importData}
                 rowsPerPage={50}
@@ -44,13 +43,6 @@ const ImportModal = ({ isOpen, importData, onClose, onConfirm }) => {
                     </td>
                     <td className="py-4 px-6 text-center">
                        <Badge text={item?.subject} variant="Info" className="!text-[8px]" />
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                       <Badge 
-                        text={item?.difficulty} 
-                        variant={item?.difficulty === 'Mudah' ? 'Success' : 'Warning'} 
-                        className="!text-[8px]"
-                       />
                     </td>
                   </tr>
                 )}

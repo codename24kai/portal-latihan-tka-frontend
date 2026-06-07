@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useCountdown } from '@/hooks/useHitungMundur';
 import mockQuestions from '@/data/mockSoalV2'; // Using V2 for demo
 import ExamHeader from '@/komponen/siswa/HeaderUjian';
@@ -20,9 +20,9 @@ import { QUESTION_TYPES } from '@/konstanta/soal';
 
 const RENDERER_MAP = {
   [QUESTION_TYPES.SINGLE_CHOICE]: SingleChoiceRenderer,
-  [QUESTION_TYPES.MULTI_CHOICE]:  MultiChoiceRenderer,
-  [QUESTION_TYPES.TRUE_FALSE]:    TrueFalseRenderer,
-  [QUESTION_TYPES.ESSAY]:         EssayRenderer,
+  [QUESTION_TYPES.MULTI_CHOICE]: MultiChoiceRenderer,
+  [QUESTION_TYPES.TRUE_FALSE]: TrueFalseRenderer,
+  [QUESTION_TYPES.ESSAY]: EssayRenderer,
 };
 
 /**
@@ -32,6 +32,9 @@ const RENDERER_MAP = {
 export default function ExamExecution() {
   const { examId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const examType = location.state?.examType || 'tryout';
 
   // State
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -56,10 +59,11 @@ export default function ExamExecution() {
   // Timer
   const handleTimeUp = useCallback(() => {
     setIsSubmitted(true);
-    navigate(`/exam/${examId}/result`, {
-      state: { answers, totalQuestions, timeUp: true },
+    const targetPath = examType === 'practice' ? `/latihan/${examId}/hasil` : `/ujian/${examId}/hasil`;
+    navigate(targetPath, {
+      state: { answers, totalQuestions, timeUp: true, examData: { id: examId, type: examType } },
     });
-  }, [answers, examId, navigate, totalQuestions]);
+  }, [answers, examId, navigate, totalQuestions, examType]);
 
   const { timeLeft, isWarning, start } = useCountdown(5400, handleTimeUp);
 
@@ -106,10 +110,12 @@ export default function ExamExecution() {
   const handleConfirmSubmit = useCallback(() => {
     setIsSubmitted(true);
     setShowSubmitDialog(false);
-    navigate(`/exam/${examId}/result`, {
-      state: { answers, totalQuestions, timeUp: false, examData: { id: examId } },
+    const targetPath = examType === 'practice' ? `/latihan/${examId}/hasil` : `/ujian/${examId}/hasil`;
+    navigate(targetPath, {
+      state: { answers, totalQuestions, timeUp: false, examData: { id: examId, type: examType } },
     });
-  }, [answers, examId, navigate, totalQuestions]);
+  }, [answers, examId, navigate, totalQuestions, examType]);
+
 
   if (isSubmitted) return null;
 
@@ -157,8 +163,8 @@ export default function ExamExecution() {
               <button
                 onClick={handleToggleFlag}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all border-2 ${flaggedQuestions.has(currentNumber)
-                    ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm'
-                    : 'bg-white dark:bg-dark border-slate-100 dark:border-dark-border text-slate-400 hover:border-slate-200'
+                  ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm'
+                  : 'bg-white dark:bg-dark border-slate-100 dark:border-dark-border text-slate-400 hover:border-slate-200'
                   }`}
               >
                 <div className={`w-2 h-2 rounded-full ${flaggedQuestions.has(currentNumber) ? 'bg-orange-500 animate-pulse' : 'bg-slate-300'}`} />
@@ -167,10 +173,10 @@ export default function ExamExecution() {
             </div>
 
             <div className="mt-8">
-              <Renderer 
-                payload={currentQuestion.payload} 
-                selected={currentAnswer} 
-                onSelect={handleAnswerChange} 
+              <Renderer
+                payload={currentQuestion.payload}
+                selected={currentAnswer}
+                onSelect={handleAnswerChange}
               />
             </div>
           </div>

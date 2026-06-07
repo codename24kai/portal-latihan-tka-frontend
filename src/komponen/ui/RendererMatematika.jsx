@@ -51,7 +51,10 @@ export default function MathRenderer({ text, className = '' }) {
         }
       }
 
-      // Plain text: Escape HTML to prevent XSS while allowing KaTeX HTML
+      // Plain text: Escape HTML to prevent XSS while allowing KaTeX HTML, but keep rich HTML elements intact
+      if (/<[a-z][\s\S]*>/i.test(part)) {
+        return part;
+      }
       return part
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')

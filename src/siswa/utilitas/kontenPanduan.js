@@ -13,7 +13,7 @@ export const guideContent = {
     ],
     emoji: "🏠"
   },
-  '/test': {
+  '/ujian': {
     title: "Cara Ikut Latihan",
     description: "Siapkan dirimu untuk ujian yang seru!",
     steps: [
@@ -23,7 +23,7 @@ export const guideContent = {
     ],
     emoji: "📝"
   },
-  '/modules': {
+  '/modul': {
     title: "Membaca Materi",
     description: "Yuk, pelajari hal baru hari ini!",
     steps: [

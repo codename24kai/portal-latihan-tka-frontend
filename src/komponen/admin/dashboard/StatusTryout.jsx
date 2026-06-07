@@ -1,13 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClipboardList, MoreVertical, Circle } from 'lucide-react';
 import Badge from '@/komponen/ui/Badge';
 
 export default function TryoutStatus({ data }) {
+  const navigate = useNavigate();
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col transition-colors duration-300">
-      <div className="flex items-center justify-between mb-8">
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">Status Tryout</h2>
+          <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">Status Simulasi TKA</h2>
           <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">Sesi Berlangsung</p>
         </div>
         <button className="text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
@@ -15,11 +19,12 @@ export default function TryoutStatus({ data }) {
         </button>
       </div>
 
-      <div className="space-y-4 flex-1">
+      {/* Kontainer List - Ditambahkan overflow-y-auto agar bisa di-scroll jika item banyak */}
+      <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
         {data?.length > 0 ? (
           data.map((item, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="group flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl hover:bg-teal-50 dark:hover:bg-teal-900/10 transition-all border border-transparent hover:border-teal-100 dark:hover:border-teal-900/30"
             >
               <div className="flex items-center gap-4">
@@ -36,10 +41,10 @@ export default function TryoutStatus({ data }) {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <Badge 
-                  text={item.status} 
-                  variant={item.status === 'Berlangsung' ? 'Success' : 'Warning'} 
-                  className="text-[8px] px-2.5 py-0.5 border-none font-black uppercase" 
+                <Badge
+                  text={item.status}
+                  variant={item.status === 'Berlangsung' ? 'Success' : 'Warning'}
+                  className="text-[8px] px-2.5 py-0.5 border-none font-black uppercase"
                 />
                 <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{item.timeLeft} Tersisa</span>
               </div>
@@ -48,14 +53,21 @@ export default function TryoutStatus({ data }) {
         ) : (
           <div className="flex flex-col items-center justify-center h-full py-12 opacity-50 grayscale dark:opacity-30">
             <ClipboardList size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Tidak Ada Tryout Aktif</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Tidak Ada Simulasi Aktif</p>
           </div>
         )}
       </div>
 
-      <button className="mt-8 w-full py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-teal-600 hover:border-teal-200 dark:hover:text-teal-400 dark:hover:border-teal-900 transition-all active:scale-[0.98]">
-        Kelola Semua Tryout
-      </button>
+      {/* Wrapper Tombol - Ditambahkan mt-auto dan pt-4 agar selalu terkunci di bawah */}
+      <div className="mt-auto pt-6">
+        <button
+          onClick={() => navigate('/admin/simulasi')}
+          className="w-full py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-teal-600 hover:border-teal-200 dark:hover:text-teal-400 dark:hover:border-teal-900 transition-all active:scale-[0.98]"
+        >
+          Kelola Semua Simulasi TKA
+        </button>
+      </div>
+
     </div>
   );
 }

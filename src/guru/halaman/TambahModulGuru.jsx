@@ -7,7 +7,8 @@ import {
   Save,
   Link,
   Upload,
-  MessageSquare
+  MessageSquare,
+  ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -98,7 +99,7 @@ export default function GuruAddModule() {
   };
 
   return (
-    <div className="animate-fade-in space-y-8 pb-32">
+    <div className="animate-fade-in space-y-8 pb-32 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
@@ -108,8 +109,8 @@ export default function GuruAddModule() {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight leading-none">
-            {isEdit ? 'Edit Materi Belajar' : 'Tambah Materi Baru'}
+          <h1 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight leading-none italic">
+            {isEdit ? 'Edit' : 'Tambah'} <span className="text-orange-600">Materi Belajar</span>
           </h1>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
             <span>Khusus Kelas {assignedClass}</span>
@@ -119,166 +120,175 @@ export default function GuruAddModule() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 space-y-8">
-          <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-orange-50 dark:bg-orange-950/30 rounded-xl flex items-center justify-center text-orange-600">
-                <Layers size={20} />
-              </div>
+      {/* VERTICAL FORM FLOW */}
+      <div className="space-y-8">
+        
+        {/* CARD 1: INFORMASI DASAR */}
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-orange-50 dark:bg-orange-950/30 rounded-xl flex items-center justify-center text-orange-600">
+              <Layers size={20} />
+            </div>
+            <div>
+              <span className="text-[9px] font-black uppercase text-orange-500 tracking-wider">Langkah 1 dari 3</span>
               <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Informasi Dasar</h3>
             </div>
+          </div>
 
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Judul Materi</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="E.g. Pengenalan Aljabar Dasar"
-                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2 md:col-span-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Judul Materi</label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="E.g. Pengenalan Aljabar Dasar"
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mata Pelajaran</label>
-                <Dropdown
-                  value={formData.subject}
-                  onChange={(val) => setFormData({ ...formData, subject: val })}
-                  options={SUBJECTS.filter(s => s.category === 'Akademik').map(s => ({ value: s.name, label: s.name }))}
-                  fullWidth
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mata Pelajaran</label>
+              <Dropdown
+                value={formData.subject}
+                onChange={(val) => setFormData({ ...formData, subject: val })}
+                options={SUBJECTS.filter(s => s.category === 'Akademik').map(s => ({ value: s.name, label: s.name }))}
+                fullWidth
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori</label>
-                <Dropdown
-                  value={formData.category}
-                  onChange={(val) => setFormData({ ...formData, category: val })}
-                  options={Object.values(SUBJECT_CATEGORIES).map(c => ({ value: c, label: c }))}
-                  fullWidth
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori</label>
+              <Dropdown
+                value={formData.category}
+                onChange={(val) => setFormData({ ...formData, category: val })}
+                options={Object.values(SUBJECT_CATEGORIES).map(c => ({ value: c, label: c }))}
+                fullWidth
+              />
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-teal-600">
-                  <Video size={20} />
-                </div>
+        {/* CARD 2: KONTEN MATERI */}
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-teal-600">
+                <Video size={20} />
+              </div>
+              <div>
+                <span className="text-[9px] font-black uppercase text-teal-500 tracking-wider">Langkah 2 dari 3</span>
                 <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Konten Materi</h3>
               </div>
-              <div className="flex bg-slate-100 dark:bg-slate-900/50 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-                {['video', 'pdf'].map(type => (
-                  <button
-                    key={type}
-                    onClick={() => setFormData({ ...formData, type })}
-                    className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                      formData.type === type 
-                      ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' 
-                      : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    {type.toUpperCase()}
-                  </button>
-                ))}
-              </div>
+            </div>
+            <div className="flex bg-slate-100 dark:bg-slate-900/50 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+              {['video', 'pdf'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setFormData({ ...formData, type })}
+                  className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                    formData.type === type 
+                    ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' 
+                    : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  {type.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => setUploadMode('url')}
+                className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                  uploadMode === 'url' ? 'bg-orange-600 text-white border-orange-600 shadow-lg shadow-orange-600/20' : 'bg-transparent text-slate-400 border-slate-100 dark:border-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                Link URL
+              </button>
+              <button
+                onClick={() => setUploadMode('file')}
+                className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                  uploadMode === 'file' ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-600/20' : 'bg-transparent text-slate-400 border-slate-100 dark:border-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                Upload File
+              </button>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 mb-4">
-                <button
-                  onClick={() => setUploadMode('url')}
-                  className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-                    uploadMode === 'url' ? 'bg-orange-600 text-white border-orange-600 shadow-lg shadow-orange-600/20' : 'bg-transparent text-slate-400 border-slate-100 dark:border-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  Link URL
-                </button>
-                <button
-                  onClick={() => setUploadMode('file')}
-                  className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-                    uploadMode === 'file' ? 'bg-teal-600 text-white border-teal-600 shadow-lg shadow-teal-600/20' : 'bg-transparent text-slate-400 border-slate-100 dark:border-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  Upload File
-                </button>
-              </div>
-
-              {uploadMode === 'url' ? (
-                <div className="space-y-2 animate-in fade-in duration-300">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    {formData.type === 'video' ? 'Link Video YouTube' : 'URL File PDF / Materi'}
-                  </label>
-                  <div className="relative">
-                     <Link size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
-                     <input
-                      type="text"
-                      value={formData.url}
-                      onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                      placeholder="https://..."
-                      className="w-full pl-14 pr-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2 animate-in fade-in duration-300">
-                  <FilePreviewUpload 
-                    files={mediaFiles}
-                    onAdd={setMediaFiles}
-                    onRemove={handleRemoveFile}
-                    multiple={false}
-                    accept={formData.type === 'video' ? 'video/*' : '.pdf'}
-                    maxSizeMB={formData.type === 'video' ? 100 : 50}
-                    label={`Unggah File ${formData.type.toUpperCase()}`}
+            {uploadMode === 'url' ? (
+              <div className="space-y-2 animate-in fade-in duration-300">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  {formData.type === 'video' ? 'Link Video YouTube' : 'URL File PDF / Materi'}
+                </label>
+                <div className="relative">
+                   <Link size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                   <input
+                    type="text"
+                    value={formData.url}
+                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full pl-14 pr-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white"
                   />
                 </div>
-              )}
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi & Ringkasan</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Tuliskan ringkasan materi atau instruksi untuk siswa..."
-                  rows={4}
-                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white resize-none"
+              </div>
+            ) : (
+              <div className="space-y-2 animate-in fade-in duration-300">
+                <FilePreviewUpload 
+                  files={mediaFiles}
+                  onAdd={setMediaFiles}
+                  onRemove={handleRemoveFile}
+                  multiple={false}
+                  accept={formData.type === 'video' ? 'video/*' : '.pdf'}
+                  maxSizeMB={formData.type === 'video' ? 100 : 50}
+                  label={`Unggah File ${formData.type.toUpperCase()}`}
                 />
               </div>
-            </div>
-          </div>
-
-          {/* KUIS EVALUASI */}
-          <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${formData.hasQuiz ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-700'}`}>
-                  <MessageSquare size={20} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Kuis Evaluasi</h3>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Wajibkan kuis setelah materi selesai</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={formData.hasQuiz} onChange={() => setFormData({ ...formData, hasQuiz: !formData.hasQuiz })} />
-                <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-6 after:transition-all peer-checked:bg-orange-600"></div>
-              </label>
-            </div>
-
-            {formData.hasQuiz && (
-              <GuruQuizBuilder quizData={quizData} setQuizData={setQuizData} openMathEditor={openMathEditor} />
             )}
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi & Ringkasan</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Tuliskan ringkasan materi atau instruksi untuk siswa..."
+                rows={4}
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white resize-none"
+              />
+            </div>
           </div>
+        </div>
+
+        {/* CARD 3: KUIS EVALUASI */}
+        <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-700 space-y-8 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${formData.hasQuiz ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-700'}`}>
+                <MessageSquare size={20} />
+              </div>
+              <div>
+                <span className="text-[9px] font-black uppercase text-orange-500 tracking-wider">Langkah 3 dari 3</span>
+                <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Kuis Evaluasi</h3>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Wajibkan kuis setelah materi selesai</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={formData.hasQuiz} onChange={() => setFormData({ ...formData, hasQuiz: !formData.hasQuiz })} />
+              <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-6 after:transition-all peer-checked:bg-orange-600"></div>
+            </label>
+          </div>
+
+          {formData.hasQuiz && (
+            <div className="animate-fade-in pt-4">
+              <GuruQuizBuilder quizData={quizData} setQuizData={setQuizData} openMathEditor={openMathEditor} />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Floating Action Bar */}
+      {/* Floating Action Bar / Summary Bar */}
       <div className="mt-12 w-full">
          <div className="bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-xl border-t-4 border-orange-500 rounded-[2.5rem] px-8 md:px-12 py-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden relative">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 md:gap-14">

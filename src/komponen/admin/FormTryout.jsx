@@ -14,7 +14,8 @@ import {
   Info,
   Globe,
   Shuffle,
-  Eye
+  Eye,
+  Image as ImageIcon
 } from 'lucide-react';
 import { SUBJECTS } from '@/konstanta/mataPelajaran';
 import ConfirmDialog from '@/komponen/ui/DialogKonfirmasi';
@@ -292,10 +293,9 @@ export default function TryoutForm({ onClose, onSave }) {
                </div>
             </div>
 
-                   <p className="text-[9px] font-medium text-indigo-700 dark:text-indigo-300 leading-relaxed italic">
+               <p className="text-[9px] font-medium text-indigo-700 dark:text-indigo-300 leading-relaxed italic">
                   Dengan metode "Otomatis", sistem akan menarik {formData.questionCount} soal {formData.subject} secara acak yang tersedia di Bank Soal.
                </p>
-            </div>
 
             <div className="space-y-3 pt-4">
                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
@@ -315,7 +315,7 @@ export default function TryoutForm({ onClose, onSave }) {
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-4 pt-10 border-t border-slate-50 dark:border-slate-700">
+        <div className="flex items-center gap-3 pt-10 border-t border-slate-50 dark:border-slate-700">
           <button 
             type="button"
             onClick={handleCancelClick}

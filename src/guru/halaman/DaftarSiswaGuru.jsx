@@ -1,15 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  Filter, 
-  Mail, 
-  Eye, 
+import {
+  Search,
+  Filter,
+  Mail,
+  Eye,
   ChevronDown,
   TrendingUp,
   AlertCircle,
   Users,
-  CheckCircle2
+  CheckCircle2,
+  Send,
+  X,
+  Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DataTable from '@/komponen/ui/TabelData';
@@ -24,6 +27,13 @@ export default function GuruStudentList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua Status');
   const [expandedId, setExpandedId] = useState(null);
+
+  // State for Direct Messaging Modal (T1)
+  const [messagingStudent, setMessagingStudent] = useState(null);
+  const [messageText, setMessageText] = useState('');
+  const [messageType, setMessageType] = useState('Motivasi');
+  const [isSending, setIsSending] = useState(false);
+
   const assignedClass = localStorage.getItem('assignedClass') ?? '';
 
   const classStudents = useMemo(() => {
@@ -52,6 +62,28 @@ export default function GuruStudentList() {
     return diffDays;
   };
 
+  const handleMessageSend = async (payload) => {
+    if (!payload.body?.trim()) return;
+    setIsSending(true);
+    setTimeout(() => {
+      toast.success(`Pesan [${payload.type}] berhasil dikirim ke ${payload.name}!`, {
+        duration: 3000,
+        icon: '📨',
+        style: {
+          borderRadius: '1rem',
+          background: '#14b8a6',
+          color: '#fff',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          textTransform: 'uppercase'
+        }
+      });
+      setIsSending(false);
+      setMessagingStudent(null);
+      setMessageText('');
+    }, 1000);
+  };
+
   const headers = [
     { label: 'Siswa' },
     { label: 'Login Terakhir', align: 'center' },
@@ -63,7 +95,7 @@ export default function GuruStudentList() {
   const renderRow = (student) => {
     const isExpanded = expandedId === student.id;
     const days = getDaysSinceLogin(student?.lastActive);
-    
+
     return (
       <React.Fragment key={student?.id}>
         <tr className={`hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors group ${isExpanded ? 'bg-orange-50/50 dark:bg-orange-950/10' : ''}`}>
@@ -96,23 +128,23 @@ export default function GuruStudentList() {
             </div>
           </td>
           <td className="py-6 px-4 text-center">
-            <Badge 
-              text={student?.status === 'active' ? 'AKTIF' : 'NONAKTIF'} 
-              variant={student?.status === 'active' ? 'Success' : 'Danger'} 
+            <Badge
+              text={student?.status === 'active' ? 'AKTIF' : 'NONAKTIF'}
+              variant={student?.status === 'active' ? 'Success' : 'Danger'}
             />
           </td>
           <td className="py-6 px-8 text-center">
             <div className="flex items-center justify-center gap-2">
-              <button 
+              <button
                 onClick={() => setExpandedId(isExpanded ? null : student.id)}
                 className={`p-2 rounded-lg transition-all ${isExpanded ? 'bg-orange-600 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-orange-600'}`}
                 title="Lihat Progress"
               >
                 <Eye size={16} />
               </button>
-              <button 
-                onClick={() => toast.success('Pesan dikirim ke ' + student.name)}
-                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-teal-600 transition-colors" 
+              <button
+                onClick={() => { setMessagingStudent(student); setMessageText(''); }}
+                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-all active:scale-95"
                 title="Hubungi"
               >
                 <Mail size={16} />
@@ -120,7 +152,7 @@ export default function GuruStudentList() {
             </div>
           </td>
         </tr>
-        
+
         {/* Expandable Progress Drawer */}
         {isExpanded && (
           <tr className="bg-white dark:bg-slate-900 border-x-4 border-orange-500/20 animate-fade-in">
@@ -131,33 +163,33 @@ export default function GuruStudentList() {
                     <TrendingUp size={14} className="text-orange-500" /> Performa Akademik
                   </h4>
                   <div className="space-y-4">
-                    <ProgressBar 
-                      progress={student?.avgScore ?? 0} 
-                      label="Rata-rata Global" 
-                      color={(student?.avgScore ?? 0) >= 80 ? "bg-teal-500" : (student?.avgScore ?? 0) >= 65 ? "bg-amber-500" : "bg-rose-500"} 
+                    <ProgressBar
+                      progress={student?.avgScore ?? 0}
+                      label="Rata-rata Global"
+                      color={(student?.avgScore ?? 0) >= 80 ? "bg-teal-500" : (student?.avgScore ?? 0) >= 65 ? "bg-amber-500" : "bg-rose-500"}
                     />
                     <div className="flex justify-between items-end">
-                       <p className="text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase">Skor Akhir</p>
-                       <p className={`text-xl font-black ${(student?.avgScore ?? 0) >= 80 ? "text-teal-600" : "text-rose-600"}`}>{student?.avgScore}</p>
+                      <p className="text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase">Skor Akhir</p>
+                      <p className={`text-xl font-black ${(student?.avgScore ?? 0) >= 80 ? "text-teal-600" : "text-rose-600"}`}>{student?.avgScore}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
-                   <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Matematika</p>
-                      <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                         <div className="h-full bg-teal-500" style={{ width: `${Math.max(0, (student?.avgScore ?? 0) - 5)}%` }} />
-                      </div>
-                      <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter">Estimasi: {Math.max(0, (student?.avgScore ?? 0) - 5)} Poin</p>
-                   </div>
-                   <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">B. Indonesia</p>
-                      <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                         <div className="h-full bg-orange-500" style={{ width: `${Math.min(100, (student?.avgScore ?? 0) + 4)}%` }} />
-                      </div>
-                      <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter">Estimasi: {Math.min(100, (student?.avgScore ?? 0) + 4)} Poin</p>
-                   </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Matematika</p>
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-teal-500" style={{ width: `${Math.max(0, (student?.avgScore ?? 0) - 5)}%` }} />
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter">Estimasi: {Math.max(0, (student?.avgScore ?? 0) - 5)} Poin</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">B. Indonesia</p>
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-orange-500" style={{ width: `${Math.min(100, (student?.avgScore ?? 0) + 4)}%` }} />
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-tighter">Estimasi: {Math.min(100, (student?.avgScore ?? 0) + 4)} Poin</p>
+                  </div>
                 </div>
               </div>
             </td>
@@ -185,11 +217,11 @@ export default function GuruStudentList() {
           { label: 'Perlu Perhatian', val: stats.attention, color: 'bg-rose-50 text-rose-600', icon: AlertCircle },
         ].map((stat, i) => (
           <div key={i} className={`px-5 py-3 rounded-2xl ${stat.color} flex items-center gap-3 border border-transparent hover:border-current/10 transition-colors`}>
-             <stat.icon size={18} />
-             <div>
-               <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1 opacity-70">{stat.label}</p>
-               <p className="text-lg font-black leading-none">{stat.val}</p>
-             </div>
+            <stat.icon size={18} />
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1 opacity-70">{stat.label}</p>
+              <p className="text-lg font-black leading-none">{stat.val}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -207,7 +239,7 @@ export default function GuruStudentList() {
           />
         </div>
         <div className="flex flex-wrap gap-4">
-          <Dropdown 
+          <Dropdown
             value={statusFilter}
             onChange={setStatusFilter}
             options={[
@@ -227,6 +259,21 @@ export default function GuruStudentList() {
         rowsPerPage={10}
         renderRow={renderRow}
       />
+
+      {/* T1: Kirim Pesan Modal */}
+      {messagingStudent && (
+        <MessageDialog
+          student={messagingStudent}
+          isOpen={!!messagingStudent}
+          onClose={() => setMessagingStudent(null)}
+          onSend={handleMessageSend}
+          messageType={messageType}
+          setMessageType={setMessageType}
+          messageText={messageText}
+          setMessageText={setMessageText}
+          isSending={isSending}
+        />
+      )}
     </div>
   );
 }

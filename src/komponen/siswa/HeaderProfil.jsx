@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, Menu, Sun, Moon } from 'lucide-react';
 import NetworkIndicator from '@/komponen/IndikatorJaringan';
-import NotificationDropdown from '@/komponen/siswa/DropdownNotifikasi';
+import NotificationDropdown from '@/komponen/ui/DropdownNotifikasi';
 
 import { useUser } from '@/konteks/KonteksPengguna';
 
@@ -9,10 +9,10 @@ import { useUser } from '@/konteks/KonteksPengguna';
  * ProfileHeader Component for Student Portal
  * extracted from StudentLayout for better maintainability.
  */
-export default function ProfileHeader({ 
-  isSidebarOpen, 
-  toggleSidebar, 
-  isOnline, 
+export default function ProfileHeader({
+  isSidebarOpen,
+  toggleSidebar,
+  isOnline,
   isDark,
   toggleDarkMode
 }) {
@@ -38,7 +38,7 @@ export default function ProfileHeader({
           </div>
 
           <NotificationDropdown />
- 
+
           <button
             onClick={toggleDarkMode}
             className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-teal-600 transition-all hover:shadow-md active:scale-90"
@@ -50,7 +50,7 @@ export default function ProfileHeader({
 
         {/* Divider */}
         <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
-        
+
         <div className="flex items-center gap-3">
           <div className="text-right">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-0.5">Siswa</p>
@@ -58,11 +58,11 @@ export default function ProfileHeader({
               {currentUser?.name || 'Siswa TKA'}
             </p>
           </div>
-          
+
           <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-700 shadow-md bg-white p-0.5 transition-transform hover:scale-105">
-            <img 
-              src={avatarSrc} 
-              alt="Profile" 
+            <img
+              src={avatarSrc}
+              alt="Profile"
               className="w-full h-full object-cover rounded-xl"
               onError={(e) => {
                 e.target.src = '/avatar/avatar-boy-1.svg';

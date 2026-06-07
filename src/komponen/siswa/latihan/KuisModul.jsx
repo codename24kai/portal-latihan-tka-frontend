@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import MathRenderer from '@/komponen/ui/RendererMatematika';
 import OptionCard from '@/komponen/siswa/KartuOpsi';
-import QuizResult from '@/komponen/siswa/HasilKuis';
+import QuizResult from '@/komponen/siswa/latihan/HasilKuis';
 import QuizGuideModal from '@/komponen/siswa/ModalPanduanKuis';
 import LoadingSkeleton from '@/komponen/ui/SkeletonMemuat';
 import ExamFallback from '@/komponen/siswa/FallbackUjian';
@@ -135,7 +135,7 @@ export default function ModuleQuiz() {
         total={scoreData.total}
         history={scoreData.history}
         timeTaken={timeTaken}
-        onBack={() => navigate('/modules')}
+        onBack={() => navigate('/modul')}
       />
     );
   }
@@ -161,14 +161,14 @@ export default function ModuleQuiz() {
   }
 
   // Normalize options: Handles both array ["text"] and object {A: "text"}
-  const normalizedOptions = Array.isArray(currentQuestion?.options) 
+  const normalizedOptions = Array.isArray(currentQuestion?.options)
     ? currentQuestion.options.map((opt, idx) => {
-        const label = ["A", "B", "C", "D"][idx];
-        return typeof opt === 'object' ? { label, ...opt, index: idx } : { label, text: opt, index: idx };
-      })
+      const label = ["A", "B", "C", "D"][idx];
+      return typeof opt === 'object' ? { label, ...opt, index: idx } : { label, text: opt, index: idx };
+    })
     : Object.entries(currentQuestion?.options || {}).map(([label, opt], idx) => {
-        return typeof opt === 'object' ? { label, ...opt, index: idx } : { label, text: opt, index: idx };
-      });
+      return typeof opt === 'object' ? { label, ...opt, index: idx } : { label, text: opt, index: idx };
+    });
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in relative overflow-hidden">
@@ -185,7 +185,7 @@ export default function ModuleQuiz() {
         </div>
 
         <button
-          onClick={() => navigate('/modules')}
+          onClick={() => navigate('/modul')}
           className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all group"
         >
           <X size={16} className="group-hover:rotate-90 transition-transform" />
@@ -274,8 +274,8 @@ export default function ModuleQuiz() {
             disabled={currentIndex === 0}
             onClick={handlePrevious}
             className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black text-sm uppercase tracking-widest transition-all ${currentIndex === 0
-                ? 'text-slate-200 dark:text-slate-800 cursor-not-allowed'
-                : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+              ? 'text-slate-200 dark:text-slate-800 cursor-not-allowed'
+              : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
               }`}
           >
             <ArrowLeft size={20} />
@@ -286,8 +286,8 @@ export default function ModuleQuiz() {
             disabled={selectedOption === null}
             onClick={handleNext}
             className={`flex items-center justify-center gap-3 px-12 py-5 rounded-[2.5rem] font-black text-sm uppercase tracking-widest transition-all shadow-2xl active:scale-95 min-w-[280px] ${selectedOption === null
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-600/30'
+              ? 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed'
+              : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-600/30'
               }`}
           >
             {currentIndex === questions.length - 1 ? 'Selesaikan Kuis' : 'Lanjut ke Soal Berikutnya'}

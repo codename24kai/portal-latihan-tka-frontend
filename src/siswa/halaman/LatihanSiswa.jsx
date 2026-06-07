@@ -10,6 +10,7 @@ import {
   Trophy,
   CheckCircle2,
   ChevronRight,
+  RotateCcw,
   Zap
 } from 'lucide-react';
 import mockExams from '@/data/mockUjian';
@@ -84,12 +85,12 @@ export default function StudentTest() {
   const handleConfirmStart = () => {
     if (selectedExam.type === 'tryout') {
       if (token === 'TKA2026') {
-        navigate(`/exam/${selectedExam.id}/prepare`, { state: { examType: selectedExam.type } });
+        navigate(`/ujian/${selectedExam.id}/persiapan`, { state: { examType: selectedExam.type } });
       } else {
         setTokenError(true);
       }
     } else {
-      navigate(`/exam/${selectedExam.id}/prepare`, { state: { examType: selectedExam.type } });
+      navigate(`/ujian/${selectedExam.id}/persiapan`, { state: { examType: selectedExam.type } });
     }
   };
 
@@ -140,7 +141,7 @@ export default function StudentTest() {
               : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
               }`}
           >
-            <ClipboardList size={16} /> SIMULASI TRYOUT
+            <ClipboardList size={16} /> SIMULASI TKA
           </button>
           <button
             onClick={() => setActiveTab('latihan')}
@@ -265,10 +266,10 @@ export default function StudentTest() {
                 Mulai Ujian Sekarang
               </button>
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-full py-5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all outline-none"
+                onClick={() => onStart ? onStart(exam) : navigate(`/ujian/${exam.id}/persiapan`)}
+                className="flex items-center justify-center gap-2 h-14 px-6 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all shrink-0"
               >
-                Nanti Dulu
+                <RotateCcw size={16} /> Kerjakan Ulang
               </button>
             </div>
           </div>

@@ -1,22 +1,24 @@
 import { Plus, Trash2, Calculator, ImageIcon, X } from 'lucide-react';
 import Dropdown from '@/komponen/ui/Dropdown';
 import MathRenderer from '@/komponen/ui/RendererMatematika';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const GuruQuizBuilder = ({ quizData, setQuizData, openMathEditor, hideHeader = false }) => {
   const addQuestion = () => {
     setQuizData(prev => ({
       ...prev,
-      questions: [...prev.questions, { 
-        id: Date.now(), 
-        text: '', 
+      questions: [...prev.questions, {
+        id: Date.now(),
+        text: '',
         image: null,
         options: [
           { text: '', image: null },
           { text: '', image: null },
           { text: '', image: null },
           { text: '', image: null }
-        ], 
-        answer: 0 
+        ],
+        answer: 0
       }]
     }));
   };
@@ -93,65 +95,65 @@ const GuruQuizBuilder = ({ quizData, setQuizData, openMathEditor, hideHeader = f
         {quizData.questions.map((q, qIndex) => (
           <div key={q.id} className="p-8 bg-slate-50 dark:bg-slate-900/30 rounded-[2rem] border border-slate-100 dark:border-slate-700 relative group animate-in zoom-in-95">
             <div className="flex items-start gap-4 mb-6">
-               <span className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg shadow-orange-600/20 shrink-0">{qIndex + 1}</span>
-               <div className="flex-1 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pertanyaan {qIndex + 1}</label>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => openMathEditor(qIndex, 'text')}
-                        className="flex items-center gap-1.5 text-[8px] font-black text-orange-600 bg-orange-50 dark:bg-orange-900/30 px-3 py-1 rounded-lg uppercase tracking-widest transition-all hover:scale-105"
-                      >
-                        <Calculator size={10} /> Rumus
-                      </button>
-                      <button
-                        onClick={() => removeQuestion(q.id)}
-                        className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                        title="Hapus Pertanyaan"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+              <span className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg shadow-orange-600/20 shrink-0">{qIndex + 1}</span>
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pertanyaan {qIndex + 1}</label>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => openMathEditor(qIndex, 'text')}
+                      className="flex items-center gap-1.5 text-[8px] font-black text-orange-600 bg-orange-50 dark:bg-orange-900/30 px-3 py-1 rounded-lg uppercase tracking-widest transition-all hover:scale-105"
+                    >
+                      <Calculator size={10} /> Rumus
+                    </button>
+                    <button
+                      onClick={() => removeQuestion(q.id)}
+                      className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                      title="Hapus Pertanyaan"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                  <div className="flex flex-col gap-4">
-                    <div className="relative">
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div className="relative">
+                    <ReactQuill
+                      value={q.text || ''}
+                      onChange={(val) => updateQuestion(qIndex, 'text', val)}
+                      placeholder="Ketik pertanyaan kuis..."
+                      theme="snow"
+                      className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-[2.5rem] overflow-hidden border border-slate-100 dark:border-slate-700"
+                    />
+                    <label className="absolute right-6 bottom-4 cursor-pointer text-slate-350 hover:text-orange-500 transition-colors z-10">
+                      <ImageIcon size={18} />
                       <input
-                        type="text"
-                        value={q.text}
-                        onChange={(e) => updateQuestion(qIndex, 'text', e.target.value)}
-                        placeholder="Ketik pertanyaan kuis..."
-                        className="w-full bg-transparent border-b-2 border-slate-200 dark:border-slate-700 focus:border-orange-500 outline-none font-bold text-sm text-slate-800 dark:text-white pb-1"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, qIndex)}
                       />
-                      <label className="absolute right-0 bottom-1 cursor-pointer text-slate-300 hover:text-orange-500 transition-colors">
-                        <ImageIcon size={18} />
-                        <input 
-                          type="file" 
-                          className="hidden" 
-                          accept="image/*" 
-                          onChange={(e) => handleImageUpload(e, qIndex)} 
-                        />
-                      </label>
-                    </div>
-
-                    {q.image && (
-                      <div className="relative w-full max-w-sm rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 group/img">
-                        <img src={q.image} alt="Question" className="w-full h-auto object-contain bg-white" />
-                        <button 
-                          onClick={() => updateQuestion(qIndex, 'image', null)}
-                          className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    )}
+                    </label>
                   </div>
-                  {q.text.includes('$') && (
-                    <div className="mt-4 p-4 bg-orange-50/30 dark:bg-orange-900/10 border border-dashed border-orange-200 dark:border-orange-800 rounded-2xl animate-in fade-in zoom-in-95">
-                      <p className="text-[8px] font-black text-orange-500 uppercase tracking-widest mb-2">Pratinjau Rumus</p>
-                      <MathRenderer text={q.text} className="text-xs text-slate-700 dark:text-slate-200" />
+
+                  {q.image && (
+                    <div className="relative w-full max-w-sm rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 group/img">
+                      <img src={q.image} alt="Question" className="w-full h-auto object-contain bg-white" />
+                      <button
+                        onClick={() => updateQuestion(qIndex, 'image', null)}
+                        className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity"
+                      >
+                        <X size={14} />
+                      </button>
                     </div>
                   )}
-               </div>
+                </div>
+                {q.text.includes('$') && (
+                  <div className="mt-4 p-4 bg-orange-50/30 dark:bg-orange-900/10 border border-dashed border-orange-200 dark:border-orange-800 rounded-2xl animate-in fade-in zoom-in-95">
+                    <p className="text-[8px] font-black text-orange-500 uppercase tracking-widest mb-2">Pratinjau Rumus</p>
+                    <MathRenderer text={q.text} className="text-xs text-slate-700 dark:text-slate-200" />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,26 +172,26 @@ const GuruQuizBuilder = ({ quizData, setQuizData, openMathEditor, hideHeader = f
                         className="w-full pl-12 pr-12 py-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[11px] font-bold focus:border-teal-500 outline-none"
                       />
                       <div className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                         <label className="text-slate-300 hover:text-orange-500 transition-colors cursor-pointer">
-                            <ImageIcon size={14} />
-                            <input 
-                              type="file" 
-                              className="hidden" 
-                              accept="image/*" 
-                              onChange={(e) => handleImageUpload(e, qIndex, oIndex)} 
-                            />
-                         </label>
-                         <button onClick={() => openMathEditor(qIndex, 'option', oIndex)} className="text-slate-300 hover:text-orange-500 transition-colors"><Calculator size={14} /></button>
+                        <label className="text-slate-300 hover:text-orange-500 transition-colors cursor-pointer">
+                          <ImageIcon size={14} />
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, qIndex, oIndex)}
+                          />
+                        </label>
+                        <button onClick={() => openMathEditor(qIndex, 'option', oIndex)} className="text-slate-300 hover:text-orange-500 transition-colors"><Calculator size={14} /></button>
                       </div>
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                         <input type="radio" checked={q.answer === oIndex} onChange={() => updateQuestion(qIndex, 'answer', oIndex)} className="w-4 h-4 accent-teal-500 cursor-pointer" />
+                        <input type="radio" checked={q.answer === oIndex} onChange={() => updateQuestion(qIndex, 'answer', oIndex)} className="w-4 h-4 accent-teal-500 cursor-pointer" />
                       </div>
                     </div>
 
                     {opt.image && (
                       <div className="relative w-full rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 group/optimg shadow-sm bg-white dark:bg-slate-900">
                         <img src={opt.image} alt={`Option ${oIndex}`} className="max-h-24 w-full object-contain p-2" />
-                        <button 
+                        <button
                           onClick={() => updateOption(qIndex, oIndex, 'image', null)}
                           className="absolute top-1 right-1 p-1 bg-rose-500 text-white rounded-md opacity-0 group-hover/optimg:opacity-100 transition-opacity"
                         >

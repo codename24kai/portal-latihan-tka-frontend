@@ -54,7 +54,7 @@ export default function StatCards({ data, isLoading }) {
     },
     {
       icon: ClipboardCheck,
-      label: 'Tryout Dibuat',
+      label: 'Simulasi Dibuat',
       value: data?.activeTryouts || '0',
       trend: data?.trends?.tryouts || 5,
       color: 'orange'

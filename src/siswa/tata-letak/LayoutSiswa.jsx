@@ -19,8 +19,9 @@ import { useNetworkStatus } from '@/hooks/useStatusJaringan';
 import FloatingGuide from '@/komponen/siswa/PanduanMelayang';
 import Sidebar from '@/komponen/siswa/SidebarSiswa';
 import ProfileHeader from '@/komponen/siswa/HeaderProfil';
-import NotificationDropdown from '@/komponen/siswa/DropdownNotifikasi';
+import NotificationDropdown from '@/komponen/ui/DropdownNotifikasi';
 import { useUser } from '@/konteks/KonteksPengguna';
+
 
 /**
  * StudentLayout — The "Bulletproof Shell"
@@ -42,10 +43,11 @@ export default function StudentLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const navItems = [
-    { label: 'Beranda', icon: Home, path: '/', end: true },
-    { label: 'Latihan', icon: PenTool, path: '/test' },
-    { label: 'Modul Belajar', icon: BookOpen, path: '/modules' },
-    { label: 'Pengaturan', icon: Settings, path: '/settings' },
+    { label: 'Beranda', icon: Home, path: '/beranda', end: true },
+    { label: 'Latihan', icon: PenTool, path: '/ujian' },
+    { label: 'Modul Belajar', icon: BookOpen, path: '/modul' },
+    { label: 'Pengaturan', icon: Settings, path: '/pengaturan' },
+    { label: 'Bantuan', icon: HelpCircle, path: '/bantuan' },
   ];
 
   const handleLogout = () => {

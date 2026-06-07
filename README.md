@@ -248,56 +248,57 @@ Berikut adalah gambaran alur kerja aplikasi dari hulu ke hilir:
 Aplikasi frontend menggunakan **React Router v7** dengan pola routing bersarang (*nested routes*) berdasarkan peran:
 
 ```
-/                          → Redirect ke /login
-/login                     → Halaman login (semua role)
-/lupa-password                     → Halaman login (semua role)
-│
+/                          → Redirect ke halaman Login
+/login                     → Halaman Login
+/lupa-password             → Halaman Lupa Password
+
 ├── /admin                 → Layout Admin (AdminLayout)
-│   ├── /admin/            → Dashboard Admin
-│   ├── /admin/bank-soal   → Manajemen Bank Soal
-│   	├── /admin/bank-soal/tambah     → Manajemen Bank Soal
-│   	└── /admin/bank-soal/edit/:id   → Manajemen Bank Soal
-│   ├── /admin/simulasi    → Manajemen Simulasi TKA
-│   	├── /admin/simulasi/tambah      → Manajemen Simulasi TKA
-│   	└── /admin/simulasi/edit/:id    → Manajemen Simulasi TKA
-│   ├── /admin/pengguna    → Manajemen Pengguna
-│   	├── /admin/pengguna/tambah      → Manajemen Pengguna
-│   	└── /admin/pengguna/edit/:id    → Manajemen Pengguna
-│   ├── /admin/modul       → Manajemen Modul
-|	├── /admin/modul/tambah   	→ Dashboard Wali Kelas
-|	└── /admin/modul/edit/:id 	→ Dashboard Wali Kelas
-│   ├── /admin/laporan     → Laporan Nilai Akademik
-│   	└── /admin/laporan/survei     	→ Laporan Hasil Survei
-│   ├── /admin/log-aktivitas → Log Aktivitas Sistem
-│   └── /admin/notifikasi  → Sub Halaman Notifikasi
-│
+│   ├── /admin/                    → Dashboard Admin
+│   ├── /admin/bank-soal           → Daftar Bank Soal
+│   │   ├── /admin/bank-soal/tambah    → Form Tambah Soal
+│   │   └── /admin/bank-soal/edit/:id  → Form Edit Soal
+│   ├── /admin/simulasi            → Daftar Simulasi TKA
+│   │   ├── /admin/simulasi/tambah     → Form Tambah Simulasi TKA
+│   │   └── /admin/simulasi/edit/:id   → Form Edit Simulasi TKA
+│   ├── /admin/pengguna            → Daftar Pengguna
+│   │   ├── /admin/pengguna/tambah     → Form Tambah Pengguna
+│   │   └── /admin/pengguna/edit/:id   → Form Edit Pengguna
+│   ├── /admin/modul               → Daftar Modul Pembelajaran
+│   │   ├── /admin/modul/tambah        → Form Tambah Modul
+│   │   └── /admin/modul/edit/:id      → Form Edit Modul
+│   ├── /admin/laporan             → Laporan Akademik Siswa
+│   │   └── /admin/laporan/survei      → Laporan Hasil Survei
+│   ├── /admin/log-aktivitas       → Log Aktivitas Sistem
+│   └── /admin/notifikasi          → Daftar Notifikasi
+
 ├── /guru                  → Layout Guru (GuruLayout)
-│   ├── /guru/             → Dashboard Wali Kelas
-|   ├── /guru/agenda       → Dashboard Wali Kelas
-│   ├── /guru/kuis         → Kelola Kuis Kelas
-|   	├── /guru/kuis/tambah   → Kelola Kuis Kelas
-|	└── /guru/kuis/edit/:id → Kelola Kuis Kelas
-│   ├── /guru/siswa        → Daftar Siswa Kelas
-│   ├── /guru/modul        → Kelola Modul Pembelajaran
-|	├── /guru/modul/tambah   → Dashboard Wali Kelas
-|	└── /guru/modul/edit/:id → Dashboard Wali Kelas
-│   ├── /guru/laporan      → Laporan Nilai Siswa
-│   	└── /guru/laporan/survey       → Laporan Survei Non-Kognitif
-│   └── /guru/notifikasi   → Sub Halaman Notifikasi
-│
+│   ├── /guru/                     → Dashboard Guru
+│   ├── /guru/agenda               → Agenda Pembelajaran
+│   ├── /guru/kuis                 → Daftar Kuis
+│   │   ├── /guru/kuis/tambah          → Form Tambah Kuis
+│   │   └── /guru/kuis/edit/:id        → Form Edit Kuis
+│   ├── /guru/siswa                → Daftar Siswa
+│   ├── /guru/modul                → Daftar Modul Pembelajaran
+│   │   ├── /guru/modul/tambah         → Form Tambah Modul
+│   │   └── /guru/modul/edit/:id       → Form Edit Modul
+│   ├── /guru/laporan              → Laporan Nilai Siswa
+│   │   └── /guru/laporan/survei       → Laporan Hasil Survei
+│   └── /guru/notifikasi           → Daftar Notifikasi
+
 └── /siswa                 → Layout Siswa (SiswaLayout)
-    ├── /siswa/beranda     → Dashboard Siswa
-    ├── /siswa/ujian	   → Daftar Tryout Tersedia
-    	├── /siswa/ujian/:ujianId/persiapan       → Riwayat & Skor Pengerjaan
-    	├── /siswa/ujian/:ujianId       → Riwayat & Skor Pengerjaan
-    	└── /siswa/ujian/:ujianId/hasil       → Riwayat & Skor Pengerjaan
-    ├── /siswa/survey/:surveyId       → Riwayat & Skor Pengerjaan
-    	└──  /siswa/survey/:surveiId/selesai       → Riwayat & Skor Pengerjaan
-    ├── /siswa/modul       → Riwayat & Skor Pengerjaan
-    	└── /siswa/modul/kuis/:modulId       → Riwayat & Skor Pengerjaan
-    ├── /siswa/pengaturan  → Sub Halaman Notifikasi
-    ├── /siswa/bantuan  → Sub Halaman Notifikasi
-    └── /siswa/notifikasi  → Sub Halaman Notifikasi
+├── /siswa/beranda             → Dashboard Siswa
+├── /siswa/ujian               → Daftar Simulasi TKA
+│   ├── /siswa/ujian/:ujianId/persiapan → Halaman Persiapan Simulasi
+│   ├── /siswa/ujian/:ujianId           → Halaman Pengerjaan Simulasi
+│   └── /siswa/ujian/:ujianId/hasil     → Hasil Simulasi TKA
+├── /siswa/survey/:surveyId    → Halaman Pengisian Survei
+│   └── /siswa/survey/:surveyId/selesai → Halaman Survei Selesai
+├── /siswa/modul               → Daftar Modul Pembelajaran
+│   └── /siswa/modul/kuis/:modulId      → Kuis Modul Pembelajaran
+├── /siswa/pengaturan          → Pengaturan Akun
+├── /siswa/bantuan             → Pusat Bantuan
+└── /siswa/notifikasi          → Daftar Notifikasi
+
 ```
 
 ### Backend API Routing (Laravel)

@@ -176,7 +176,7 @@ export default function UserManagement() {
             Import Excel
           </button>
           <button
-            onClick={() => navigate('/admin/users/add')}
+            onClick={() => navigate('/admin/pengguna/tambah')}
             className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-600/20 active:scale-95 flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
@@ -246,14 +246,14 @@ export default function UserManagement() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Siap mendaftarkan {importData?.length} akun baru</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setIsImportModalOpen(false);
                   setImportData([]);
-                }} 
+                }}
                 className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all font-black text-xs uppercase"
               >
-                <X size={24} /> 
+                <X size={24} />
               </button>
             </div>
 

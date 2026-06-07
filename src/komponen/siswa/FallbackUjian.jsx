@@ -28,7 +28,7 @@ export default function ExamFallback({ message = "Maaf, data ujian tidak ditemuk
         </div>
 
         <button
-          onClick={() => navigate('/test')}
+          onClick={() => navigate('/ujian')}
           className="w-full flex items-center justify-center gap-3 py-5 bg-slate-900 dark:bg-slate-700 text-white dark:text-slate-200 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-800 transition-all active:scale-95"
         >
           <ArrowLeft size={16} />

@@ -55,7 +55,7 @@ export default function GuruManageQuizzes() {
   };
 
   const handleAdd = () => {
-    navigate('add');
+    navigate('tambah');
   };
 
   const handleDelete = () => {

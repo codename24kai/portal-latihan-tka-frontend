@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ClipboardList,
   Timer,
@@ -8,6 +8,7 @@ import {
   Play
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import mockExams from '@/data/mockUjian';
 
 /**
  * PreSimulation Page
@@ -15,16 +16,24 @@ import { motion } from 'framer-motion';
  * Follows Orange-Yellow-Teal aesthetic.
  */
 export default function PreSimulation() {
-  const { examId } = useParams();
+  const { ujianId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Mock simulation data based on ID
+  const examItem = mockExams.find(e => e.id === parseInt(ujianId)) || {};
+  const examType = location.state?.examType || examItem.type || 'tryout';
+
+  // Dynamic simulation data based on exam item
   const simulationData = {
-    title: examId === '1' ? 'Tryout Akbar Nasional #1' : 'Simulasi Ujian TKA #2',
-    subject: 'Matematika & Literasi',
-    questionCount: 40,
-    duration: 90,
-    description: 'Halo! Selamat datang di Simulasi Tes Kemampuan Akademik (TKA) 🤗 \n Latihan ini dirancang khusus untuk membantumu bersiap menghadapi ujian sekolah yang sesungguhnya. Jangan terburu-buru, baca setiap pertanyaan dengan teliti, dan berikan jawaban terbaikmu. Ingat, ini adalah tempat untuk belajar dan berlatih. Tetap semangat dan percaya diri!'
+    title: examItem.subject
+      ? (examItem.type === 'practice' ? `Latihan Mandiri: ${examItem.subject}` : `Simulasi Resmi TKA: ${examItem.subject}`)
+      : (ujianId === '1' ? 'Tryout Akbar Nasional #1' : 'Simulasi Ujian TKA #2'),
+    subject: examItem.subject || 'Matematika & Literasi',
+    questionCount: examItem.totalQuestions || 40,
+    duration: examItem.duration ? Math.round(examItem.duration / 60) : 90,
+    description: examItem.type === 'practice'
+      ? 'Halo! Selamat datang di Latihan Mandiri 🤗 \n Latihan ini dirancang untuk membantumu mengasah pemahaman topik tertentu secara mendalam. Kerjakan soal-soal ini secara mandiri untuk mengukur kemampuanmu. Di akhir sesi, kamu bisa mempelajari pembahasan lengkap untuk setiap soal agar pemahamanmu makin mantap!'
+      : 'Halo! Selamat datang di Simulasi Tes Kemampuan Akademik (TKA) 🤗 \n Latihan ini dirancang khusus untuk membantumu bersiap menghadapi ujian sekolah yang sesungguhnya. Jangan terburu-buru, baca setiap pertanyaan dengan teliti, dan berikan jawaban terbaikmu. Ingat, ini adalah tempat untuk belajar dan berlatih. Tetap semangat dan percaya diri!'
   };
 
   const isReady = true;
@@ -38,7 +47,7 @@ export default function PreSimulation() {
       >
         {/* Back Button */}
         <button
-          onClick={() => navigate('/test')}
+          onClick={() => navigate('/ujian')}
           className="flex items-center gap-2 text-slate-500 hover:text-teal-600 font-bold transition-colors"
         >
           <ChevronLeft size={20} />
@@ -96,7 +105,7 @@ export default function PreSimulation() {
               <div className="pt-4">
                 <button
                   disabled={!isReady}
-                  onClick={() => navigate(`/exam/${examId}`)}
+                  onClick={() => navigate(`/ujian/${ujianId}`, { state: { examType } })}
                   className={`w-full group relative flex items-center justify-center gap-3 py-5 rounded-3xl font-black text-base uppercase tracking-widest transition-all shadow-2xl active:scale-95 ${isReady
                     ? 'bg-gradient-to-r from-teal-500 via-teal-600 to-indigo-600 text-white shadow-teal-500/25 hover:shadow-teal-500/40'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed shadow-none'

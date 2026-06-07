@@ -10,7 +10,8 @@ import {
   X,
   Users,
   Layers,
-  FileText
+  FileText,
+  History
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ConfirmDialog from '@/komponen/ui/DialogKonfirmasi';
@@ -34,17 +35,20 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
     {
       label: 'Akademik',
       items: [
-        { path: `${basePath}/question-bank`, icon: BookOpen, label: 'Bank Soal' },
-        { path: `${basePath}/tryout`, icon: ClipboardList, label: 'Manajemen Tryout' },
-        { path: `${basePath}/modules`, icon: Layers, label: 'Materi Belajar' },
+        { path: `${basePath}/bank-soal`, icon: BookOpen, label: 'Bank Soal' },
+        { path: `${basePath}/simulasi`, icon: ClipboardList, label: 'Manajemen Simulasi TKA' },
+        { path: `${basePath}/modul`, icon: Layers, label: 'Materi Belajar' },
+        { path: `${basePath}/survei`, icon: FileText, label: 'Manajemen Survei' },
       ]
     },
     {
       label: 'Pengguna & Laporan',
       items: [
-        { path: `${basePath}/users`, icon: Users, label: 'Manajemen Pengguna' },
-        { path: `${basePath}/reports`, icon: BarChart3, label: 'Laporan Nilai', end: true },
-        { path: `${basePath}/reports/survey`, icon: FileText, label: 'Laporan Survei' },
+        { path: `${basePath}/pengguna`, icon: Users, label: 'Manajemen Pengguna' },
+        { path: `${basePath}/laporan`, icon: BarChart3, label: 'Laporan Nilai', end: true },
+        { path: `${basePath}/laporan/survey`, icon: FileText, label: 'Laporan Survei' },
+        { path: `${basePath}/log-aktivitas`, icon: History, label: 'Log Aktivitas' },
+
       ]
     }
   ];
@@ -170,7 +174,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
         </div>
       </aside>
 
-      <ConfirmDialog 
+      <ConfirmDialog
         isOpen={isLogoutConfirmOpen}
         title="Konfirmasi Keluar"
         message="Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses portal."

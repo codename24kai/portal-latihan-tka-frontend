@@ -276,7 +276,7 @@ export default function GuruDashboard() {
         <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="p-8 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between">
             <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">Ringkasan Performa</h3>
-            <button className="text-[10px] font-black text-orange-600 uppercase hover:underline">Lihat Laporan</button>
+            <button onClick={() => navigate('/guru/laporan')} className="text-[10px] font-black text-orange-600 uppercase hover:underline">Lihat Laporan</button>
           </div>
           <div className="p-4">
             <div className="space-y-2">
@@ -340,7 +340,10 @@ export default function GuruDashboard() {
           <p className="text-sm font-bold opacity-80 uppercase tracking-widest mb-6">
             Klik tombol di atas untuk mengirimkan info ke seluruh siswa di Kelas {assignedClass}.
           </p>
-          <button className="w-full py-4 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white/30 transition-all">
+          <button 
+            onClick={() => setShowAnnounceModal(true)}
+            className="w-full py-4 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white/30 transition-all"
+          >
             Kelola Pengumuman
           </button>
         </div>

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import GuruSidebar from '@/komponen/guru/SidebarGuru';
 import { useDarkMode } from '@/hooks/useModGelap';
 import { Moon, Sun, Menu, Bell, Search } from 'lucide-react';
+import NotificationDropdown from '@/komponen/ui/DropdownNotifikasi';
 
 /**
  * Guru Layout with scoped sidebar and header.
@@ -46,12 +47,7 @@ export default function GuruLayout() {
 
             <div className="flex items-center gap-3">
               {/* Notifications */}
-              <button className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-orange-600 transition-colors relative">
-                <Bell size={20} />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800 animate-bounce">
-                  3
-                </span>
-              </button>
+              <NotificationDropdown />
 
               {/* Theme Toggle */}
               <button

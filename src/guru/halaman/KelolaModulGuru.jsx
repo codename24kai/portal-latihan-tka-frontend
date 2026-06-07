@@ -79,7 +79,7 @@ export default function GuruManageModules() {
           </p>
         </div>
         <button
-          onClick={() => navigate('add')}
+          onClick={() => navigate('tambah')}
           className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-2"
         >
           <Plus size={18} /> Tambah Modul
@@ -104,7 +104,7 @@ export default function GuruManageModules() {
               value={filterSubject}
               onChange={setFilterSubject}
               options={[
-                { value: 'Semua', label: 'Semua Mapel' }, 
+                { value: 'Semua', label: 'Semua Mapel' },
                 ...SUBJECTS.filter(s => s.category === 'Akademik').map(s => ({ value: s.name, label: s.name }))
               ]}
               className="min-w-[200px]"
@@ -174,7 +174,7 @@ export default function GuruManageModules() {
             </td>
             <td className="py-6 px-8 text-right">
               <div className="flex justify-end gap-2 opacity-100">
-                <button 
+                <button
                   onClick={() => navigate(`edit/${module.id}`)}
                   className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-xl transition-all font-black text-[10px] uppercase"
                 >
@@ -195,13 +195,13 @@ export default function GuruManageModules() {
       {/* EMPTY STATE */}
       {filteredModules.length === 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-700 p-20 text-center">
-           <div className="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-6">
-              <Layers size={40} />
-           </div>
-           <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-2">Belum ada modul khusus</h3>
-           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest max-w-sm mx-auto">
-             Mulai buat modul pembelajaran harian pertama Anda untuk Kelas {assignedClass}.
-           </p>
+          <div className="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-3xl flex items-center justify-center text-slate-300 mx-auto mb-6">
+            <Layers size={40} />
+          </div>
+          <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-2">Belum ada modul khusus</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest max-w-sm mx-auto">
+            Mulai buat modul pembelajaran harian pertama Anda untuk Kelas {assignedClass}.
+          </p>
         </div>
       )}
 

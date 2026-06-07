@@ -28,6 +28,35 @@ const mockExams = [
     deadline: '2026-04-15',
     type: 'tryout'
   },
+  {
+    id: 3,
+    subject: 'Matematika Mandiri',
+    icon: 'Calculator',
+    color: 'from-teal-500 to-emerald-600',
+    bgLight: 'bg-teal-50',
+    textColor: 'text-teal-600',
+    totalQuestions: 40,
+    duration: 5400,
+    status: 'available',
+    score: null,
+    deadline: '2026-04-30',
+    type: 'practice'
+  },
+  {
+    id: 4,
+    subject: 'Bahasa Indonesia Mandiri',
+    icon: 'Book',
+    color: 'from-teal-500 to-emerald-600',
+    bgLight: 'bg-teal-50',
+    textColor: 'text-teal-600',
+    totalQuestions: 40,
+    duration: 5400,
+    status: 'available',
+    score: null,
+    deadline: '2026-04-30',
+    type: 'practice'
+  }
 ];
 
 export default mockExams;
+

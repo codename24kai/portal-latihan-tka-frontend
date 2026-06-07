@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { 
-  LogOut, 
+import {
+  LogOut,
   HelpCircle,
   ChevronLeft,
   Menu
@@ -14,10 +14,10 @@ import { useUser } from '@/konteks/KonteksPengguna';
  * Sidebar Component for Student Portal
  * extracted from StudentLayout for better maintainability.
  */
-export default function Sidebar({ 
-  isSidebarOpen, 
-  toggleSidebar, 
-  navItems, 
+export default function Sidebar({
+  isSidebarOpen,
+  toggleSidebar,
+  navItems,
   handleLogout
 }) {
   const { currentUser } = useUser();
@@ -34,7 +34,7 @@ export default function Sidebar({
         {/* Brand Logo */}
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
-            <Link to="/" className="flex items-center gap-3 overflow-hidden animate-in fade-in slide-in-from-left-2 duration-300">
+            <Link to="/beranda" className="flex items-center gap-3 overflow-hidden animate-in fade-in slide-in-from-left-2 duration-300">
               <div className="w-10 h-10 flex items-center justify-center shrink-0">
                 <img src="/logo-sd.png" alt="Logo" className="w-10 h-10 object-contain shadow-lg rounded-xl" />
               </div>
@@ -80,7 +80,7 @@ export default function Sidebar({
         {/* Sidebar Footer */}
         <div className="p-5 border-t border-slate-100 dark:border-slate-700 space-y-3">
           <Link
-            to="/help"
+            to="/bantuan"
             title={!isSidebarOpen ? 'Bantuan' : ''}
             className={`
               flex items-center rounded-xl font-bold text-base transition-all w-full
@@ -109,7 +109,7 @@ export default function Sidebar({
         </div>
       </aside>
 
-      <ConfirmDialog 
+      <ConfirmDialog
         isOpen={isLogoutConfirmOpen}
         title="Konfirmasi Keluar"
         message="Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses portal."

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import {
   Upload,
   Type,
@@ -28,11 +30,11 @@ export default function QuestionForm({ onClose, isModal = false }) {
   const [questionImage, setQuestionImage] = useState(null);
   const [explanation, setExplanation] = useState('');
   const [difficulty, setDifficulty] = useState('Sedang');
-  const [options, setOptions] = useState({ 
-    A: { text: '', image: null }, 
-    B: { text: '', image: null }, 
-    C: { text: '', image: null }, 
-    D: { text: '', image: null } 
+  const [options, setOptions] = useState({
+    A: { text: '', image: null },
+    B: { text: '', image: null },
+    C: { text: '', image: null },
+    D: { text: '', image: null }
   });
 
   // Media handling state
@@ -50,9 +52,9 @@ export default function QuestionForm({ onClose, isModal = false }) {
     if (activeField === 'question') {
       setQuestionText(prev => prev + formatted);
     } else if (['A', 'B', 'C', 'D'].includes(activeField)) {
-      setOptions(prev => ({ 
-        ...prev, 
-        [activeField]: { ...prev[activeField], text: prev[activeField].text + formatted } 
+      setOptions(prev => ({
+        ...prev,
+        [activeField]: { ...prev[activeField], text: prev[activeField].text + formatted }
       }));
     }
   };
@@ -137,7 +139,7 @@ export default function QuestionForm({ onClose, isModal = false }) {
       </div>
 
       {/* Question text */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between ml-1">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none flex items-center gap-1">
             <Type size={12} className="text-indigo-500" />
@@ -151,41 +153,39 @@ export default function QuestionForm({ onClose, isModal = false }) {
             <Calculator size={12} strokeWidth={3} /> Sisipkan Rumus
           </button>
         </div>
-        <div className="relative">
-          <textarea
-            value={questionText}
-            onChange={(e) => setQuestionText(e.target.value)}
-            placeholder="Tuliskan pertanyaan tryout di sini..."
-            rows={4}
-            className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-[1.5rem] text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all dark:text-white resize-none placeholder:text-slate-300"
-          />
-          <label className="absolute right-4 bottom-4 cursor-pointer text-slate-300 hover:text-indigo-600 transition-colors">
+
+        <div className="relative group">
+          {/* Wrapper editor untuk merapikan border dan background */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden focus-within:border-indigo-500 dark:focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
+            <ReactQuill
+              value={questionText}
+              onChange={setQuestionText}
+              placeholder="Tuliskan pertanyaan simulasi TKA di sini..."
+              modules={{
+                toolbar: [
+                  [{ 'header': [1, 2, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                  ['link', 'image'], // Ini memunculkan icon gambar bawaan di toolbar atas
+                  ['clean']
+                ]
+              }}
+              theme="snow"
+              // CSS custom untuk memaksa Quill lebih tinggi dan membuang border bawaannya
+              className="[&_.ql-editor]:min-h-[250px] [&_.ql-editor]:text-base [&_.ql-editor]:text-slate-700 dark:[&_.ql-editor]:text-slate-200 [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-slate-200 dark:[&_.ql-toolbar]:border-slate-700 [&_.ql-toolbar]:bg-slate-50 dark:[&_.ql-toolbar]:bg-slate-800/50 [&_.ql-container]:border-none"
+            />
+          </div>
+
+          {/* Tombol Insert Gambar Khusus (di pojok kanan bawah) */}
+          <label className="absolute right-4 bottom-4 cursor-pointer p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 dark:hover:border-indigo-700 transition-all shadow-sm opacity-60 group-hover:opacity-100 z-10">
             <ImageIcon size={18} />
-            <input 
-              type="file" 
-              className="hidden" 
-              accept="image/*" 
-              onChange={(e) => handleImageUpload(e, 'question')} 
+            <input
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, 'question')}
             />
           </label>
-        </div>
-
-        {questionImage && (
-          <div className="relative w-full max-w-lg rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 group/qimg shadow-sm mt-2">
-            <img src={questionImage} alt="Question" className="w-full h-auto object-contain bg-white" />
-            <button 
-              onClick={() => setQuestionImage(null)}
-              className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover/qimg:opacity-100 transition-opacity"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        )}
-        <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl">
-          <Info size={14} className="text-indigo-500" />
-          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">
-            Klik 'Sisipkan Rumus' untuk menambahkan simbol matematika dengan mudah.
-          </p>
         </div>
       </div>
 
@@ -238,7 +238,7 @@ export default function QuestionForm({ onClose, isModal = false }) {
                   )}
                 </div>
               ) : (
-                <FilePreviewUpload 
+                <FilePreviewUpload
                   files={mediaFiles}
                   onAdd={setMediaFiles}
                   onRemove={handleRemoveFile}
@@ -270,20 +270,20 @@ export default function QuestionForm({ onClose, isModal = false }) {
                     <input
                       type="text"
                       value={options[label].text}
-                      onChange={(e) => setOptions(prev => ({ 
-                        ...prev, 
-                        [label]: { ...prev[label], text: e.target.value } 
+                      onChange={(e) => setOptions(prev => ({
+                        ...prev,
+                        [label]: { ...prev[label], text: e.target.value }
                       }))}
                       placeholder={`Masukkan pilihan ${label}...`}
                       className="flex-1 bg-transparent border-none outline-none font-bold text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-300"
                     />
                     <label className="p-2 text-slate-300 hover:text-indigo-600 transition-colors cursor-pointer">
                       <ImageIcon size={18} />
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/*" 
-                        onChange={(e) => handleImageUpload(e, label)} 
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, label)}
                       />
                     </label>
                     <button
@@ -299,7 +299,7 @@ export default function QuestionForm({ onClose, isModal = false }) {
                   {options[label].image && (
                     <div className="relative w-full max-w-[150px] rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 group/optimg shadow-sm bg-white dark:bg-slate-900 ml-2 mb-2">
                       <img src={options[label].image} alt={`Option ${label}`} className="w-full h-auto object-contain p-2" />
-                      <button 
+                      <button
                         onClick={() => setOptions(prev => ({
                           ...prev,
                           [label]: { ...prev[label], image: null }
