@@ -36,7 +36,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
       label: 'Akademik',
       items: [
         { path: `${basePath}/bank-soal`, icon: BookOpen, label: 'Bank Soal' },
-        { path: `${basePath}/simulasi`, icon: ClipboardList, label: 'Manajemen Simulasi TKA' },
+        { path: `${basePath}/sesi-latihan`, icon: ClipboardList, label: 'Manajemen Sesi Latihan' },
         { path: `${basePath}/modul`, icon: Layers, label: 'Materi Belajar' },
         { path: `${basePath}/survei`, icon: FileText, label: 'Manajemen Survei' },
       ]
@@ -46,9 +46,15 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, collapsed, 
       items: [
         { path: `${basePath}/pengguna`, icon: Users, label: 'Manajemen Pengguna' },
         { path: `${basePath}/laporan`, icon: BarChart3, label: 'Laporan Nilai', end: true },
-        { path: `${basePath}/laporan/survey`, icon: FileText, label: 'Laporan Survei' },
+        { path: `${basePath}/laporan/survei`, icon: FileText, label: 'Laporan Survei' },
         { path: `${basePath}/log-aktivitas`, icon: History, label: 'Log Aktivitas' },
 
+      ]
+    },
+    {
+      label: 'Profil',
+      items: [
+        {path: `${basePath}/profil`, icon: GraduationCap, label: 'Profil Admin' },
       ]
     }
   ];

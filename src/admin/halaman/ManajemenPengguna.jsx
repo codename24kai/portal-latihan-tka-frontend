@@ -17,20 +17,14 @@ import {
   ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '@/utilitas/api';
 import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import ConfirmDialog from '@/komponen/ui/DialogKonfirmasi';
 
-const initialUsers = [
-  { id: 1, name: 'Ahmad Rafiq', username: 'student1', role: 'student', class: '6A', status: 'active', gender: 'Laki-laki', nidn: '0012345678' },
-  { id: 2, name: 'Budi Santoso', username: 'student2', role: 'student', class: '6B', status: 'active', gender: 'Laki-laki', nidn: '0012345679' },
-  { id: 3, name: 'Citra Kirana', username: 'student3', role: 'student', class: '6A', status: 'active', gender: 'Perempuan', nidn: '0012345680' },
-  { id: 4, name: 'Dewi Lestari', username: 'admin1', role: 'admin', class: 'N/A', status: 'active', gender: 'Perempuan', nidn: '19870321' },
-];
-
 export default function UserManagement() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,7 +34,37 @@ export default function UserManagement() {
   const [importData, setImportData] = useState([]);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  // Filtering mock logic
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get('/admin/pengguna');
+        const payload = response.data?.data || response.data || {};
+        const items = payload.data || payload;
+
+        const mapped = Array.isArray(items) ? items.map((item) => {
+          const guru = item.guru || {};
+          const siswa = item.siswa || {};
+          return {
+            id: item.id_pengguna,
+            name: guru.nama_lengkap || siswa.nama_lengkap || item.username,
+            username: item.username,
+            role: item.role,
+            gender: guru.gender || siswa.gender || '-',
+            class: siswa.kelas?.nama_kelas || siswa.kelas?.nama || '-',
+          };
+        }) : [];
+
+        setUsers(mapped);
+      } catch (error) {
+        toast.error('Gagal memuat daftar pengguna');
+        console.error(error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Filtering logic
   const filteredUsers = users?.filter(user => {
     const matchesSearch = user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user?.username?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -51,9 +75,13 @@ export default function UserManagement() {
   const handleEdit = (id) => navigate(`edit/${id}`);
 
   const handleDelete = () => {
-    toast.success('Pengguna berhasil dihapus');
-    setUsers(users?.filter(u => u?.id !== deleteConfirmId));
-    setDeleteConfirmId(null);
+    api.delete(`/admin/pengguna/${deleteConfirmId}`)
+      .then(() => {
+        toast.success('Pengguna berhasil dihapus');
+        setUsers(users?.filter(u => u?.id !== deleteConfirmId));
+      })
+      .catch(() => toast.error('Gagal menghapus pengguna'))
+      .finally(() => setDeleteConfirmId(null));
   };
 
   // Import Logic
@@ -68,12 +96,7 @@ export default function UserManagement() {
     toast.loading('Membaca file Excel...', { duration: 1000 });
 
     setTimeout(() => {
-      const mockImported = [
-        { id: Date.now() + 1, name: 'Siti Aminah', username: 'siti88', role: 'student', class: '6C', gender: 'Perempuan', status: 'active' },
-        { id: Date.now() + 2, name: 'Bambang Pamungkas', username: 'bp20', role: 'student', class: '6B', gender: 'Laki-laki', status: 'active' },
-        { id: Date.now() + 3, name: 'Administrator', username: 'admin2', role: 'admin', class: 'N/A', gender: 'Perempuan', status: 'active' },
-      ];
-      setImportData(mockImported);
+      setImportData([]);
       setIsImportModalOpen(true);
       e.target.value = '';
     }, 1200);
@@ -116,9 +139,9 @@ export default function UserManagement() {
         </code>
       </td>
       <td className="py-5 px-8 text-center">
-        <Badge
-          text={user?.role === 'admin' ? 'Admin' : 'Siswa'}
-          variant={user?.role === 'admin' ? 'Info' : 'Success'}
+          <Badge
+          text={user?.role === 'admin' ? 'Admin' : user?.role === 'guru' ? 'Guru' : 'Siswa'}
+          variant={user?.role === 'admin' ? 'Info' : user?.role === 'guru' ? 'Warning' : 'Success'}
         />
       </td>
       <td className="py-5 px-8 text-center">
@@ -205,6 +228,7 @@ export default function UserManagement() {
           >
             <option value="all">Semua Peran</option>
             <option value="student">Siswa</option>
+            <option value="guru">Guru</option>
             <option value="admin">Admin</option>
           </select>
           <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-600 transition-colors" size={18} />

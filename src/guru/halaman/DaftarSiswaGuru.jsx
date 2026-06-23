@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -19,11 +19,13 @@ import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import Dropdown from '@/komponen/ui/Dropdown';
 import ProgressBar from '@/komponen/ui/BarProgres';
-import mockStudents from '@/data/mockSiswa';
+import MessageDialog from '@/komponen/guru/MessageDialog';
+import { getDaftarSiswaGuru, broadcastPesanGuru } from '@/utilitas/apiGuru';
 
 export default function GuruStudentList() {
   const navigate = useNavigate();
-  const [students, setStudents] = useState(mockStudents);
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua Status');
   const [expandedId, setExpandedId] = useState(null);
@@ -35,6 +37,21 @@ export default function GuruStudentList() {
   const [isSending, setIsSending] = useState(false);
 
   const assignedClass = localStorage.getItem('assignedClass') ?? '';
+
+  useEffect(() => {
+    const fetchSiswa = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getDaftarSiswaGuru();
+        setStudents(data || []);
+      } catch (err) {
+        toast.error('Gagal memuat daftar siswa.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSiswa();
+  }, []);
 
   const classStudents = useMemo(() => {
     return (students ?? [])
@@ -65,7 +82,14 @@ export default function GuruStudentList() {
   const handleMessageSend = async (payload) => {
     if (!payload.body?.trim()) return;
     setIsSending(true);
-    setTimeout(() => {
+    try {
+      await broadcastPesanGuru({
+        judul: `Pesan ${payload.type}`,
+        isi_pesan: payload.body,
+        target_type: 'Spesifik',
+        target_ids: [messagingStudent.id]
+      });
+
       toast.success(`Pesan [${payload.type}] berhasil dikirim ke ${payload.name}!`, {
         duration: 3000,
         icon: '📨',
@@ -78,10 +102,13 @@ export default function GuruStudentList() {
           textTransform: 'uppercase'
         }
       });
-      setIsSending(false);
       setMessagingStudent(null);
       setMessageText('');
-    }, 1000);
+    } catch (err) {
+      toast.error('Gagal mengirim pesan.');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const headers = [

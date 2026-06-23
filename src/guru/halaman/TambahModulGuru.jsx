@@ -11,6 +11,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '@/utilitas/api';
 
 // UI Components
 import Dropdown from '@/komponen/ui/Dropdown';
@@ -23,6 +24,7 @@ import FilePreviewUpload from '@/komponen/ui/UnggahPratinjauFile';
 
 // Constants
 import { SUBJECTS, SUBJECT_CATEGORIES } from '@/konstanta/mataPelajaran';
+import { tambahModulGuru } from '@/utilitas/apiGuru';
 
 export default function GuruAddModule() {
   const navigate = useNavigate();
@@ -52,6 +54,46 @@ export default function GuruAddModule() {
   const [mathTarget, setMathTarget] = useState(null);
   const [uploadMode, setUploadMode] = useState('url'); 
   const [mediaFiles, setMediaFiles] = useState([]);
+  const [mapelOptions, setMapelOptions] = useState([]);
+  const [moduleId, setModuleId] = useState(null);
+
+  // Load existing data in Edit Mode
+  useEffect(() => {
+    api.get('/mata-pelajaran')
+      .then((res) => {
+        setMapelOptions((res.data.data || []).map((item) => ({
+          value: item.id_mapel,
+          label: item.nama_mapel
+        })));
+      })
+      .catch(() => setMapelOptions([]));
+
+    if (isEdit) {
+      api.get(`/guru/modul/${id}`)
+        .then((res) => {
+          const data = res.data.data || res.data;
+          setModuleId(id);
+          setFormData({
+            title: data.judul || '',
+            category: SUBJECT_CATEGORIES.AKADEMIK,
+            subject: data.subject || data.mata_pelajaran || SUBJECTS[0].name,
+            type: data.type || 'video',
+            url: data.url || '',
+            description: data.description || '',
+            status: data.status === 'published' ? 'published' : 'draft',
+            hasQuiz: data.hasQuiz || false,
+            target_class: assignedClass
+          });
+          if (data.quizData) {
+            setQuizData(data.quizData);
+          }
+        })
+        .catch(() => {
+          toast.error('Data modul belum tersedia dari backend');
+          navigate('/guru/modul');
+        });
+    }
+  }, [id, isEdit, navigate, assignedClass]);
 
   const openMathEditor = (qIndex, type, oIndex = null) => {
     setMathTarget({ qIndex, type, oIndex });
@@ -87,15 +129,35 @@ export default function GuruAddModule() {
         if (p.url) URL.revokeObjectURL(p.url);
       });
     };
-  }, []);
+  }, [mediaFiles]);
 
   const handleSave = (status) => {
     if (!formData.title) {
       toast.error('Judul materi harus diisi!');
       return;
     }
-    toast.success(isEdit ? 'Materi berhasil diperbarui' : `Materi berhasil disimpan sebagai ${status === 'draft' ? 'Draft' : 'Rilisan'}`);
-    setTimeout(() => navigate('/guru/modules'), 1500);
+    const selectedSubject = SUBJECTS.find(s => s.name === formData.subject);
+    const selectedMapel = mapelOptions.find(m => m.label === formData.subject) || mapelOptions[0];
+    const payload = {
+      judul: formData.title,
+      mapel_id: selectedMapel?.value || selectedSubject?.id || selectedSubject?.value || selectedSubject?.mapel_id || selectedSubject?.id_mapel,
+      deskripsi: formData.description,
+      status: status === 'published' ? 'aktif' : 'draft'
+    };
+
+    const request = isEdit && moduleId
+      ? api.put(`/guru/modul/${moduleId}`, payload)
+      : tambahModulGuru(payload);
+
+    request
+      .then(() => {
+        toast.success(isEdit ? 'Materi berhasil diperbarui' : `Materi berhasil disimpan sebagai ${status === 'draft' ? 'Draft' : 'Rilisan'}`);
+        setTimeout(() => navigate('/guru/modul'), 1200);
+      })
+      .catch((error) => {
+        console.error('Gagal menyimpan modul:', error);
+        toast.error('Gagal menyimpan modul ke backend');
+      });
   };
 
   return (
@@ -103,7 +165,7 @@ export default function GuruAddModule() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate('/guru/modules')}
+          onClick={() => navigate('/guru/modul')}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-orange-600 transition-all shadow-sm"
         >
           <ArrowLeft size={20} />
@@ -295,8 +357,8 @@ export default function GuruAddModule() {
                <div className="flex flex-col items-center md:items-start min-w-[100px]">
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 shadow-sm">Status Materi</span>
                   <div className="flex items-center gap-2">
-                     <div className={`w-2 h-2 rounded-full ${formData.status === 'draft' ? 'bg-amber-500' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
-                     <span className="text-xl font-black text-white italic tracking-tighter leading-none uppercase">{formData.status}</span>
+                      <div className={`w-2 h-2 rounded-full ${formData.status === 'draft' ? 'bg-amber-500' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+                      <span className="text-xl font-black text-white italic tracking-tighter leading-none uppercase">{formData.status}</span>
                   </div>
                </div>
                <div className="hidden sm:flex flex-col">
@@ -312,7 +374,7 @@ export default function GuruAddModule() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-center md:justify-end">
-                <button onClick={() => navigate('/guru/modules')} className="px-6 py-4 text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors mr-2 md:mr-6">Batal</button>
+                <button onClick={() => navigate('/guru/modul')} className="px-6 py-4 text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors mr-2 md:mr-6">Batal</button>
                 <div className="flex items-center gap-3">
                   <button onClick={() => handleSave('draft')} className="px-8 py-4 bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 border border-white/5">Simpan Draft</button>
                   <button onClick={() => handleSave('published')} className="bg-white text-slate-900 px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95 shadow-xl shadow-white/10">{isEdit ? 'Perbarui & Publish' : 'Simpan & Publish'}</button>

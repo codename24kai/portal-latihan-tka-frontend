@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Download,
   Filter,
@@ -13,7 +13,9 @@ import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import ProgressBar from '@/komponen/ui/BarProgres';
 import Dropdown from '@/komponen/ui/Dropdown';
-import mockStudents from '@/data/mockSiswa';
+import api from '@/utilitas/api';
+import toast from 'react-hot-toast';
+// Data will be fetched from API; mock data removed
 
 /**
  * Score reports page showing student exam results.
@@ -21,6 +23,20 @@ import mockStudents from '@/data/mockSiswa';
  */
 export default function ScoreReports() {
   const [activeTab, setActiveTab] = useState('academic'); // 'academic' | 'survey'
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data from backend
+  useEffect(() => {
+    api.get('/admin/laporan/nilai')
+      .then((res) => {
+        setStudents(res.data.data || []);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch laporan nilai:', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
   const [selectedClass, setSelectedClass] = useState('Semua Kelas');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('Simulasi TKA Tahap 1');
@@ -34,46 +50,54 @@ export default function ScoreReports() {
 
   // Generate counts for class tabs
   const classCounts = useMemo(() => {
-    const counts = { 'Semua Kelas': mockStudents.length };
+    const counts = { 'Semua Kelas': students.length };
     classes.filter(c => c !== 'Semua Kelas').forEach(cls => {
-      counts[cls] = mockStudents.filter(s => s.class === cls).length;
+      counts[cls] = students.filter(s => s.class === cls).length;
     });
     return counts;
-  }, [mockStudents]);
+  }, [students]);
 
   // Process & Filter Data
   const filteredData = useMemo(() => {
     const userRole = localStorage.getItem('userRole');
     const userClass = localStorage.getItem('assignedClass');
 
-    // 1. Add mocked specific scores based on student's avgScore
-    const processed = mockStudents.map(s => ({
+    const processed = students.map(s => ({
       ...s,
-      matematika: Math.max(0, Math.min(100, Math.round(s.avgScore + (s.id % 2 === 0 ? 5 : -5)))),
-      bahasa: Math.max(0, Math.min(100, Math.round(s.avgScore + (s.id % 3 === 0 ? 3 : -2)))),
-      slb: Math.max(0, Math.min(100, Math.round(s.avgScore + (s.id % 4 === 0 ? -10 : 8)))),
-      sk: Math.max(0, Math.min(100, Math.round(s.avgScore + (s.id % 5 === 0 ? 2 : -4)))),
+      matematika: s.matematika ?? 0,
+      bahasa: s.bahasa ?? 0,
+      slb: s.slb ?? 0,
+      sk: s.sk ?? 0,
     }));
 
-    // 2. Apply Role-based Scoping & manual filters
     return processed.filter((s) => {
-      // Role scope: Guru only sees their class
       const matchesScope = userRole === 'admin' ? true : s.class === (userClass ?? '');
-      
       const matchClass = selectedClass === 'Semua Kelas' || s.class === selectedClass;
       const matchSearch = (s.name ?? '').toLowerCase().includes((searchQuery ?? '').toLowerCase());
-      
       return matchesScope && matchClass && matchSearch;
     });
-  }, [selectedClass, searchQuery, mockStudents]);
+  }, [selectedClass, searchQuery, students]);
 
   const handleExportClick = (type) => {
     setExportConfig({ type });
   };
 
-  const confirmExport = () => {
-    toast.success(`Berhasil mengekspor ${filteredData?.length} data dalam format ${exportConfig.type}`);
-    setExportConfig(null);
+  const confirmExport = async () => {
+    try {
+      const type = exportConfig.type === 'Excel' ? 'xlsx' : 'pdf';
+      const response = await api.get(`/admin/laporan/export?type=${type}`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: response.headers['content-type'] || 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `laporan-nilai-admin.${type === 'xlsx' ? 'xlsx' : 'pdf'}`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Laporan berhasil diunduh');
+      setExportConfig(null);
+    } catch (error) {
+      toast.error('Gagal mengekspor laporan');
+    }
   };
 
   const scoreBadgeVariant = (value) => {
@@ -103,20 +127,26 @@ export default function ScoreReports() {
         </div>
       </td>
       <td className="py-6 px-4 text-center">
-            <Badge text={(student?.avgScore ?? 0).toString()} variant={scoreBadgeVariant(student?.avgScore)} />
+        <Badge text={(student?.avgScore ?? 0).toString()} variant={scoreBadgeVariant(student?.avgScore ?? 0)} />
       </td>
       <td className="py-6 px-4 text-center">
-        <Badge text={(student?.bahasa ?? 0).toString()} variant={scoreBadgeVariant(student?.bahasa)} />
+        <Badge text={(student?.bahasa ?? 0).toString()} variant={scoreBadgeVariant(student?.bahasa ?? 0)} />
       </td>
       <td className="py-6 px-4">
         <div className="min-w-[140px] px-4">
           <ProgressBar
-            progress={student.avgScore}
-            color={student.avgScore >= 80 ? "bg-teal-500" : student.avgScore >= 60 ? "bg-amber-500" : "bg-rose-500"}
+            progress={student.avgScore ?? 0}
+            color={(student.avgScore ?? 0) >= 80 ? "bg-teal-500" : (student.avgScore ?? 0) >= 60 ? "bg-amber-500" : "bg-rose-500"}
           />
         </div>
       </td>
     </tr>
+  );
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-xl">Memuat data...</p>
+    </div>
   );
 
   return (
@@ -182,8 +212,8 @@ export default function ScoreReports() {
                   key={cls}
                   onClick={() => setSelectedClass(cls)}
                   className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedClass === cls
-                      ? 'bg-white dark:bg-slate-800 text-teal-600 shadow-md'
-                      : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'
+                    ? 'bg-white dark:bg-slate-800 text-teal-600 shadow-md'
+                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'
                     }`}
                 >
                   {cls === 'Semua Kelas' ? cls : `Kelas ${cls}`} ({classCounts[cls]})

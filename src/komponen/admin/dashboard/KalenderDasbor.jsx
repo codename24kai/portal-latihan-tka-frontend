@@ -42,7 +42,7 @@ export default function DashboardCalendar({ events }) {
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight italic text-balance">
-              Agenda dan Jadwal <span className="text-teal-600 font-black not-italic">Latihan</span>
+              Jadwal dan Sesi <span className="text-teal-600 font-black not-italic">Latihan</span>
             </h2>
             <div className="flex items-center gap-2 mt-1">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dateString}</p>
@@ -142,7 +142,7 @@ export default function DashboardCalendar({ events }) {
               ) : (
                 <div className="col-span-full py-16 flex flex-col items-center justify-center opacity-30">
                   <CalendarIcon size={64} className="text-slate-300 mb-4" />
-                  <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Tidak Ada Agenda Mendatang</p>
+                  <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Tidak Ada Jadwal Mendatang</p>
                 </div>
               )}
             </div>
@@ -161,14 +161,14 @@ export default function DashboardCalendar({ events }) {
               <X size={20} />
             </button>
             <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-2">
-              {showAddModal ? 'Buat Agenda Baru' : 'Detail Agenda'}
+              {showAddModal ? 'Buat Jadwal Baru' : 'Detail Jadwal'}
             </h3>
             <div className="p-8 border-2 border-dashed border-teal-100 dark:border-teal-900/30 rounded-3xl flex flex-col items-center justify-center text-center mt-6">
               <div className="w-16 h-16 bg-teal-50 dark:bg-teal-500/10 rounded-2xl flex items-center justify-center text-teal-600 mb-4">
                 {showAddModal ? <CalendarIcon size={32} /> : <TrendingUp size={32} />}
               </div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
-                Fitur Manajemen Agenda Berbasis Modal <br /> Sedang Dalam Proses Integrasi Data
+                Fitur Manajemen Jadwal Berbasis Modal <br /> Sedang Dalam Proses Integrasi Data
               </p>
               <button
                 className="mt-6 px-10 py-3 bg-teal-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-teal-500/20 active:scale-95"

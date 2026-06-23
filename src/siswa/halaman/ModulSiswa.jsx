@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   BookOpen,
   Download,
@@ -11,123 +11,78 @@ import {
   RotateCcw,
   Calculator,
   Library,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+import { getDaftarModul } from '@/utilitas/apiSiswa';
 
 export default function StudentModul() {
   const navigate = useNavigate();
 
-  const initialModules = [
-    {
-      id: 1,
-      title: 'Teks Narasi & Deskripsi',
-      subject: 'Bahasa Indonesia',
-      pages: 45,
-      size: '2.4 MB',
-      heroImage: '/assets/hero/bahasa-background-hero.jpg',
-      color: 'from-orange-400 to-orange-600',
-      bgLight: 'bg-orange-50',
-      textColor: 'text-orange-600',
-      hasQuiz: true,
-      quizLocked: true,
-      prerequisiteType: 'download',
-      type: 'pdf',
-      estimasiWaktu: '± 25 menit',
-      progressStatus: 'sedang',
-      isFirst: true
-    },
-    {
-      id: 2,
-      title: 'Bilangan Bulat & Operasi',
-      subject: 'Matematika',
-      pages: 32,
-      size: '1.8 MB',
-      heroImage: '/assets/hero/math-background-hero.jpg',
-      color: 'from-teal-400 to-teal-600',
-      bgLight: 'bg-teal-50',
-      textColor: 'text-teal-600',
-      hasQuiz: true,
-      quizLocked: true,
-      prerequisiteType: 'video',
-      type: 'video',
-      estimasiWaktu: '± 30 menit',
-      progressStatus: 'belum'
-    },
-    {
-      id: 3,
-      title: 'Panduan Survei Karakter',
-      subject: 'Umum',
-      pages: 20,
-      size: '1.2 MB',
-      heroImage: '/assets/hero/kids-school.jpg',
-      color: 'from-slate-400 to-slate-600',
-      bgLight: 'bg-slate-50',
-      textColor: 'text-slate-600',
-      hasQuiz: false,
-      type: 'text',
-      estimasiWaktu: '± 15 menit',
-      progressStatus: 'selesai'
-    },
-    {
-      id: 4,
-      title: 'Puisi & Karya Sastra',
-      subject: 'Bahasa Indonesia',
-      pages: 28,
-      size: '1.5 MB',
-      heroImage: '/assets/hero/bahasa-background-hero-2.jpg',
-      color: 'from-orange-400 to-orange-600',
-      bgLight: 'bg-orange-50',
-      textColor: 'text-orange-600',
-      hasQuiz: true,
-      quizLocked: false,
-      prerequisiteType: 'download',
-      type: 'pdf',
-      estimasiWaktu: '± 20 menit',
-      progressStatus: 'selesai'
-    },
-    {
-      id: 5,
-      title: 'Bangun Datar & Ruang',
-      subject: 'Matematika',
-      pages: 40,
-      size: '3.1 MB',
-      heroImage: '/assets/hero/math-background-hero-3.jpg',
-      color: 'from-teal-400 to-teal-600',
-      bgLight: 'bg-teal-50',
-      textColor: 'text-teal-600',
-      hasQuiz: true,
-      quizLocked: true,
-      prerequisiteType: 'video',
-      type: 'video',
-      estimasiWaktu: '± 40 menit',
-      progressStatus: 'belum'
-    },
-  ];
-
-  const [modules, setModules] = useState(initialModules);
+  const [modules, setModules] = useState([]);
   const [activeTab, setActiveTab] = useState('Semua');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [activeModule, setActiveModule] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Synchronize progress status from Learning Viewer
-  React.useEffect(() => {
-    try {
-      const storedProgress = JSON.parse(localStorage.getItem('materi_progress') || '{}');
-      setModules(prev => prev.map(mod => {
-        const progress = storedProgress[mod.id];
-        if (progress) {
+  // Mengambil data dari Backend dan sinkronisasi dengan Local Progress
+  useEffect(() => {
+    const fetchModules = async () => {
+      try {
+        setLoading(true);
+        // Menggunakan utilitas apiSiswa
+        const apiData = await getDaftarModul();
+
+        // Mapped response (sudah dilakukan di adapter, jadi hanya ditambahkan styling khusus UI jika diperlukan)
+        const mappedModules = apiData.map((mod, index) => {
+          const isMath = mod.mataPelajaran === 'Matematika';
+          const isBahasa = mod.mataPelajaran === 'Bahasa Indonesia';
+
+          return {
+            id: mod.id,
+            title: mod.judul,
+            subject: mod.mataPelajaran || 'Umum',
+            pages: mod.totalMateri || 20,
+            size: '2.0 MB', // mock size
+            heroImage: mod.gambarCover,
+            color: isMath ? 'from-teal-400 to-teal-600' : isBahasa ? 'from-orange-400 to-orange-600' : 'from-slate-400 to-slate-600',
+            bgLight: isMath ? 'bg-teal-50' : isBahasa ? 'bg-orange-50' : 'bg-slate-50',
+            textColor: isMath ? 'text-teal-600' : isBahasa ? 'text-orange-600' : 'text-slate-600',
+            hasQuiz: false, // fallback untuk quiz
+            quizLocked: true, 
+            prerequisiteType: 'download',
+            type: 'pdf',
+            estimasiWaktu: `± 30 menit`,
+            progressStatus: mod.status || 'belum',
+            isFirst: index === 0
+          };
+        });
+
+        // SINKRONISASI: Timpa dengan progress dari LocalStorage (jika ada)
+        const storedProgress = JSON.parse(localStorage.getItem('materi_progress') || '{}');
+        const syncedModules = mappedModules.map(mod => {
+          const localProgress = storedProgress[mod.id];
+          const finalProgress = localProgress || mod.progressStatus;
+
           return {
             ...mod,
-            progressStatus: progress,
-            quizLocked: progress === 'selesai' ? false : mod.quizLocked
+            progressStatus: finalProgress,
+            quizLocked: finalProgress === 'selesai' ? false : mod.quizLocked
           };
-        }
-        return mod;
-      }));
-    } catch (e) {
-      console.error('Gagal memuat sinkronisasi progres modul', e);
-    }
+        });
+
+        setModules(syncedModules);
+      } catch (error) {
+        console.error('Gagal memuat modul dari server:', error);
+        // Bisa tambahkan toast error di sini
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModules();
   }, []);
 
   // Segmentasi Data Berdasarkan Mata Pelajaran
@@ -140,7 +95,7 @@ export default function StudentModul() {
   }, [modules]);
 
   const generalModules = useMemo(() => {
-    return modules.filter(m => m.subject === 'Umum' && m.progressStatus !== 'selesai');
+    return modules.filter(m => m.subject !== 'Matematika' && m.subject !== 'Bahasa Indonesia' && m.progressStatus !== 'selesai');
   }, [modules]);
 
   const completedModules = useMemo(() => {
@@ -156,12 +111,28 @@ export default function StudentModul() {
     navigate(`/modul/materi/${moduleId}`);
   };
 
+  // Komponen Helper Internal
+  const Badge = ({ subject }) => {
+    const isMath = subject === 'Matematika';
+    return (
+      <span className={`inline-flex items-center gap-1.5 text-[9px] font-black px-3 py-1.5 rounded-lg border backdrop-blur-md uppercase tracking-widest ${isMath
+        ? 'bg-teal-500/20 text-teal-100 border-teal-400/30'
+        : subject === 'Bahasa Indonesia'
+          ? 'bg-orange-500/20 text-orange-100 border-orange-400/30'
+          : 'bg-slate-500/20 text-slate-100 border-slate-400/30'
+        }`}>
+        {isMath ? <Calculator size={10} /> : subject === 'Bahasa Indonesia' ? <Library size={10} /> : <BookOpen size={10} />}
+        {subject}
+      </span>
+    );
+  };
+
   const ModuleCard = ({ mod }) => (
     <div
       key={mod.id}
       className={`group relative bg-white dark:bg-slate-800 border-2 rounded-[2.5rem] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 ${mod.progressStatus === 'selesai'
-          ? 'border-emerald-100 dark:border-emerald-900/30 bg-slate-50/50 dark:bg-slate-900/40'
-          : 'border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-700'
+        ? 'border-emerald-100 dark:border-emerald-900/30 bg-slate-50/50 dark:bg-slate-900/40'
+        : 'border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-700'
         }`}
     >
       <div>
@@ -184,10 +155,10 @@ export default function StudentModul() {
               </div>
             )}
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md backdrop-blur-md ${mod.progressStatus === 'selesai'
-                ? 'bg-emerald-500/90 text-white border border-emerald-400'
-                : mod.progressStatus === 'sedang'
-                  ? 'bg-blue-500/90 text-white border border-blue-400'
-                  : 'bg-white/90 text-slate-600 border border-white/50'
+              ? 'bg-emerald-500/90 text-white border border-emerald-400'
+              : mod.progressStatus === 'sedang'
+                ? 'bg-blue-500/90 text-white border border-blue-400'
+                : 'bg-white/90 text-slate-600 border border-white/50'
               }`}>
               {mod.progressStatus === 'selesai' && <CheckCircle2 size={12} />}
               {mod.progressStatus === 'selesai' ? 'Tuntas' : mod.progressStatus === 'sedang' ? 'Sedang Belajar' : 'Belum Dibaca'}
@@ -237,8 +208,8 @@ export default function StudentModul() {
                   disabled={mod.quizLocked}
                   onClick={() => handleQuizStart(mod)}
                   className={`w-full py-4 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95 ${mod.quizLocked
-                      ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed'
-                      : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400'
+                    ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed'
+                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400'
                     }`}
                 >
                   {mod.quizLocked ? <Lock size={14} /> : <Gamepad2 size={16} />}
@@ -263,21 +234,16 @@ export default function StudentModul() {
     </div>
   );
 
-  // Helper component for uniform subject tags
-  const Badge = ({ subject }) => {
-    const isMath = subject === 'Matematika';
+  if (loading) {
     return (
-      <span className={`inline-flex items-center gap-1.5 text-[9px] font-black px-3 py-1.5 rounded-lg border backdrop-blur-md uppercase tracking-widest ${isMath
-          ? 'bg-teal-500/20 text-teal-100 border-teal-400/30'
-          : subject === 'Bahasa Indonesia'
-            ? 'bg-orange-500/20 text-orange-100 border-orange-400/30'
-            : 'bg-slate-500/20 text-slate-100 border-slate-400/30'
-        }`}>
-        {isMath ? <Calculator size={10} /> : subject === 'Bahasa Indonesia' ? <Library size={10} /> : <BookOpen size={10} />}
-        {subject}
-      </span>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Loader2 size={48} className="text-indigo-500 animate-spin" />
+        <p className="text-sm font-black text-slate-400 uppercase tracking-widest animate-pulse">
+          Mempersiapkan Materi...
+        </p>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-12 animate-in fade-in duration-500 text-slate-900 dark:text-white pb-20">
@@ -300,8 +266,8 @@ export default function StudentModul() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 md:flex-none flex items-center justify-center px-6 py-3.5 rounded-[1.5rem] font-black text-[10px] tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === tab
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                  : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
             >
               {tab === 'Bahasa Indonesia' ? 'B. Indonesia' : tab}

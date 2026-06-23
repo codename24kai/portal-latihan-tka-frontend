@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Key, CheckCircle2, AlertCircle, Calendar, Shield, Fingerprint, Lock, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import api from '@/utilitas/api';
 
 const MOCK_ACCOUNTS = [
   { username: 'student', name: 'Ahmad Fauzi', role: 'student', roleLabel: 'Siswa', lastLogin: '2026-04-01 08:30', resetPasswordTemplate: 'siswasd123' },
@@ -38,14 +39,14 @@ export default function LupaPassword() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  const handleCheckUsername = (e) => {
+  const handleCheckUsername = async (e) => {
     e.preventDefault();
     setError('');
 
     const trimmedUsername = username.trim().toLowerCase();
-    const user = MOCK_ACCOUNTS.find(acc => acc.username === trimmedUsername);
-
-    if (user) {
+    try {
+      const response = await api.post('/auth/forgot-password/check', { username: trimmedUsername });
+      const user = response.data.data;
       setFoundUser(user);
       setStep(2);
       toast.success('Username ditemukan!', {
@@ -59,29 +60,37 @@ export default function LupaPassword() {
           textTransform: 'uppercase'
         }
       });
-    } else {
-      setError('Username tidak terdaftar di sistem. Silakan periksa kembali.');
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Username tidak terdaftar di sistem. Silakan periksa kembali.');
+      }
     }
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!foundUser) return;
 
-    localStorage.setItem('reset_pwd_' + foundUser.username, foundUser.resetPasswordTemplate);
-    setStep(3);
+    try {
+      await api.post('/auth/forgot-password/reset', { username: foundUser.username });
+      setStep(3);
 
-    toast.success('Password berhasil direset!', {
-      duration: 4000,
-      icon: '🔐',
-      style: {
-        borderRadius: '1rem',
-        background: '#f97316',
-        color: '#fff',
-        fontSize: '12px',
-        fontWeight: 'bold',
-        textTransform: 'uppercase'
-      }
-    });
+      toast.success('Password berhasil direset!', {
+        duration: 4000,
+        icon: '🔐',
+        style: {
+          borderRadius: '1rem',
+          background: '#f97316',
+          color: '#fff',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          textTransform: 'uppercase'
+        }
+      });
+    } catch (err) {
+      toast.error('Gagal mereset password. Silakan coba lagi.');
+    }
   };
 
   const handleCopyPassword = () => {

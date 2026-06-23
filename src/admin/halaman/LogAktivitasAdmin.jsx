@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '@/utilitas/api';
 import {
   Activity,
   Clock,
@@ -33,56 +34,57 @@ const ActivityIcon = ({ type }) => {
   }
 };
 
-const mockActivities = [
-  { id: 1, user: 'Rina Saputri', type: 'finish', description: 'Menyelesaikan Tryout Matematika', subject: 'Matematika', class: '6A', time: '06 Jun 2026, 14:28 WIB', detail: 'Siswa Rina Saputri (6A) berhasil menyelesaikan Tryout Matematika dengan skor 85 dalam durasi 45 menit.' },
-  { id: 2, user: 'Ahmad Faisal', type: 'start', description: 'Memulai Kuis B. Indonesia', subject: 'B. Indonesia', class: '6B', time: '06 Jun 2026, 14:15 WIB', detail: 'Siswa Ahmad Faisal (6B) baru saja memulai pengerjaan Kuis Modul B. Indonesia sesi ke-2.' },
-  { id: 3, user: 'Admin System', type: 'login', description: 'Melakukan Update Bank Soal', subject: 'System', class: 'Main', time: '06 Jun 2026, 13:45 WIB', detail: 'Admin mengunggah format CSV terbaru untuk Bank Soal IPA yang berisi 50 butir soal baru.' },
-  { id: 4, user: 'Toni Kroos', type: 'finish', description: 'Menyelesaikan Simulasi AKM', subject: 'Multi', class: '6C', time: '06 Jun 2026, 13:30 WIB', detail: 'Siswa Toni Kroos (6C) berhasil menyelesaikan rangkaian Simulasi AKM Numerasi dan Literasi.' },
-  { id: 5, user: 'Guru Budi', type: 'upload', description: 'Mengunggah Modul Baru "Aljabar"', subject: 'Matematika', class: '6A', time: '06 Jun 2026, 11:10 WIB', detail: 'Guru Budi mengunggah materi ajar berupa PDF (Modul Aljabar Dasar) untuk kelas 6A.' },
-  { id: 6, user: 'Siti Aminah', type: 'login', description: 'Login ke Portal Siswa', subject: 'Portal', class: '6B', time: '06 Jun 2026, 09:05 WIB', detail: 'Siti Aminah berhasil login menggunakan perangkat Android.' },
-  { id: 7, user: 'Admin System', type: 'update', description: 'Menghapus Soal Duplikat', subject: 'Bank Soal', class: 'Main', time: '05 Jun 2026, 16:20 WIB', detail: 'Penghapusan 3 butir soal duplikat pada mata pelajaran IPS.' },
-  { id: 8, user: 'Fajar Hidayat', type: 'finish', description: 'Menyelesaikan Kuis IPA', subject: 'Sains', class: '6C', time: '05 Jun 2026, 14:00 WIB', detail: 'Fajar Hidayat (6C) mendapatkan skor 90 pada kuis IPA bab Tata Surya.' },
-  { id: 9, user: 'Guru Rian', type: 'download', description: 'Mengunduh Laporan Nilai Kelas 6B', subject: 'Laporan', class: '6B', time: '05 Jun 2026, 10:15 WIB', detail: 'File Laporan_Nilai_6B_Juni.xlsx berhasil diunduh.' },
-  { id: 10, user: 'Andi Wijaya', type: 'start', description: 'Memulai Tryout Mandiri Bahasa', subject: 'B. Indonesia', class: '6A', time: '04 Jun 2026, 08:30 WIB', detail: 'Andi Wijaya (6A) menginisiasi Tryout Mandiri dengan alokasi 40 soal acak.' },
-];
-
-// Data Mock Pengguna Aktif Realtime
-const mockOnlineUsers = [
-  { id: 101, name: 'Rina Saputri', role: 'Siswa', class: '6A', currentAction: 'Sedang Mengerjakan Simulasi TKA', duration: '45 Menit', device: 'Laptop / Windows' },
-  { id: 102, name: 'Ahmad Faisal', role: 'Siswa', class: '6B', currentAction: 'Eksplorasi Modul B. Indonesia', duration: '12 Menit', device: 'Mobile / Android' },
-  { id: 103, name: 'Guru Budi', role: 'Guru', class: 'Pengajar', currentAction: 'Meninjau Hasil Ujian 6A', duration: '1 Jam 15 Menit', device: 'Tablet / iPad' },
-  { id: 104, name: 'Siti Aminah', role: 'Siswa', class: '6B', currentAction: 'Beranda Dasbor', duration: '5 Menit', device: 'Mobile / iOS' },
-  { id: 105, name: 'Toni Kroos', role: 'Siswa', class: '6C', currentAction: 'Melihat Analisis Nilai Kuis', duration: '30 Menit', device: 'Desktop / Windows' },
-  { id: 106, name: 'Admin System', role: 'Admin', class: 'Sistem', currentAction: 'Memantau Log Aktivitas', duration: '3 Jam', device: 'Desktop / MacOS' },
-];
-
 export default function LogAktivitasAdmin() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('Semua');
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showActiveModal, setShowActiveModal] = useState(false); // State untuk Tabel Pengguna Aktif
-  const [activeUsersCount, setActiveUsersCount] = useState(124);
+  const [activeUsersCount, setActiveUsersCount] = useState(0);
+  const [activities, setActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchLogs = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = {};
+      if (searchQuery) params.search = searchQuery;
+      if (typeFilter !== 'Semua') {
+          // Map typeFilter to aksi
+          const aksiMap = {
+              'login': 'login',
+              'start': 'mulai',
+              'finish': 'selesai',
+              'update': 'update',
+              'upload': 'upload',
+              'download': 'download'
+          };
+          params.aksi = aksiMap[typeFilter] || typeFilter;
+      }
+      
+      const res = await api.get('/admin/log-aktivitas', { params });
+      
+      const formatted = res.data.data.map(l => ({
+        id: l.id_log,
+        user: l.pengguna ? l.pengguna.username : 'Unknown',
+        type: l.aksi.includes('login') ? 'login' : l.aksi.includes('selesai') ? 'finish' : l.aksi.includes('mulai') ? 'start' : 'update',
+        description: l.keterangan || l.aksi,
+        subject: 'System',
+        class: '-',
+        time: new Date(l.created_at).toLocaleString('id-ID'),
+        detail: l.keterangan
+      }));
+      setActivities(formatted);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery, typeFilter]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveUsersCount(prev => prev + (Math.floor(Math.random() * 5) - 2));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const filteredData = useMemo(() => {
-    return mockActivities.filter((act) => {
-      const matchSearch =
-        act.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        act.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        act.subject.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchType = typeFilter === 'Semua' || act.type === typeFilter;
-
-      return matchSearch && matchType;
-    });
-  }, [searchQuery, typeFilter]);
+    fetchLogs();
+  }, [fetchLogs]);
 
   const typeOptions = [
     { value: 'Semua', label: 'Semua Tipe' },
@@ -167,7 +169,7 @@ export default function LogAktivitasAdmin() {
             { label: 'Lingkup / Subjek', align: 'center' },
             { label: 'Waktu Kejadian', align: 'right' }
           ]}
-          data={filteredData}
+          data={activities}
           rowsPerPage={10}
           renderRow={(act) => (
             <tr
@@ -260,36 +262,11 @@ export default function LogAktivitasAdmin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockOnlineUsers.map((user) => (
-                    <tr key={user.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                      <td className="py-5 px-6">
-                        <p className="font-bold text-slate-800 dark:text-white text-sm">{user.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${user.role === 'Siswa' ? 'bg-blue-100 text-blue-600' :
-                              user.role === 'Guru' ? 'bg-purple-100 text-purple-600' :
-                                'bg-slate-200 text-slate-600'
-                            }`}>
-                            {user.role}
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400">Kelas {user.class}</span>
-                        </div>
-                      </td>
-                      <td className="py-5 px-6">
-                        <div className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{user.currentAction}</span>
-                        </div>
-                      </td>
-                      <td className="py-5 px-6 text-center">
-                        <Badge text={user.device} variant="Neutral" className="text-[9px]" />
-                      </td>
-                      <td className="py-5 px-6 text-right">
-                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 italic bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg">
-                          {user.duration}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td colSpan="4" className="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      Belum ada pengguna aktif realtime
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>

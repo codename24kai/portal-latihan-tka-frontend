@@ -11,7 +11,7 @@ export default function TryoutStatus({ data }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">Status Simulasi TKA</h2>
+          <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight">Status Sesi Latihan</h2>
           <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">Sesi Berlangsung</p>
         </div>
         <button className="text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
@@ -53,7 +53,7 @@ export default function TryoutStatus({ data }) {
         ) : (
           <div className="flex flex-col items-center justify-center h-full py-12 opacity-50 grayscale dark:opacity-30">
             <ClipboardList size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Tidak Ada Simulasi Aktif</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Tidak Ada Sesi Aktif</p>
           </div>
         )}
       </div>
@@ -61,10 +61,10 @@ export default function TryoutStatus({ data }) {
       {/* Wrapper Tombol - Ditambahkan mt-auto dan pt-4 agar selalu terkunci di bawah */}
       <div className="mt-auto pt-6">
         <button
-          onClick={() => navigate('/admin/simulasi')}
+          onClick={() => navigate('/admin/sesi-latihan')}
           className="w-full py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-teal-600 hover:border-teal-200 dark:hover:text-teal-400 dark:hover:border-teal-900 transition-all active:scale-[0.98]"
         >
-          Kelola Semua Simulasi TKA
+          Kelola Semua Sesi Latihan
         </button>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   User,
   IdCard,
@@ -19,11 +19,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import mockExams from '@/data/mockUjian';
-import mockStudents from '@/data/mockSiswa';
 import ProfilePicModal from '@/komponen/siswa/ModalFotoProfil';
 import { useUser } from '@/konteks/KonteksPengguna';
 import ConfirmDialog from '@/komponen/ui/DialogKonfirmasi';
+import { getProfilSiswa, gantiPasswordSiswa } from '@/utilitas/apiSiswa';
 
 /**
  * Student Setting Page - Overhauled with Modal Pattern
@@ -42,13 +41,16 @@ export default function StudentSetting() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSaveProfilePic = async (newPic) => {
     try {
-      // Update global context (handles persistence to IndexedDB too)
       await updateProfilePic(newPic);
-
-      // Show success feedback
       toast.success('Foto profil berhasil diperbarui!');
       setIsProfileModalOpen(false);
     } catch (error) {
@@ -57,14 +59,54 @@ export default function StudentSetting() {
     }
   };
 
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfilSiswa();
+        setProfileData(data);
+      } catch (error) {
+        console.warn('Backend error, menggunakan data konteks untuk Pengaturan Siswa.');
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      return toast.error('Konfirmasi password tidak cocok');
+    }
+    try {
+      setIsSubmitting(true);
+      await gantiPasswordSiswa({
+        password_lama: oldPassword,
+        password_baru: newPassword,
+        password_baru_confirmation: confirmPassword
+      });
+      toast.success('Password berhasil diubah!');
+      setIsModalOpen(false);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Gagal mengubah password');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('userRole');
     navigate('/login');
   };
 
-  // Filter completed exams for "Riwayat Belajar"
-  const historyExams = mockExams.filter(exam => exam.status === 'completed');
-  const isMale = currentUser?.gender === 'Laki-laki';
+  const historyExams = [];
+  const displayedUser = profileData || currentUser || {};
+  const schoolName = displayedUser?.school || displayedUser?.sekolah || '-';
+  const className = displayedUser?.class || displayedUser?.kelas || '-';
+  const waliKelasName = displayedUser?.wali_kelas?.nama_lengkap || displayedUser?.waliKelas || '-';
+  const isMale = (displayedUser?.gender || displayedUser?.jenis_kelamin) === 'Laki-laki';
 
   return (
     <div className="space-y-8 animate-fade-in text-slate-900 dark:text-white pb-10">
@@ -91,9 +133,9 @@ export default function StudentSetting() {
                 ? 'bg-gradient-to-br from-blue-500 to-indigo-600'
                 : 'bg-gradient-to-br from-pink-500 to-rose-600')
                 }`}>
-                {currentUser?.profile_pic ? (
+                {displayedUser?.profile_pic ? (
                   <img
-                    src={currentUser.profile_pic}
+                    src={displayedUser.profile_pic}
                     alt="Profile"
                     className="w-full h-full object-cover animate-in fade-in zoom-in-75 duration-500"
                   />
@@ -103,7 +145,7 @@ export default function StudentSetting() {
               </div>
 
               <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-700 px-3 py-1 rounded-full shadow-md border border-slate-100 dark:border-slate-600 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-widest">
-                {currentUser?.gender}
+                {displayedUser?.gender || displayedUser?.jenis_kelamin || '-'}
               </div>
 
               {/* Quick Action Overlay */}
@@ -118,9 +160,9 @@ export default function StudentSetting() {
             </div>
 
             <div className="text-center mb-6">
-              <h3 className="text-xl font-black tracking-tight">{currentUser?.name}</h3>
+              <h3 className="text-xl font-black tracking-tight">{displayedUser?.name || displayedUser?.nama_lengkap}</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                {currentUser?.school} • {currentUser?.class}
+                {schoolName} • {className}
               </p>
             </div>
 
@@ -133,14 +175,28 @@ export default function StudentSetting() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
                   <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm">
-                    {currentUser?.name}
+                    {displayedUser?.name || displayedUser?.nama_lengkap}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">NISN</label>
                   <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm">
-                    {currentUser?.nisn}
+                    {displayedUser?.nisn}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</label>
+                  <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm">
+                    {displayedUser?.gender || displayedUser?.jenis_kelamin || '-'}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Wali Kelas</label>
+                  <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm">
+                    {waliKelasName}
                   </div>
                 </div>
               </div>
@@ -257,7 +313,7 @@ export default function StudentSetting() {
             </div>
 
             <div className="p-8">
-              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setIsModalOpen(false); }}>
+              <form className="space-y-6" onSubmit={handleChangePassword}>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password Lama</label>
                   <div className="relative group">
@@ -266,8 +322,11 @@ export default function StudentSetting() {
                     </span>
                     <input
                       type={showOldPassword ? "text" : "password"}
-                      placeholder="••••••••"
+                      value={oldPassword}
+                      onChange={e => setOldPassword(e.target.value)}
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-bold text-sm text-slate-700 dark:text-slate-200"
+                      required
                     />
                     <button
                       type="button"
@@ -287,8 +346,11 @@ export default function StudentSetting() {
                     </span>
                     <input
                       type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
                       placeholder="Minimal 8 karakter"
                       className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-bold text-sm text-slate-700 dark:text-slate-200"
+                      required minLength={8}
                     />
                     <button
                       type="button"
@@ -308,8 +370,11 @@ export default function StudentSetting() {
                     </span>
                     <input
                       type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="Ulangi password baru"
                       className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-bold text-sm text-slate-700 dark:text-slate-200"
+                      required
                     />
                     <button
                       type="button"
@@ -322,8 +387,8 @@ export default function StudentSetting() {
                 </div>
 
                 <div className="flex flex-col gap-3 pt-4">
-                  <button className="w-full flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all">
-                    <Save size={18} /> Simpan Perubahan
+                  <button disabled={isSubmitting} type="submit" className="w-full flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all disabled:opacity-50">
+                    <Save size={18} /> {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
                   </button>
                   <button
                     type="button"
@@ -346,7 +411,7 @@ export default function StudentSetting() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         onSave={handleSaveProfilePic}
-        currentPic={currentUser?.profile_pic}
+        currentPic={displayedUser?.profile_pic}
       />
 
       <ConfirmDialog
@@ -362,3 +427,4 @@ export default function StudentSetting() {
     </div>
   );
 }
+

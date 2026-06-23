@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '@/utilitas/api';
 import {
   Plus,
   Calendar,
@@ -23,34 +24,47 @@ import Badge from '@/komponen/ui/Badge';
 import DataTable from '@/komponen/ui/TabelData';
 import ProgressBar from '@/komponen/ui/BarProgres';
 
-// Mock tryout data
-const mockTryouts = [
-  { id: 1, name: 'Tryout Matematika Minggu 1', subject: 'Matematika', status: 'active', studentsFinished: 32, totalStudents: 42, questions: 40, duration: '90 menit', startDate: '2026-03-31T08:00', endDate: '2026-04-07T23:59' },
-  { id: 2, name: 'Tryout B. Indonesia Minggu 1', subject: 'Bahasa Indonesia', status: 'active', studentsFinished: 15, totalStudents: 38, questions: 35, duration: '70 menit', startDate: '2026-03-31T08:00', endDate: '2026-04-07T23:59' },
-  { id: 3, name: 'Latihan Ujian Akhir', subject: 'Matematika', status: 'draft', studentsFinished: 0, totalStudents: 45, questions: 60, duration: '120 menit', startDate: '2026-04-14T10:00', endDate: '2026-04-14T12:00' },
-  { id: 4, name: 'Simulasi Tryout Nasional', subject: 'Matematika', status: 'ended', studentsFinished: 48, totalStudents: 48, questions: 40, duration: '90 menit', startDate: '2026-03-24T08:00', endDate: '2026-03-25T17:00' },
-  { id: 5, name: 'Evaluasi Mingguan 2', subject: 'Bahasa Indonesia', status: 'ended', studentsFinished: 35, totalStudents: 40, questions: 20, duration: '45 menit', startDate: '2026-03-20T08:00', endDate: '2026-03-21T18:00' },
-];
-
 export default function TryoutManagement() {
   const navigate = useNavigate();
-  const [tryouts, setTryouts] = useState(mockTryouts);
+  const [tryouts, setTryouts] = useState([]);
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [subjectFilter, setSubjectFilter] = useState('Semua');
+  const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredTryouts = useMemo(() => {
-    return tryouts?.filter(t => {
-      const matchStatus = statusFilter === 'Semua' || t?.status === statusFilter.toLowerCase();
-      const matchSubject = subjectFilter === 'Semua' || t?.subject === subjectFilter;
-      return matchStatus && matchSubject;
-    }) || [];
-  }, [tryouts, statusFilter, subjectFilter]);
+  const fetchTryouts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = {};
+      if (statusFilter !== 'Semua') params.status = statusFilter;
+      if (subjectFilter !== 'Semua') params.subject = subjectFilter;
+      if (searchQuery) params.search = searchQuery;
+
+      const res = await api.get('/admin/sesi-latihan', { params });
+      setTryouts(res.data.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal mengambil data sesi latihan');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [statusFilter, subjectFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchTryouts();
+  }, [fetchTryouts]);
 
   const handleEdit = (id) => navigate(`edit/${id}`);
 
-  const handleDelete = () => {
-    setTryouts(prev => prev?.filter(t => t?.id !== deleteConfirmId));
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/admin/sesi-latihan/${deleteConfirmId}`);
+      toast.success('Sesi latihan berhasil dihapus');
+      fetchTryouts();
+    } catch (err) {
+      toast.error('Gagal menghapus sesi latihan');
+    }
     setDeleteConfirmId(null);
   };
 
@@ -58,8 +72,8 @@ export default function TryoutManagement() {
     <div id="tryout-management" className="animate-fade-in space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Manajemen Simulasi TKA</h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Atur jadwal dan materi simulasi ujian siswa</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Manajemen Sesi Latihan</h1>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Atur jadwal dan materi sesi latihan siswa</p>
         </div>
         <button
           onClick={() => navigate('tambah')}
@@ -68,7 +82,7 @@ export default function TryoutManagement() {
           <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover:rotate-90 transition-transform">
             <Plus size={16} strokeWidth={3} />
           </div>
-          Buat Sesi Simulasi TKA
+          Buat Sesi Latihan
         </button>
       </div>
 
@@ -102,7 +116,9 @@ export default function TryoutManagement() {
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
           <input
             type="text"
-            placeholder="Cari nama simulasi..."
+            placeholder="Cari nama sesi latihan..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-14 pr-5 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 outline-none text-xs font-bold transition-all dark:text-white"
           />
         </div>
@@ -111,13 +127,13 @@ export default function TryoutManagement() {
       {/* Data Table View */}
       <DataTable
         headers={[
-          { label: 'Informasi Simulasi TKA' },
+          { label: 'Informasi Sesi Latihan' },
           { label: 'Progres Siswa', align: 'center' },
           { label: 'Jadwal & Durasi', align: 'center' },
           { label: 'Status', align: 'center' },
           { label: 'Aksi', align: 'right' }
         ]}
-        data={filteredTryouts}
+        data={tryouts}
         rowsPerPage={5}
         renderRow={(tryout) => {
           const isEnded = tryout.status === 'ended' || new Date(tryout.endDate) < new Date();
@@ -189,7 +205,7 @@ export default function TryoutManagement() {
       <ConfirmDialog
         isOpen={deleteConfirmId !== null}
         variant="danger"
-        title="Hapus Sesi Simulasi TKA?"
+        title="Hapus Sesi Latihan?"
         message="Menghapus sesi ini akan menghilangkan seluruh data progres siswa yang sedang berjalan. Tindakan ini tidak dapat dibatalkan."
         confirmLabel="Ya, Hapus Permanen"
         cancelLabel="Batal"

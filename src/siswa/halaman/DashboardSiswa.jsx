@@ -6,26 +6,20 @@ import {
   UserCircle,
   Award,
   History,
-  Flame,
-  Play
+  Flame
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// Shared API Client
-import api from '@/utilitas/api';
-
-// UI Components
-import ProgressBar from '@/komponen/ui/BarProgres';
 import SkeletonLoading from '@/komponen/ui/SkeletonMemuat';
 
-// Dashboard Components
-import MissionCard from '@/komponen/siswa/KartuMisi';
-import CountdownTimer from '@/komponen/siswa/Dasboard/PenghitungWaktu';
-import { AcademicProgress } from '@/komponen/siswa/Dasboard/WidgetProgres';
+import CountdownTimer from '@/komponen/siswa/Dashboard/PenghitungWaktu';
+import { AcademicProgress } from '@/komponen/siswa/Dashboard/WidgetProgres';
 import LoginStreakModal from '@/komponen/siswa/ModalStreakLogin';
 
 // User Context Hook
 import { useUser } from '@/konteks/KonteksPengguna';
+
+import { getDashboardData } from '@/utilitas/apiSiswa';
 
 export default function StudentDashboard() {
   const { currentUser } = useUser();
@@ -37,7 +31,7 @@ export default function StudentDashboard() {
   const isMale = currentUser?.gender === 'Laki-laki';
 
   // Timer logic for Ujian TKA
-  const targetDate = new Date('2026-06-15');
+  const targetDate = new Date('2026-06-25');
   const today = new Date();
   const diffTime = Math.max(0, targetDate - today);
   const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -45,10 +39,35 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await api.get('/dashboard/student');
-        setDashboardData(response.data.data);
+        const response = await getDashboardData();
+        const progressLatihan = response.progressLatihan || response.progress_latihan || [];
+        const modulAktif = response.modulAktif || response.modul_aktif || [];
+        const sesiTerdekat = response.sesiLatihanTerdekat || response.sesi_latihan_terdekat || null;
+
+        setDashboardData({
+          progress: {
+            simulations: {
+              completed: response.statistik?.totalSimulasi ?? response.statistik?.totalSesiLatihan ?? 0,
+              total: response.statistik?.totalSimulasi ?? response.statistik?.totalSesiLatihan ?? 0,
+              percentage: 0
+            },
+            modules: {
+              completed: response.statistik?.modulSelesai ?? 0,
+              total: modulAktif.length,
+              percentage: modulAktif.length > 0 ? Math.round(((response.statistik?.modulSelesai ?? 0) / modulAktif.length) * 100) : 0
+            }
+          },
+          upcoming_exams: sesiTerdekat ? [sesiTerdekat] : [],
+          recent_results: progressLatihan.map((item) => ({
+            attempt_id: item.id,
+            exam_title: item.jenis === 'latihan_mandiri' ? 'Latihan Mandiri' : 'Simulasi TKA',
+            subject: item.jenis,
+            total_score: item.nilai
+          })),
+          modules: modulAktif
+        });
       } catch (error) {
-        console.error('Failed to load student dashboard data:', error);
+        console.error('gagal memuat data dashboard siswa', error);
       } finally {
         setLoading(false);
       }
@@ -70,33 +89,22 @@ export default function StudentDashboard() {
     );
   }
 
-  const progress = dashboardData?.progress || {
-    simulations: { completed: 0, total: 0, percentage: 0 },
-    modules: { completed: 0, total: 0, percentage: 0 }
-  };
-
-  const upcomingExams = dashboardData?.upcoming_exams || [];
   const recentResults = dashboardData?.recent_results || [];
-
-  // Map progress to standard format for AcademicProgress
-  const academicProgressMockList = [
-    { subject: 'Matematika', score: progress.simulations.percentage },
-    { subject: 'B. Indonesia', score: progress.modules.percentage }
-  ];
+  const modules = dashboardData?.modules || [];
 
   return (
-    <div id="student-dashboard" className="space-y-8 animate-fade-in">
+    <div id="student-dashboard" className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-10">
 
       <CountdownTimer daysLeft={daysLeft} />
 
       {showReminder && (
-        <div className="relative overflow-hidden bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 dark:from-amber-500/10 dark:to-rose-500/10 border-2 border-orange-200 dark:border-orange-900/50 p-6 rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md animate-in slide-in-from-top duration-300">
+        <div className="relative overflow-hidden bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 dark:from-amber-500/10 dark:to-rose-500/10 border-2 border-orange-200 dark:border-orange-950/50 p-6 rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md animate-in slide-in-from-top duration-300">
           <div className="flex items-center gap-5 text-center sm:text-left flex-col sm:flex-row">
             <div className="w-14 h-14 bg-orange-500 text-white rounded-2xl flex items-center justify-center shadow-lg shrink-0">
               <span className="text-2xl">📢</span>
             </div>
             <div>
-              <h4 className="text-sm font-black text-slate-850 dark:text-white uppercase tracking-wider">Penting: Persiapan Simulasi TKA Tahap Akhir!</h4>
+              <h4 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Penting: Persiapan Simulasi TKA Tahap Akhir!</h4>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
                 Jangan lupa untuk menyelesaikan materi pecahan dan gaya sebelum Simulasi TKA Nasional dimulai tanggal 15 Juni 2026.
               </p>
@@ -105,7 +113,7 @@ export default function StudentDashboard() {
           <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end shrink-0">
             <button
               onClick={() => setShowReminder(false)}
-              className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-500 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm"
+              className="px-5 py-3 bg-orange-600 hover:bg-orange-700 dark:bg-orange-600/20 dark:hover:bg-orange-600/40 border border-orange-500/30 text-white dark:text-orange-400 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
             >
               Tutup Pengingat
             </button>
@@ -165,11 +173,11 @@ export default function StudentDashboard() {
       {/* 2. ACADEMIC PROGRESS & RECENT HISTORY */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <AcademicProgress exams={academicProgressMockList} averageScore={Math.round((progress.simulations.percentage + progress.modules.percentage) / 2)} />
+          <AcademicProgress exams={dashboardData?.upcoming_exams || []} averageScore={dashboardData?.progress?.simulations?.percentage || 0} />
         </div>
 
         <div className="flex flex-col gap-6">
-          {/* S3: Agenda Mendatang */}
+          {/* Agenda Mendatang */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex-1">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-black uppercase tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
@@ -177,21 +185,16 @@ export default function StudentDashboard() {
               </h3>
             </div>
             <div className="space-y-4">
-              {[
-                { title: 'Simulasi TKA Matematika (Wajib)', date: '15 Juni 2026', time: '08:00 WIB' },
-                { title: 'Pembahasan Soal Bersama Guru', date: '18 Juni 2026', time: '13:00 WIB' }
-              ].map((agenda, index) => (
-                <div key={index} className="p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col gap-1 hover:border-orange-200 transition-all">
-                  <h4 className="text-xs font-black text-slate-750 dark:text-slate-200 uppercase tracking-tight leading-tight">{agenda.title}</h4>
-                  <div className="flex items-center justify-between mt-1 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    <span>{agenda.date}</span>
-                    <span className="text-teal-600 dark:text-teal-400">{agenda.time}</span>
-                  </div>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col gap-1 text-center">
+                <h4 className="text-xs font-black text-slate-750 dark:text-slate-200 uppercase tracking-tight leading-tight">Belum Ada Agenda Aktif</h4>
+                <div className="flex items-center justify-center mt-1 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  Menunggu jadwal latihan atau simulasi dari backend
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
+          {/* Riwayat */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex-1">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-black uppercase tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
@@ -216,7 +219,7 @@ export default function StudentDashboard() {
                 ))
               ) : (
                 <div className="text-center py-6 text-xs text-slate-400 font-bold uppercase tracking-widest">
-                  Belum ada ujian diselesaikan
+                  Belum ada riwayat pengerjaan yang tersimpan
                 </div>
               )}
             </div>
@@ -228,18 +231,20 @@ export default function StudentDashboard() {
       <section>
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Latihan Terbaru</h3>
-          <Link to="/ujian" className="text-xs font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5 hover:underline">
+          <Link to="/latihan" className="text-xs font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5 hover:underline">
             Lihat Semua <ChevronRight size={14} />
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {upcomingExams.length > 0 ? (
-            upcomingExams.slice(0, 2).map((exam) => (
-              <MissionCard key={exam.id} exam={exam} />
+          {dashboardData?.upcoming_exams?.length > 0 ? (
+            dashboardData.upcoming_exams.map((item) => (
+              <div key={item.id} className="col-span-2 text-center py-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl text-sm text-slate-700 dark:text-slate-200 font-bold">
+                {item.judul || item.judul_sesi_latihan || 'Sesi latihan tersedia'}
+              </div>
             ))
           ) : (
             <div className="col-span-2 text-center py-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl text-sm text-slate-400 font-bold uppercase tracking-widest">
-              Tidak ada simulasi/ujian aktif saat ini
+              Tidak ada sesi latihan atau simulasi aktif saat ini
             </div>
           )}
         </div>
@@ -254,31 +259,22 @@ export default function StudentDashboard() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { id: 1, title: 'Operasi Campuran Pecahan', subject: 'Matematika', heroImage: '/assets/hero/math-background-hero-3.jpg' },
-            { id: 2, title: 'Konsep Gaya & Energi', subject: 'Sains', heroImage: '/assets/hero/kids-school.jpg' },
-            { id: 3, title: 'Teks Narasi & Deskripsi', subject: 'Bahasa Indonesia', heroImage: '/assets/hero/bahasa-background-hero.jpg' },
-          ].map((module) => (
-            <Link
-              to="/modul"
-              key={module.id}
-              className="group relative h-32 rounded-[2rem] overflow-hidden hover:shadow-xl transition-all"
-            >
-              <img
-                src={module.heroImage}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                alt={module.title}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-5 w-full">
-                <h4 className="font-black text-white text-sm truncate uppercase tracking-tight drop-shadow-md">{module.title}</h4>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-[9px] font-black text-white/70 uppercase tracking-widest drop-shadow-sm">{module.subject}</p>
-                  <Play size={14} className="text-white/80" fill="currentColor" />
+          {modules.length > 0 ? modules.map((modul) => (
+            <div key={modul.id_modul} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <BookOpen size={18} className="text-orange-500" />
+                <div>
+                  <h4 className="font-black text-slate-800 dark:text-white">{modul.judul_modul}</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{modul.mata_pelajaran}</p>
                 </div>
               </div>
-            </Link>
-          ))}
+              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3">{modul.deskripsi || 'Modul belajar tersedia.'}</p>
+            </div>
+          )) : (
+            <div className="col-span-full text-center py-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl text-sm text-slate-400 font-bold uppercase tracking-widest">
+              Belum ada modul aktif dari backend
+            </div>
+          )}
         </div>
       </section>
     </div>

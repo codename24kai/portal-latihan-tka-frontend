@@ -7,9 +7,13 @@ import {
   ChevronDown,
   Search,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  Send,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { kirimPesanBantuan } from '@/utilitas/apiSiswa';
+import toast from 'react-hot-toast';
 
 /**
  * Help Center Page — Interactive FAQ for Students
@@ -18,6 +22,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function HelpCenter() {
   const [activeCategory, setActiveCategory] = useState('Semua');
   const [expandedId, setExpandedId] = useState(null);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [pesan, setPesan] = useState('');
+  const [judulPesan, setJudulPesan] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleKirimPesan = async (e) => {
+    e.preventDefault();
+    if (!judulPesan || !pesan) return toast.error('Harap isi judul dan pesan!');
+    
+    try {
+      setIsSubmitting(true);
+      await kirimPesanBantuan({ judul: judulPesan, isi_pesan: pesan });
+      toast.success('Pesan berhasil dikirim ke Admin!');
+      setIsMessageModalOpen(false);
+      setJudulPesan('');
+      setPesan('');
+    } catch (error) {
+      toast.error('Gagal mengirim pesan.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // FAQ Data - Tailored for child-friendly logic
   const faqData = [
@@ -150,6 +176,60 @@ export default function HelpCenter() {
           </motion.div>
         ))}
       </div>
+
+      {/* 4. FAB TANYA ADMIN */}
+      <button
+        onClick={() => setIsMessageModalOpen(true)}
+        className="fixed bottom-8 right-8 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-110 z-40"
+      >
+        <MessageSquare size={24} />
+      </button>
+
+      {/* MODAL: KIRIM PESAN */}
+      {isMessageModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsMessageModalOpen(false)} />
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-2xl z-10">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Tanya Admin</h3>
+              <button onClick={() => setIsMessageModalOpen(false)} className="text-slate-400 hover:text-red-500">
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleKirimPesan} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Topik Pertanyaan</label>
+                <input
+                  type="text"
+                  value={judulPesan}
+                  onChange={(e) => setJudulPesan(e.target.value)}
+                  placeholder="Misal: Lupa Password"
+                  className="w-full mt-1 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sm outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pesan Lengkap</label>
+                <textarea
+                  value={pesan}
+                  onChange={(e) => setPesan(e.target.value)}
+                  placeholder="Ceritakan kesulitanmu..."
+                  rows={4}
+                  className="w-full mt-1 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sm outline-none focus:border-indigo-500 resize-none"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              >
+                <Send size={18} /> {isSubmitting ? 'Mengirim...' : 'Kirim Sekarang'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -68,7 +68,7 @@ export default function QuestionBankSummary({ data }) {
               height={36}
               iconType="circle"
               iconSize={8}
-              wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+              wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', paddingBlock: '20px' }}
             />
           </PieChart>
         </ResponsiveContainer>

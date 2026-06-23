@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '@/utilitas/api';
 import {
   Plus,
   Search,
@@ -16,25 +17,36 @@ import Dropdown from '@/komponen/ui/Dropdown';
 import Badge from '@/komponen/ui/Badge';
 import DataTable from '@/komponen/ui/TabelData';
 
-const mockModules = [
-  { id: 1, title: 'Matematika: Pengenalan Aljabar Dasar', type: 'video', subject: 'Matematika', category: 'Akademik', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', status: 'published', hasQuiz: true, questionCount: 5, quizLocked: true, prerequisite: 'video', description: 'Materi ini membahas dasar-dasar aljabar untuk siswa kelas 6.' },
-  { id: 3, title: 'Survei Lingkungan Belajar', type: 'pdf', subject: 'Survei Lingkungan Belajar', category: 'Non-Akademik', url: '#', status: 'draft', hasQuiz: true, questionCount: 10, quizLocked: true, prerequisite: 'download', description: 'Survei untuk mengukur kualitas lingkungan belajar di sekolah.' },
-];
-
 export default function ModuleManagement() {
   const navigate = useNavigate();
-  const [modules, setModules] = useState(mockModules);
+  const [modules, setModules] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSubject, setFilterSubject] = useState('Semua');
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredModules = modules?.filter(m => {
-    const matchesSearch = m?.title?.toLowerCase().includes(searchTerm.toLowerCase()) || m?.subject?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSubject = filterSubject === 'Semua' || m?.subject === filterSubject;
-    const matchesStatus = filterStatus === 'Semua' || m?.status === filterStatus.toLowerCase();
-    return matchesSearch && matchesSubject && matchesStatus;
-  }) || [];
+  const fetchModules = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = {};
+      if (filterSubject !== 'Semua') params.subject = filterSubject;
+      if (filterStatus !== 'Semua') params.status = filterStatus;
+      if (searchTerm) params.search = searchTerm;
+
+      const res = await api.get('/admin/modul', { params });
+      setModules(res.data.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal mengambil data modul');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filterSubject, filterStatus, searchTerm]);
+
+  useEffect(() => {
+    fetchModules();
+  }, [fetchModules]);
 
   const handleEdit = (id) => navigate(`edit/${id}`);
 
@@ -46,9 +58,14 @@ export default function ModuleManagement() {
     }
   };
 
-  const handleDelete = () => {
-    toast.success('Materi berhasil dihapus permanen');
-    setModules(modules?.filter(m => m?.id !== deleteConfirmId));
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/admin/modul/${deleteConfirmId}`);
+      toast.success('Materi berhasil dihapus permanen');
+      fetchModules();
+    } catch (err) {
+      toast.error('Gagal menghapus materi');
+    }
     setDeleteConfirmId(null);
   };
 
@@ -121,7 +138,7 @@ export default function ModuleManagement() {
           { label: 'Status', align: 'center' },
           { label: 'Aksi', align: 'right' }
         ]}
-        data={filteredModules}
+        data={modules}
         rowsPerPage={5}
         renderRow={(module) => (
           <tr key={module.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group">

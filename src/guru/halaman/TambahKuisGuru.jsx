@@ -23,8 +23,8 @@ import {
   Shuffle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { mockQuestionBank } from '@/data/mockSoal';
 import { SUBJECTS } from '@/konstanta/mataPelajaran';
+import api from '@/utilitas/api';
 import Dropdown from '@/komponen/ui/Dropdown';
 import Badge from '@/komponen/ui/Badge';
 import DataTable from '@/komponen/ui/TabelData';
@@ -42,6 +42,7 @@ export default function GuruAddQuiz() {
   // 1. CONFIG STATE
   const [formData, setFormData] = useState({
     title: '',
+    moduleId: '',
     subject: 'Matematika',
     duration: '45',
     startDate: '',
@@ -72,6 +73,7 @@ export default function GuruAddQuiz() {
 
   const [selectedBankQuestionIds, setSelectedBankQuestionIds] = useState([]);
   const [bankSearch, setBankSearch] = useState('');
+  const [modules, setModules] = useState([]);
 
   const openMathEditor = (qIndex, type, oIndex = null) => {
     setMathTarget({ qIndex, type, oIndex });
@@ -122,9 +124,25 @@ export default function GuruAddQuiz() {
     setSelectedBankQuestionIds([]);
   }, [confirmedConfig.subject, confirmedConfig.selectionMethod]);
 
+  useEffect(() => {
+    const loadModules = async () => {
+      try {
+        const res = await api.get('/guru/modul');
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        setModules(list);
+        setFormData(prev => ({
+          ...prev,
+          moduleId: prev.moduleId || String(list[0]?.id ?? '')
+        }));
+      } catch (err) {
+        console.error('Gagal memuat modul guru', err);
+      }
+    };
+    loadModules();
+  }, []);
+
   const availableQuestions = useMemo(() => {
-    return (mockQuestionBank ?? [])
-      .filter(q => q.subject === confirmedConfig.subject && q.category === 'Akademik');
+    return [];
   }, [confirmedConfig.subject]);
 
   const filteredBankQuestions = useMemo(() => {
@@ -180,10 +198,68 @@ export default function GuruAddQuiz() {
     executeSave('draft');
   };
 
-  const executeSave = (status) => {
-    toast.success(`Kuis berhasil disimpan sebagai ${status === 'draft' ? 'Draft' : 'Rilisan'}`);
-    setIsConfirmOpen(false);
-    setTimeout(() => navigate('/guru/quizzes'), 1500);
+  const buildQuizQuestions = async () => {
+    if (confirmedConfig.selectionMethod === 'manual') {
+      return quizData.questions.map(q => ({
+        text: q.text,
+        options: (q.options || []).map(opt => ({ text: typeof opt === 'string' ? opt : opt.text })),
+        answer: q.answer ?? 0,
+        weight: 10
+      }));
+    }
+
+    const ids = selectedBankQuestionIds;
+    if (!ids.length) return [];
+
+    const details = await Promise.all(
+      ids.map(async (questionId) => {
+        const res = await api.get(`/soal/${questionId}`);
+        const data = res.data?.data ?? res.data;
+        return {
+          text: data.isi_soal || data.text || '',
+          options: (data.opsi_jawaban || data.options || []).map(opt => ({
+            text: opt.teks_opsi || opt.text || opt.nama_opsi || ''
+          })),
+          answer: (data.opsi_jawaban || data.options || []).findIndex(opt => opt.is_benar || opt.benar || opt.correct) ?? 0,
+          weight: 10
+        };
+      })
+    );
+
+    return details.filter(item => item.text);
+  };
+
+  const executeSave = async (status) => {
+    try {
+      if (!formData.moduleId) {
+        toast.error('Pilih modul terlebih dahulu!');
+        return;
+      }
+
+      const questions = await buildQuizQuestions();
+      const payload = {
+        modul_id: Number(formData.moduleId),
+        judul: formData.title,
+        nilai_minimum: 70,
+        questions
+      };
+
+      if (isEdit) {
+        await api.put(`/guru/kuis/${id}`, {
+          judul: formData.title,
+          nilai_minimum: 70
+        });
+      } else {
+        await api.post('/guru/kuis', payload);
+      }
+
+      toast.success(`Kuis berhasil disimpan sebagai ${status === 'draft' ? 'Draft' : 'Rilisan'}`);
+      setIsConfirmOpen(false);
+      setTimeout(() => navigate('/guru/quizzes'), 1500);
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal menyimpan kuis');
+    }
   };
 
   const toggleBankQuestion = (id) => {
@@ -246,6 +322,16 @@ export default function GuruAddQuiz() {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Contoh: Kuis Harian Matematika"
                 className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-teal-500/10 dark:text-white transition-all"
+                />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Modul Sumber</label>
+              <Dropdown
+                value={formData.moduleId}
+                onChange={(val) => setFormData({ ...formData, moduleId: val })}
+                options={modules.map(mod => ({ value: String(mod.id), label: mod.judul }))}
+                fullWidth
               />
             </div>
 
@@ -383,14 +469,13 @@ export default function GuruAddQuiz() {
                 <div className="space-y-4">
                   <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Pratinjau Soal Hasil Acakan:</h5>
                   <DataTable
-                    headers={[{ label: 'No', align: 'center' }, { label: 'Deskripsi Soal' }, { label: 'Level', align: 'center' }]}
+                    headers={[{ label: 'No', align: 'center' }, { label: 'Deskripsi Soal' }]}
                     data={randomizedQuestionsList}
                     rowsPerPage={5}
                     renderRow={(q, idx) => (
                       <tr key={q.id} className="hover:bg-slate-50 transition-colors">
                         <td className="py-4 text-center text-xs font-bold text-slate-500">{idx + 1}</td>
                         <td className="py-4 text-xs font-bold text-slate-700"><MathRenderer latex={q.text} /></td>
-                        <td className="py-4 text-center"><Badge text={q.difficulty} variant={q.difficulty === 'Mudah' ? 'Success' : 'Danger'} /></td>
                       </tr>
                     )}
                   />
@@ -417,8 +502,7 @@ export default function GuruAddQuiz() {
                 headers={[
                   { label: 'Pilih', align: 'center' },
                   { label: 'Deskripsi Soal' },
-                  { label: 'Status Penggunaan', align: 'center' },
-                  { label: 'Level', align: 'center' }
+                  { label: 'Status Penggunaan', align: 'center' }
                 ]}
                 data={filteredBankQuestions}
                 rowsPerPage={5}
@@ -438,7 +522,6 @@ export default function GuruAddQuiz() {
                           variant={q.usedIn ? 'Neutral' : 'Success'} 
                         />
                       </td>
-                      <td className="py-4 text-center"><Badge text={q.difficulty} variant={q.difficulty === 'Mudah' ? 'Success' : 'Danger'} /></td>
                     </tr>
                   );
                 }}
@@ -483,7 +566,7 @@ export default function GuruAddQuiz() {
             <div className="flex gap-4 w-full md:w-auto">
               <button onClick={() => handleSave('draft')} className="flex-1 md:flex-none px-10 py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg transition-all border border-white/5">Draft</button>
               <button
-                disabled={!isValid}
+                disabled={!isValid || !formData.moduleId}
                 onClick={() => handleSave('active')}
                 className={`flex-1 md:flex-none px-12 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl transition-all ${isValid
                     ? 'bg-white text-slate-900 hover:bg-slate-50 active:scale-95'

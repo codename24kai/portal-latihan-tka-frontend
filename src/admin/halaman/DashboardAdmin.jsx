@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import api from '@/utilitas/api';
 import AdminHeader from '@/komponen/admin/dashboard/HeaderAdmin';
 import StatCards from '@/komponen/admin/dashboard/KartuStatistik';
 import AlertSection from '@/komponen/admin/dashboard/SeksiPeringatan';
-import { PerformanceTrendChart, ClassComparisonChart } from '@/komponen/admin/dashboard/GrafikDasbor';
+import { PerformanceTrendChart, ClassComparisonChart } from '@/komponen/admin/dashboard/GrafikDashboard';
 import TryoutStatus from '@/komponen/admin/dashboard/StatusTryout';
 import SiswaPerhatianTable from '@/komponen/admin/dashboard/TabelSiswaPerhatian';
 import ActivityLog from '@/komponen/admin/dashboard/LogAktivitas';
@@ -17,58 +18,56 @@ export default function AdminDashboard() {
     role: 'Super Admin',
   };
 
-  const dashboardData = {
+  const [dashboardData, setDashboardData] = useState({
     metrics: {
-      totalSiswa: '1,284',
-      activeTryouts: '12',
-      avgScore: '78.5',
-      totalQuestions: '4,520',
-      trends: { siswa: 12, tryouts: 5, score: -2, questions: 8 }
+      totalSiswa: '0',
+      activeTryouts: '0',
+      avgScore: '0',
+      totalQuestions: '0',
+      trends: { siswa: 0, tryouts: 0, score: 0, questions: 0 }
     },
-    performanceTrend: [
-      { name: 'Jan', value: 65 },
-      { name: 'Feb', value: 68 },
-      { name: 'Mar', value: 75 },
-      { name: 'Apr', value: 72 },
-      { name: 'Mei', value: 80 },
-      { name: 'Jun', value: 78 },
-    ],
-    classComparison: [
-      { subject: 'Matematika', classA: 85, classB: 78 },
-      { subject: 'B. Indonesia', classA: 88, classB: 92 },
-      { subject: 'S. Karakter', classA: 75, classB: 70 },
-      { subject: 'S. Lingkungan', classA: 82, classB: 85 },
-    ],
-    activeTryouts: [
-      { title: 'Simulasi AKM SD 2026', category: 'Matematika', participants: 42, status: 'Berlangsung', timeLeft: '2j 15m' },
-      { title: 'Kuis Mingguan Ke-4', category: 'B. Indonesia', participants: 28, status: 'Berlangsung', timeLeft: '5j 30m' },
-      { title: 'Tryout Mandiri', category: 'Sains', participants: 15, status: 'Persiapan', timeLeft: '1h' },
-    ],
-    attentionStudents: [
-      { id: 1, name: 'Andi Wijaya', class: '6B', score: 58.5, subject: 'Matematika' },
-      { id: 2, name: 'Siti Aminah', class: '6A', score: 55.2, subject: 'B. Indonesia' },
-      { id: 3, name: 'Fajar Hidayat', class: '6C', score: 52.8, subject: 'Matematika' },
-      { id: 4, name: 'Budi Santoso', class: '6B', score: 59.1, subject: 'Sains' },
-      { id: 5, name: 'Dewi Lestari', class: '6A', score: 57.4, subject: 'Matematika' },
-    ],
-    activities: [
-      { id: 1, user: 'Rina Saputri', type: 'finish', description: 'Menyelesaikan Tryout Matematika', subject: 'Matematika', class: '6A', time: '2 Menit Lalu' },
-      { id: 2, user: 'Ahmad Faisal', type: 'start', description: 'Memulai Kuis B. Indonesia', subject: 'B. Indonesia', class: '6B', time: '5 Menit Lalu' },
-      { id: 3, user: 'Admin System', type: 'login', description: 'Melakukan Update Bank Soal', subject: 'System', class: 'Main', time: '15 Menit Lalu' },
-      { id: 4, user: 'Toni Kroos', type: 'finish', description: 'Menyelesaikan Simulasi AKM', subject: 'Multi', class: '6C', time: '30 Menit Lalu' },
-    ],
-    questionBank: [
-      { subject: 'Matematika', easy: 450, medium: 320, hard: 120, total: 890 },
-      { subject: 'B. Indonesia', easy: 520, medium: 280, hard: 95, total: 895 },
-      { subject: 'S. Karakter', easy: 210, medium: 150, hard: 45, total: 405 },
-    ]
-  };
+    performanceTrend: [],
+    classComparison: [],
+    activeTryouts: [],
+    attentionStudents: [],
+    activities: [],
+    questionBank: []
+  });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get('/admin/dashboard');
+        const result = response.data.data;
+
+        // Memperbarui state dashboardData yang bentuknya objek bersarang (nested object)
+        setDashboardData(prev => ({
+          ...prev,
+          metrics: {
+            ...prev.metrics,
+            totalSiswa: result.statistik?.total_pengguna?.toString() || '0',
+            totalQuestions: result.statistik?.total_soal?.toString() || '0',
+            activeTryouts: result.statistik?.total_sesi_latihan?.toString()
+              || result.statistik?.total_simulasi?.toString()
+              || '0',
+            // Atribut yang belum disuplai backend tetap memakai nilai nol
+          },
+          performanceTrend: result.grafik_tren ? result.grafik_tren.map(item => ({
+            name: item.tanggal,
+            jumlah: item.jumlah
+          })) : prev.performanceTrend
+        }));
+
+      } catch (error) {
+        console.error('Error fetching admin dashboard:', error);
+      } finally {
+        // PENTING: Mematikan loading skeleton setelah data ditarik
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const scopedData = dashboardData;
@@ -78,7 +77,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen p-6 md:p-10 space-y-10 animate-fade-in pb-20 bg-slate-45 dark:bg-slate-900">
+    <div className="min-h-screen p-6 md:p-8 lg:p-10 space-y-8 lg:space-y-10 animate-fade-in pb-20 bg-slate-50 dark:bg-slate-900">
 
       {/* ROW 1: Admin Header */}
       <AdminHeader admin={adminData} />
@@ -93,132 +92,145 @@ export default function AdminDashboard() {
       />
 
       {/* ROW 4: Mixed Grid (Line Chart & Active Tryouts) */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
-        <div className="lg:col-span-6 h-[400px]">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-stretch">
+        <div className="lg:col-span-3 flex flex-col min-h-[400px]">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col justify-between">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col justify-between">
               <div className="flex justify-between items-center mb-6">
                 <LoadingSkeleton className="w-48 h-6" />
-                <LoadingSkeleton className="w-24 h-8" />
+                <LoadingSkeleton className="w-24 h-8 rounded-xl" />
               </div>
               <div className="flex-1 flex items-end gap-4 px-2">
                 {[40, 60, 45, 80, 55, 90, 70, 85].map((h, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                     <LoadingSkeleton className="w-full rounded-t-lg" style={{ height: `${h}%` }} />
-                    <LoadingSkeleton className="w-8 h-3" />
+                    <LoadingSkeleton className="w-8 h-3 mt-2" />
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <PerformanceTrendChart data={scopedData?.performanceTrend} />
+            <div className="h-full w-full">
+              <PerformanceTrendChart data={scopedData?.performanceTrend} />
+            </div>
           )}
         </div>
-        <div className="lg:col-span-4 h-[400px]">
+
+        <div className="lg:col-span-2 flex flex-col min-h-[400px]">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col">
-              <LoadingSkeleton className="w-48 h-6 mb-6" />
-              <div className="space-y-4 flex-1 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col">
+              <LoadingSkeleton className="w-48 h-6 mb-8" />
+              <div className="space-y-5 flex-1">
                 {[1, 2, 3].map((item) => (
-                  <div key={item} className="flex justify-between items-center p-4 border border-slate-50 dark:border-slate-800 rounded-2xl">
-                    <div className="space-y-2">
+                  <div key={item} className="flex justify-between items-center p-4 border border-slate-50 dark:border-slate-700/50 rounded-2xl">
+                    <div className="space-y-3">
                       <LoadingSkeleton className="w-32 h-4" />
                       <LoadingSkeleton className="w-20 h-3" />
                     </div>
-                    <LoadingSkeleton className="w-16 h-6 rounded-full" />
+                    <LoadingSkeleton className="w-16 h-8 rounded-full" />
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <TryoutStatus data={scopedData?.activeTryouts} />
+            <div className="h-full w-full">
+              <TryoutStatus data={scopedData?.activeTryouts} />
+            </div>
           )}
         </div>
       </div>
 
       {/* ROW 5: Mixed Grid (Bar Chart & Siswa Perlu Perhatian) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="h-[400px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+        <div className="flex flex-col min-h-[400px]">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col justify-between">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col justify-between">
+              <div className="flex justify-between items-center mb-8">
                 <LoadingSkeleton className="w-48 h-6" />
-                <div className="flex gap-2">
-                  <LoadingSkeleton className="w-16 h-4" />
-                  <LoadingSkeleton className="w-16 h-4" />
+                <div className="flex gap-3">
+                  <LoadingSkeleton className="w-16 h-5 rounded-md" />
+                  <LoadingSkeleton className="w-16 h-5 rounded-md" />
                 </div>
               </div>
-              <div className="flex-1 flex items-end gap-8 px-4">
+              <div className="flex-1 flex items-end gap-6 px-4 h-full">
                 {[65, 80, 50, 75].map((h, i) => (
-                  <div key={i} className="flex-1 flex items-end gap-2 h-full">
-                    <LoadingSkeleton className="w-1/2 bg-indigo-200 dark:bg-indigo-950 rounded-t-lg" style={{ height: `${h}%` }} />
-                    <LoadingSkeleton className="w-1/2 bg-teal-200 dark:bg-teal-950 rounded-t-lg" style={{ height: `${h - 15}%` }} />
+                  <div key={i} className="flex-1 flex items-end gap-2 h-full justify-center">
+                    <LoadingSkeleton className="w-full max-w-[40px] bg-indigo-100 dark:bg-indigo-900/50 rounded-t-lg" style={{ height: `${h}%` }} />
+                    <LoadingSkeleton className="w-full max-w-[40px] bg-teal-100 dark:bg-teal-900/50 rounded-t-lg" style={{ height: `${Math.max(10, h - 15)}%` }} />
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <ClassComparisonChart data={scopedData?.classComparison} />
+            <div className="h-full w-full">
+              <ClassComparisonChart data={scopedData?.classComparison} />
+            </div>
           )}
         </div>
-        <div className="h-[400px]">
+
+        <div className="flex flex-col min-h-[400px]">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col">
+              <div className="flex justify-between items-center mb-8">
                 <LoadingSkeleton className="w-48 h-6" />
                 <LoadingSkeleton className="w-24 h-4" />
               </div>
-              <div className="space-y-4 flex-1">
+              <div className="space-y-6 flex-1">
                 {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className="flex items-center gap-4">
-                    <LoadingSkeleton className="w-8 h-8 rounded-full" />
-                    <div className="flex-1 space-y-2">
+                  <div key={item} className="flex items-center gap-5">
+                    <LoadingSkeleton className="w-10 h-10 rounded-full shrink-0" />
+                    <div className="flex-1 space-y-3">
                       <LoadingSkeleton className="w-1/3 h-4" />
                       <LoadingSkeleton className="w-1/4 h-3" />
                     </div>
-                    <LoadingSkeleton className="w-12 h-6" />
+                    <LoadingSkeleton className="w-14 h-8 rounded-xl shrink-0" />
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <SiswaPerhatianTable data={scopedData?.attentionStudents} />
+            <div className="h-full w-full">
+              <SiswaPerhatianTable data={scopedData?.attentionStudents} />
+            </div>
           )}
         </div>
       </div>
 
-      {/* ROW 6: Mixed Grid (Recent Activity & Question Bank) */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
-        <div className="lg:col-span-6 h-[400px]">
+      {/* ROW 6: Vertical Stack (Recent Activity & Question Bank) */}
+      <div className="grid grid-cols-1 gap-6 lg:gap-8">
+        <div className="flex flex-col min-h-[400px]">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col">
-              <LoadingSkeleton className="w-48 h-6 mb-6" />
-              <div className="space-y-6 flex-1">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col">
+              <LoadingSkeleton className="w-48 h-6 mb-8" />
+              <div className="space-y-8 flex-1">
                 {[1, 2, 3].map((item) => (
-                  <div key={item} className="flex gap-4">
-                    <LoadingSkeleton className="w-3 h-3 rounded-full mt-1.5" />
-                    <div className="flex-1 space-y-2">
-                      <LoadingSkeleton className="w-2/3 h-4" />
-                      <LoadingSkeleton className="w-20 h-3" />
+                  <div key={item} className="flex gap-5">
+                    <LoadingSkeleton className="w-3 h-3 rounded-full mt-1.5 shrink-0" />
+                    <div className="flex-1 space-y-3">
+                      <LoadingSkeleton className="w-3/4 h-4" />
+                      <LoadingSkeleton className="w-1/4 h-3" />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <ActivityLog activities={scopedData?.activities} />
+            <div className="h-full w-full">
+              <ActivityLog activities={scopedData?.activities} />
+            </div>
           )}
         </div>
-        <div className="lg:col-span-4 h-[400px]">
+
+        <div className="flex flex-col min-h-[400px]">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm h-full flex flex-col">
-              <LoadingSkeleton className="w-48 h-6 mb-6" />
-              <div className="space-y-4 flex-1">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm h-full flex flex-col">
+              <LoadingSkeleton className="w-48 h-6 mb-8" />
+              <div className="space-y-6 flex-1">
                 {[1, 2, 3].map((item) => (
-                  <div key={item} className="space-y-2">
-                    <div className="flex justify-between">
+                  <div key={item} className="space-y-3">
+                    <div className="flex justify-between items-end">
                       <LoadingSkeleton className="w-24 h-4" />
-                      <LoadingSkeleton className="w-12 h-4" />
+                      <LoadingSkeleton className="w-12 h-3" />
                     </div>
                     <LoadingSkeleton className="w-full h-3 rounded-full" />
                   </div>
@@ -226,7 +238,9 @@ export default function AdminDashboard() {
               </div>
             </div>
           ) : (
-            <QuestionBankSummary data={scopedData?.questionBank} />
+            <div className="h-full w-full">
+              <QuestionBankSummary data={scopedData?.questionBank} />
+            </div>
           )}
         </div>
       </div>

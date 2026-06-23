@@ -81,7 +81,7 @@ export default function Sidebar({
         <div className="p-5 border-t border-slate-100 dark:border-slate-700 space-y-3">
           <Link
             to="/bantuan"
-            title={!isSidebarOpen ? 'Bantuan' : ''}
+            title={!isSidebarOpen ? 'bantuan' : ''}
             className={`
               flex items-center rounded-xl font-bold text-base transition-all w-full
               ${isSidebarOpen ? 'px-4 py-3.5 gap-4' : 'p-3.5 justify-center'}

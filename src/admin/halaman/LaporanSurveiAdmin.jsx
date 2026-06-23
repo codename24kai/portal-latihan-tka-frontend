@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
   FileText,
@@ -25,51 +25,78 @@ import {
   Cell
 } from 'recharts';
 import { useDarkMode } from '@/hooks/useModGelap';
-import mockSurveyDefinitions from '@/data/mockSurvei';
-import mockSurveyResponses from '@/data/mockResponSurvei';
-import mockStudents from '@/data/mockSiswa';
 import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import Dropdown from '@/komponen/ui/Dropdown';
+import api from '@/utilitas/api';
 
 const COLORS = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#e0e7ff'];
 
 export default function AdminSurveyReports() {
   const { isDark } = useDarkMode();
 
-  const [selectedSurveyId, setSelectedSurveyId] = useState(mockSurveyDefinitions[0]?.id);
+  const [selectedSurveyId, setSelectedSurveyId] = useState(null);
   const [classFilter, setClassFilter] = useState('Semua Kelas');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedResponseDetail, setSelectedResponseDetail] = useState(null);
+  const [surveiList, setSurveiList] = useState([]);
+  const [rekapData, setRekapData] = useState(null);
 
   // State baru untuk pratinjau grafik/soal yang diklik
   const [selectedQuestionPreview, setSelectedQuestionPreview] = useState(null);
 
-  const selectedSurvey = useMemo(() =>
-    (mockSurveyDefinitions || []).find(s => s?.id === selectedSurveyId),
-    [selectedSurveyId]);
+  useEffect(() => {
+    api.get('/admin/survei')
+      .then((res) => setSurveiList(res.data.data || []))
+      .catch(() => setSurveiList([]));
+  }, []);
 
-  const handleDownload = () => {
-    toast.success(`Berhasil mengunduh laporan survei "${selectedSurvey?.title || 'Survei'}" untuk "${classFilter}"`);
+  useEffect(() => {
+    if (!selectedSurveyId) {
+      setRekapData(null);
+      return;
+    }
+    api.get(`/survei/${selectedSurveyId}/rekap`)
+      .then((res) => setRekapData(res.data.data || null))
+      .catch(() => setRekapData(null));
+  }, [selectedSurveyId]);
+
+  const selectedSurvey = useMemo(() =>
+    surveiList.find(s => String(s.id) === String(selectedSurveyId)) || rekapData?.survei || null,
+    [selectedSurveyId, surveiList, rekapData]);
+
+  const handleDownload = async () => {
+    try {
+      const response = await api.get('/admin/survei/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'laporan-survei-admin.csv';
+      link.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Laporan survei berhasil diunduh');
+    } catch (error) {
+      toast.error('Gagal mengunduh laporan survei');
+    }
   };
 
   const filteredResponses = useMemo(() => {
-    let res = (mockSurveyResponses || []).filter(r => r?.survey_id === selectedSurveyId);
+    let res = rekapData?.responden || [];
     if (classFilter !== 'Semua Kelas') {
-      res = res.filter(r => r?.student_class === classFilter);
+      res = res.filter(r => r?.kelas === classFilter || r?.student_class === classFilter);
     }
     return res;
-  }, [selectedSurveyId, classFilter]);
+  }, [rekapData, classFilter]);
 
   const totalStudents = classFilter === 'Semua Kelas'
-    ? (mockStudents || []).length
-    : (mockStudents || []).filter(s => s?.class === classFilter).length;
+    ? (rekapData?.survei?.total_responden || 0)
+    : (filteredResponses.length || 0);
 
   const completionRate = Math.round((filteredResponses?.length / (totalStudents || 1)) * 100) || 0;
 
   // Unique classes for filter
   const classes = useMemo(() => {
-    const uniqueClasses = [...new Set((mockStudents || []).map(s => s?.class))].sort();
+    const uniqueClasses = [];
     return ['Semua Kelas', ...uniqueClasses];
   }, []);
 
@@ -156,7 +183,7 @@ export default function AdminSurveyReports() {
           <Dropdown
             value={selectedSurveyId}
             onChange={setSelectedSurveyId}
-            options={(mockSurveyDefinitions || []).map(s => ({ value: s?.id, label: s?.title }))}
+            options={(surveiList || []).map(s => ({ value: s.id, label: s.judul }))}
           />
           <Dropdown
             value={classFilter}

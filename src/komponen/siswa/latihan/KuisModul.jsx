@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   BookOpen,
   ArrowRight,
@@ -11,7 +12,7 @@ import OptionCard from '@/komponen/siswa/KartuOpsi';
 import QuizResult from '@/komponen/siswa/latihan/HasilKuis';
 import QuizGuideModal from '@/komponen/siswa/ModalPanduanKuis';
 import LoadingSkeleton from '@/komponen/ui/SkeletonMemuat';
-import ExamFallback from '@/komponen/siswa/FallbackUjian';
+import ExamFallback from '@/komponen/siswa/latihan/FallbackUjian';
 
 /**
  * ModuleQuiz Page — Distraction-Free Focus Mode
@@ -28,11 +29,15 @@ export default function ModuleQuiz() {
   const [answersMap, setAnswersMap] = useState({}); // { [index]: selectedOptionIndex }
   const [showResults, setShowResults] = useState(false);
   const [isFeedbackActive, setIsFeedbackActive] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [animation, setAnimation] = useState(null);
 
   const handleStartQuiz = () => {
     setShowGuide(false);
     setStartTime(Date.now());
   };
+
+
 
   // Mock Question Data
   const questions = useMemo(() => {
@@ -62,7 +67,22 @@ export default function ModuleQuiz() {
       ],
       'default': [
         { text: 'Siapakah presiden pertama Indonesia?', options: ['Soeharto', 'B.J. Habibie', 'Soekarno', 'Gus Dur'], correctIndex: 2 },
-        { text: 'Ibukota negara Indonesia adalah...', options: ['Bandung', 'Surabaya', 'Jakarta', 'Medan'], correctIndex: 2 }
+        { text: 'Ibukota negara Indonesia adalah...', options: ['Bandung', 'Surabaya', 'Jakarta', 'Medan'], correctIndex: 2 },
+        { text: 'Hasil dari 12 x 12 adalah...', options: ['124', '140', '144', '154'], correctIndex: 2 },
+        { text: 'Jika 2x = 10, maka x = ...', options: ['2', '5', '8', '10'], correctIndex: 1 },
+        { text: 'Luas persegi dengan sisi 5cm adalah...', options: ['10', '20', '25', '50'], correctIndex: 2 },
+        { text: 'Hasil dari 100 - 45 + 10 adalah...', options: ['55', '65', '45', '75'], correctIndex: 1 },
+        { text: 'Berapakah 1/2 dari 50?', options: ['20', '25', '30', '35'], correctIndex: 1 },
+        { text: 'Bangun datar yang memiliki 3 sisi adalah...', options: ['Persegi', 'Lingkaran', 'Segitiga', 'Trapesium'], correctIndex: 2 },
+        { text: 'Hasil dari 15 x 3 adalah...', options: ['35', '40', '45', '50'], correctIndex: 2 },
+        { text: 'Berapa jumlah sudut pada persegi?', options: ['2', '3', '4', '5'], correctIndex: 2 },
+        { text: '1 jam berapa menit?', options: ['30', '45', '60', '90'], correctIndex: 2 },
+        { text: '0,5 dalam bentuk pecahan adalah...', options: ['1/4', '1/2', '2/3', '3/4'], correctIndex: 1 },
+        { text: 'Hasil dari 8 x 8 adalah...', options: ['56', '64', '72', '81'], correctIndex: 1 },
+        { text: 'Berapa jumlah sisi kubus?', options: ['4', '6', '8', '12'], correctIndex: 1 },
+        { text: 'Jika hari ini Senin, 2 hari lagi hari...', options: ['Selasa', 'Rabu', 'Kamis', 'Jumat'], correctIndex: 1 },
+        { text: 'Hasil dari 200 : 2 adalah...', options: ['50', '80', '100', '150'], correctIndex: 2 },
+        { text: 'Berapa jumlah jari tangan manusia?', options: ['8', '9', '10', '12'], correctIndex: 2 }
       ]
     };
     if (moduleId === '1' || moduleId === '4') return allQuestions['in-1'];
@@ -76,18 +96,30 @@ export default function ModuleQuiz() {
   const handleOptionSelect = (optionIndex) => {
     if (isFeedbackActive) return;
 
-    setAnswersMap(prev => ({
-      ...prev,
-      [currentIndex]: optionIndex
-    }));
+    const isCorrect = optionIndex === currentQuestion.correctIndex;
 
-    // Trigger feedback pause
+    // Logic Animasi & Streak
+    if (isCorrect) {
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      // Pilih GIF correct (random 1-11)
+      const gifNum = Math.min(newStreak, 11);
+      setAnimation({ type: 'correct', gif: `/assets/quiz/correct-${gifNum}.gif` });
+    } else {
+      setStreak(0);
+      // Pilih GIF wrong (random 1-6) atau joe-wrong (1-4)
+      const isJoe = Math.random() > 0.5;
+      const gifNum = isJoe ? Math.floor(Math.random() * 4) + 1 : Math.floor(Math.random() * 6) + 1;
+      setAnimation({ type: 'wrong', gif: isJoe ? `/assets/quiz/joe-wrong-${gifNum}.gif` : `/assets/quiz/wrong-answer-${gifNum}.gif` });
+    }
+
+    setAnswersMap(prev => ({ ...prev, [currentIndex]: optionIndex }));
     setIsFeedbackActive(true);
+
     setTimeout(() => {
       setIsFeedbackActive(false);
-      // Auto-advance if correct, or let them stay if wrong to review? 
-      // User requested "Pause for 1-2 seconds", let's keep it manual navigation to review.
-    }, 1500);
+      setAnimation(null);
+    }, 2000);
   };
 
   const handleNext = () => {
@@ -173,6 +205,21 @@ export default function ModuleQuiz() {
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in relative overflow-hidden">
       {/* 1. FOCUS MODE HEADER */}
+      {/* Animation Overlay */}
+      {animation && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+          <motion.div
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1 }}
+            className="bg-white p-4 rounded-3xl shadow-2xl"
+          >
+            <img src={animation.gif} alt="feedback" className="w-64 h-64 object-cover rounded-2xl" />
+            <p className="text-center mt-4 font-black text-slate-800 uppercase tracking-widest">
+              {animation.type === 'correct' ? (streak > 1 ? `${streak} STREAK!` : 'Bagus!') : 'Yah, Kurang Tepat!'}
+            </p>
+          </motion.div>
+        </div>
+      )}
       <header className="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 px-6 md:px-12 flex items-center justify-between shrink-0 z-50">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">

@@ -44,10 +44,9 @@ export default function StudentLayout() {
 
   const navItems = [
     { label: 'Beranda', icon: Home, path: '/beranda', end: true },
-    { label: 'Latihan', icon: PenTool, path: '/ujian' },
+    { label: 'Latihan', icon: PenTool, path: '/latihan' },
     { label: 'Modul Belajar', icon: BookOpen, path: '/modul' },
     { label: 'Pengaturan', icon: Settings, path: '/pengaturan' },
-    { label: 'Bantuan', icon: HelpCircle, path: '/bantuan' },
   ];
 
   const handleLogout = () => {

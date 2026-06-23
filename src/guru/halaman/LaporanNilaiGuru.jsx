@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Download, 
-  FileText, 
-  Table as TableIcon, 
-  Calendar, 
+import {
+  Download,
+  FileText,
+  Table as TableIcon,
+  Calendar,
   Search,
   TrendingUp,
   ChevronRight,
@@ -30,7 +30,7 @@ import Badge from '@/komponen/ui/Badge';
 import ProgressBar from '@/komponen/ui/BarProgres';
 import Dropdown from '@/komponen/ui/Dropdown';
 import ExportOptions from '@/komponen/guru/ExportOptions';
-import mockStudents from '@/data/mockSiswa';
+import { getLaporanNilaiGuru, exportLaporanGuru, getDaftarSiswaGuru } from '@/utilitas/apiGuru';
 
 export default function GuruScoreReports() {
   const navigate = useNavigate();
@@ -38,7 +38,11 @@ export default function GuruScoreReports() {
   const [subjectFilter, setSubjectFilter] = useState('Semua Mapel');
   const [selectedChartFilter, setSelectedChartFilter] = useState('Semua Tipe');
   const [selectedSessionId, setSelectedSessionId] = useState('');
-  
+
+  const [students, setStudents] = useState([]);
+  const [historicalExams, setHistoricalExams] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // T2: Custom Export States
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState('PDF'); // 'PDF' | 'Excel'
@@ -53,15 +57,48 @@ export default function GuruScoreReports() {
   const { isDark } = useDarkMode();
   const assignedClass = localStorage.getItem('assignedClass') ?? '';
 
-  // Mock data for Historical Exams
-  const historicalExams = useMemo(() => [
-    { name: 'Simulasi TKA #1', type: 'Simulasi TKA', date: '12 Jan 2026', avgScore: 74.5 },
-    { name: 'Latihan Mandiri', type: 'Latihan Mandiri', date: '25 Jan 2026', avgScore: 78.2 },
-    { name: 'Kuis Harian Aljabar', type: 'Latihan Mandiri', date: '08 Feb 2026', avgScore: 71.8 },
-    { name: 'Simulasi TKA #2', type: 'Simulasi TKA', date: '22 Feb 2026', avgScore: 80.5 },
-    { name: 'Latihan Volume', type: 'Latihan Mandiri', date: '10 Mar 2026', avgScore: 83.0 },
-    { name: 'Simulasi TKA Akbar', type: 'Simulasi TKA', date: '05 Apr 2026', avgScore: 85.4 },
-  ], []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [siswaData, laporanData] = await Promise.all([
+          getDaftarSiswaGuru(),
+          getLaporanNilaiGuru()
+        ]);
+        setStudents(siswaData || []);
+
+        // Memproses laporanData (raw riwayat) menjadi grouped by sesi
+        const grouped = (laporanData || []).reduce((acc, curr) => {
+          if (!acc[curr.judul_simulasi]) {
+            acc[curr.judul_simulasi] = {
+              name: curr.judul_simulasi,
+              type: curr.jenis_sesi || 'Sesi Latihan',
+              date: curr.selesai_pada ? curr.selesai_pada.split(' ')[0] : 'N/A',
+              totalScore: 0,
+              count: 0
+            };
+          }
+          acc[curr.judul_simulasi].totalScore += curr.nilai;
+          acc[curr.judul_simulasi].count += 1;
+          return acc;
+        }, {});
+
+        const history = Object.values(grouped).map(g => ({
+          name: g.name,
+          type: g.type,
+          date: g.date,
+          avgScore: g.totalScore / g.count
+        }));
+
+        setHistoricalExams(history);
+      } catch (err) {
+        toast.error('Gagal memuat laporan nilai.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredChartData = useMemo(() => {
     if (selectedChartFilter === 'Semua Tipe') return historicalExams;
@@ -76,21 +113,21 @@ export default function GuruScoreReports() {
   ];
 
   const filteredData = useMemo(() => {
-    const processed = (mockStudents ?? [])
+    const processed = (students ?? [])
       .filter(s => s?.class === assignedClass)
       .map(s => ({
         ...s,
-        matematika: Math.max(0, Math.min(100, Math.round((s?.avgScore ?? 0) + (s?.id % 2 === 0 ? 5 : -5)))),
-        bahasa: Math.max(0, Math.min(100, Math.round((s?.avgScore ?? 0) + (s?.id % 3 === 0 ? 3 : -2)))),
+        matematika: s?.matematika ?? 0,
+        bahasa: s?.bahasa ?? 0,
       }));
 
     return processed
       .filter(s => (s?.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()))
       .filter(s => {
         if (subjectFilter === 'Semua Mapel') return true;
-        return true; 
+        return true;
       });
-  }, [assignedClass, searchQuery, subjectFilter]);
+  }, [students, assignedClass, searchQuery, subjectFilter]);
 
   const sessionStudentScores = useMemo(() => {
     if (!selectedSessionId) return [];
@@ -168,9 +205,9 @@ export default function GuruScoreReports() {
         <Badge text={(student?.bahasa ?? 0).toString()} variant={scoreBadgeVariant(student?.bahasa)} />
       </td>
       <td className="py-6 px-8 min-w-[200px]">
-        <ProgressBar 
-          progress={student?.avgScore ?? 0} 
-          color={(student?.avgScore ?? 0) >= 80 ? "bg-teal-500" : (student?.avgScore ?? 0) >= 65 ? "bg-amber-500" : "bg-rose-500"} 
+        <ProgressBar
+          progress={student?.avgScore ?? 0}
+          color={(student?.avgScore ?? 0) >= 80 ? "bg-teal-500" : (student?.avgScore ?? 0) >= 65 ? "bg-amber-500" : "bg-rose-500"}
         />
       </td>
     </tr>
@@ -184,9 +221,9 @@ export default function GuruScoreReports() {
         </p>
       </td>
       <td className="py-6 px-4 text-center">
-        <Badge 
-          text={exam?.type} 
-          variant={exam?.type === 'Simulasi TKA' ? 'Success' : 'Warning'} 
+        <Badge
+          text={exam?.type}
+          variant={exam?.type === 'Simulasi TKA' ? 'Success' : 'Warning'}
         />
       </td>
       <td className="py-6 px-4 text-center text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">
@@ -222,22 +259,21 @@ export default function GuruScoreReports() {
         <Badge text={(studentScore?.score ?? 0).toString()} variant={scoreBadgeVariant(studentScore?.score)} />
       </td>
       <td className="py-6 px-4 text-center">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-          studentScore?.status === 'Lulus' 
-            ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400' 
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${studentScore?.status === 'Lulus'
+            ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400'
             : 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400'
-        }`}>
+          }`}>
           {studentScore?.status}
         </span>
       </td>
     </tr>
   );
 
-  const handleStartExport = (e) => {
+  const handleStartExport = async (e) => {
     e.preventDefault();
     setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
+    try {
+      await exportLaporanGuru();
       setExportModalOpen(false);
       toast.success(`Laporan berhasil diekspor ke format ${exportFormat}!`, {
         duration: 3000,
@@ -250,7 +286,11 @@ export default function GuruScoreReports() {
           textTransform: 'uppercase'
         }
       });
-    }, 1500);
+    } catch (err) {
+      toast.error('Gagal mengekspor laporan.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const gridColor = isDark ? '#1E293B' : '#F1F5F9';
@@ -265,17 +305,17 @@ export default function GuruScoreReports() {
             <Calendar size={14} /> Statistik Akademik Kelas {assignedClass}
           </div>
           <h1 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-tight leading-none">Laporan Nilai Siswa</h1>
-          <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest italic">Monitoring hasil tryout dan perkembangan akademik</p>
+          <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest italic">Monitoring hasil sesi latihan dan perkembangan akademik</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button 
+          <button
             onClick={() => { setExportFormat('PDF'); setExportModalOpen(true); }}
             className="h-12 px-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:shadow-lg transition-all active:scale-95"
           >
             <FileText size={18} className="text-rose-500" /> Export PDF
           </button>
-          <button 
+          <button
             onClick={() => { setExportFormat('Excel'); setExportModalOpen(true); }}
             className="h-12 px-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:shadow-lg transition-all active:scale-95"
           >
@@ -294,13 +334,13 @@ export default function GuruScoreReports() {
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Perkembangan Rata-rata Nilai Kelas dari Waktu ke Waktu</p>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2 mr-2">
               <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Rata-rata Kelas</span>
             </div>
-            
+
             <select
               value={selectedChartFilter}
               onChange={(e) => setSelectedChartFilter(e.target.value)}
@@ -308,33 +348,33 @@ export default function GuruScoreReports() {
             >
               <option value="Semua Tipe">Semua Tipe</option>
               <option value="Latihan Mandiri">Latihan Mandiri</option>
-              <option value="Simulasi TKA">Simulasi TKA</option>
+              <option value="Simulasi TKA">Sesi Latihan TKA</option>
             </select>
           </div>
         </div>
-        
+
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={filteredChartData ?? []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-              <XAxis 
-                dataKey="name" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 10, fill: tickColor, fontWeight: 'bold' }} 
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fill: tickColor, fontWeight: 'bold' }}
               />
-              <YAxis 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 10, fill: tickColor, fontWeight: 'bold' }} 
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fill: tickColor, fontWeight: 'bold' }}
                 domain={[0, 100]}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="avgScore" 
+              <Line
+                type="monotone"
+                dataKey="avgScore"
                 name="Rata-rata Kelas"
-                stroke="#F97316" 
+                stroke="#F97316"
                 strokeWidth={4}
                 activeDot={{ r: 8 }}
                 dot={{ r: 4, strokeWidth: 2 }}
@@ -355,7 +395,7 @@ export default function GuruScoreReports() {
               Lihat nilai lengkap siswa untuk setiap sesi ujian/latihan
             </p>
           </div>
-          
+
           <select
             value={selectedSessionId}
             onChange={(e) => setSelectedSessionId(e.target.value)}
@@ -408,31 +448,31 @@ export default function GuruScoreReports() {
       {/* Table Section */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-           <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest flex items-center gap-2">
-             <TrendingUp size={18} className="text-teal-600" /> Rincian Nilai Per Siswa
-           </h3>
-           <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="relative min-w-[240px]">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari nama siswa..."
-                  className="w-full h-12 pl-12 pr-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all dark:text-white shadow-sm"
-                />
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-              </div>
-              <Dropdown 
-                value={subjectFilter}
-                onChange={setSubjectFilter}
-                options={[
-                  { value: 'Semua Mapel', label: 'Semua Mapel' },
-                  { value: 'Matematika', label: 'Matematika' },
-                  { value: 'Bahasa Indonesia', label: 'Bahasa Indonesia' }
-                ]}
-                className="min-w-[160px]"
+          <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest flex items-center gap-2">
+            <TrendingUp size={18} className="text-teal-600" /> Rincian Nilai Per Siswa
+          </h3>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="relative min-w-[240px]">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari nama siswa..."
+                className="w-full h-12 pl-12 pr-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all dark:text-white shadow-sm"
               />
-           </div>
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+            <Dropdown
+              value={subjectFilter}
+              onChange={setSubjectFilter}
+              options={[
+                { value: 'Semua Mapel', label: 'Semua Mapel' },
+                { value: 'Matematika', label: 'Matematika' },
+                { value: 'Bahasa Indonesia', label: 'Bahasa Indonesia' }
+              ]}
+              className="min-w-[160px]"
+            />
+          </div>
         </div>
 
         <DataTable
@@ -444,19 +484,19 @@ export default function GuruScoreReports() {
       </div>
 
       {exportModalOpen && (
-  <ExportOptions
-    isOpen={exportModalOpen}
-    onClose={() => setExportModalOpen(false)}
-    exportFormat={exportFormat}
-    setExportFormat={setExportFormat}
-    exportScope={exportScope}
-    setExportScope={setExportScope}
-    exportColumns={exportColumns}
-    setExportColumns={setExportColumns}
-    isExporting={isExporting}
-    setIsExporting={setIsExporting}
-    onExport={handleStartExport}
-  />
+        <ExportOptions
+          isOpen={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          exportFormat={exportFormat}
+          setExportFormat={setExportFormat}
+          exportScope={exportScope}
+          setExportScope={setExportScope}
+          exportColumns={exportColumns}
+          setExportColumns={setExportColumns}
+          isExporting={isExporting}
+          setIsExporting={setIsExporting}
+          onExport={handleStartExport}
+        />
       )}
     </div>
   );

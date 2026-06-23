@@ -11,14 +11,13 @@ import {
   Settings
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { mockSurveyDefinitions } from '@/data/mockSurvei';
 import DataTable from '@/komponen/ui/TabelData';
 import Badge from '@/komponen/ui/Badge';
 import ConfirmDialog from '@/komponen/ui/DialogKonfirmasi';
 
 export default function SurveyManagement() {
   const navigate = useNavigate();
-  const [surveys, setSurveys] = useState(mockSurveyDefinitions);
+  const [surveys, setSurveys] = useState([]);
   const [search, setSearch] = useState('');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -38,10 +37,6 @@ export default function SurveyManagement() {
 
   const handleConfirmDelete = () => {
     setSurveys(prev => prev.filter(s => s.id !== selectedId));
-    // Also remove from mock database reference
-    const index = mockSurveyDefinitions.findIndex(s => s.id === selectedId);
-    if (index !== -1) mockSurveyDefinitions.splice(index, 1);
-    
     toast.success('Survei berhasil dihapus!');
     setIsDeleteOpen(false);
   };
@@ -83,17 +78,18 @@ export default function SurveyManagement() {
 
       {/* DATA TABLE */}
       <div className="bg-white dark:bg-slate-800 rounded-[3rem] p-10 border border-slate-100 dark:border-slate-700 shadow-sm">
-        <DataTable
-          headers={[
-            { label: 'Judul Survei' },
-            { label: 'Tipe', align: 'center' },
-            { label: 'Jumlah Pertanyaan', align: 'center' },
-            { label: 'Status', align: 'center' },
-            { label: 'Aksi', align: 'center' }
-          ]}
-          data={filteredSurveys}
-          rowsPerPage={5}
-          renderRow={s => (
+        {filteredSurveys.length > 0 ? (
+          <DataTable
+            headers={[
+              { label: 'Judul Survei' },
+              { label: 'Tipe', align: 'center' },
+              { label: 'Jumlah Pertanyaan', align: 'center' },
+              { label: 'Status', align: 'center' },
+              { label: 'Aksi', align: 'center' }
+            ]}
+            data={filteredSurveys}
+            rowsPerPage={5}
+            renderRow={s => (
             <tr 
               key={s.id}
               onClick={() => navigate(`/admin/survei/edit/${s.id}`)}
@@ -147,8 +143,13 @@ export default function SurveyManagement() {
                 </div>
               </td>
             </tr>
-          )}
-        />
+            )}
+          />
+        ) : (
+          <div className="py-16 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Belum ada survei dari backend
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

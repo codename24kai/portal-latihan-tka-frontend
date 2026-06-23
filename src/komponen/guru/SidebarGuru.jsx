@@ -9,6 +9,7 @@ import {
   X,
   Layers,
   Zap,
+  User,
   FileText
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -27,10 +28,10 @@ export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collaps
       label: 'Dashboard',
       items: [
         { path: '/guru', icon: LayoutDashboard, label: 'Beranda', end: true },
-        { path: '/guru/agenda', icon: CalendarDays, label: 'Agenda Kelas' },
+        { path: '/guru/sesi-latihan', icon: CalendarDays, label: 'Sesi Latihan' },
         { path: '/guru/siswa', icon: Users, label: 'Daftar Siswa' },
         { path: '/guru/laporan', icon: BarChart3, label: 'Laporan Nilai', end: true },
-        { path: '/guru/laporan/survey', icon: FileText, label: 'Laporan Survei' },
+        { path: '/guru/laporan/survei', icon: FileText, label: 'Laporan Survei' },
       ]
     },
     {
@@ -39,7 +40,15 @@ export default function GuruSidebar({ mobileMenuOpen, setMobileMenuOpen, collaps
         { path: '/guru/modul', icon: Layers, label: 'Kelola Modul' },
         { path: '/guru/kuis', icon: Zap, label: 'Kelola Latihan' },
       ]
+    },
+
+    {
+      label: 'Profil',
+      items: [
+        { path: '/guru/profil', icon: User, label: 'Profil' },
+      ]
     }
+
   ];
 
   // Close mobile menu on resize

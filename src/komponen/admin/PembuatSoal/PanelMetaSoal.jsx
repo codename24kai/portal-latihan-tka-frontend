@@ -3,7 +3,7 @@ import { HelpCircle, Layers, Target, Zap } from 'lucide-react';
 import Dropdown from '@/komponen/ui/Dropdown';
 import Badge from '@/komponen/ui/Badge';
 import { SUBJECTS } from '@/konstanta/mataPelajaran';
-import { QUESTION_TYPES, QUESTION_TYPE_LABELS, COGNITIVE_LEVELS, DIFFICULTY_LEVELS } from '@/konstanta/soal';
+import { QUESTION_TYPES, QUESTION_TYPE_LABELS } from '@/konstanta/soal';
 
 export default function QuestionMetaPanel({ data, onChange }) {
   return (

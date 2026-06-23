@@ -16,18 +16,40 @@ import ConfirmDialog from '@/komponen/ui/DialogKonfirmasi';
 import Dropdown from '@/komponen/ui/Dropdown';
 import Badge from '@/komponen/ui/Badge';
 import DataTable from '@/komponen/ui/TabelData';
-
-// Mock data adapted for Guru
-const initialModules = [
-  { id: 101, title: 'Matematika: Aljabar Dasar Kelas 6A', type: 'video', subject: 'Matematika', category: 'Harian', status: 'published', target_class: '6A', hasQuiz: true, questionCount: 5 },
-  { id: 102, title: 'Bahasa Indonesia: Teks Eksplanasi', type: 'pdf', subject: 'Bahasa Indonesia', category: 'Harian', status: 'published', target_class: '6A', hasQuiz: false },
-  { id: 103, title: 'Matematika: Bangun Ruang', type: 'video', subject: 'Matematika', category: 'Mandiri', status: 'draft', target_class: '6A', hasQuiz: true, questionCount: 10 },
-];
+import { getDaftarModulGuru } from '@/utilitas/apiGuru';
 
 export default function GuruManageModules() {
   const navigate = useNavigate();
   const assignedClass = localStorage.getItem('assignedClass') ?? '';
-  const [modules, setModules] = useState(initialModules);
+  const [modules, setModules] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchModul = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getDaftarModulGuru();
+        // Memetakan struktur backend ke struktur UI
+        const mapped = data.map(m => ({
+          id: m.id ?? m.id_modul,
+          title: m.judul ?? m.judul_modul,
+          type: m.tipe ?? 'pdf',
+          subject: m.mata_pelajaran ?? m.subject ?? '-',
+          category: 'Akademik',
+          status: m.status === 'aktif' ? 'published' : (m.status || 'draft'),
+          target_class: assignedClass,
+          hasQuiz: (m.total_soal_kuis ?? m.kuis_count ?? 0) > 0,
+          questionCount: m.total_soal_kuis ?? m.kuis_count ?? 0
+        }));
+        setModules(mapped);
+      } catch (err) {
+        toast.error('Gagal memuat modul.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchModul();
+  }, [assignedClass]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSubject, setFilterSubject] = useState('Semua');
   const [filterStatus, setFilterStatus] = useState('Semua');
@@ -36,7 +58,6 @@ export default function GuruManageModules() {
   // Scoped filtering
   const filteredModules = useMemo(() => {
     return (modules ?? [])
-      .filter(m => m?.target_class === assignedClass)
       .filter(m => {
         const matchesSearch = (m?.title ?? '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesSubject = filterSubject === 'Semua' || m?.subject === filterSubject;

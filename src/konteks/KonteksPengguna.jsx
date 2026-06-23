@@ -24,19 +24,42 @@ export const UserProvider = ({ children }) => {
         setLoading(false);
         return;
       }
+
       try {
         const response = await api.get('/auth/me');
-        const user = response.data.data;
-        
-        // Sync local IndexedDB profile pic if any, otherwise keep what API returns
-        const savedPic = await getProfilePic(user.id);
-        
-        setCurrentUser({
-          ...user,
-          profile_pic: savedPic || user.profile_pic
-        });
+
+        // 1. Ekstrak data sesuai struktur Laravel kita (tanpa .data ganda)
+        const userDataRaw = response.data.user || response.data;
+        const profilRaw = response.data.profil || null;
+
+        // Jika API tidak merespons dengan benar, lemparkan error agar ditangkap catch
+        if (!userDataRaw || !userDataRaw.id) {
+          throw new Error("Struktur data /auth/me tidak sesuai ekspektasi");
+        }
+
+        // 2. Sync local IndexedDB profile pic
+        const savedPic = await getProfilePic(userDataRaw.id);
+
+        // 3. Mapping data menggunakan standar yang sama dengan fungsi login
+        const restoredUser = {
+          id: userDataRaw.id,
+          username: userDataRaw.username,
+          role: userDataRaw.role,
+          status: userDataRaw.status,
+          namaLengkap: profilRaw ? profilRaw.nama_lengkap : userDataRaw.username,
+          nisn: profilRaw ? profilRaw.nisn : null,
+          gender: profilRaw ? profilRaw.gender : null,
+          kelas: profilRaw && profilRaw.kelas ? profilRaw.kelas.nama_kelas : '-',
+          waliKelas: profilRaw && profilRaw.kelas && profilRaw.kelas.wali_kelas ? profilRaw.kelas.wali_kelas.nama_lengkap : '-',
+          detailProfil: profilRaw,
+          profile_pic: savedPic || userDataRaw.profile_pic
+        };
+
+        setCurrentUser(restoredUser);
+
       } catch (error) {
         console.error('Failed to restore session:', error);
+        // Jika gagal (misal token expired atau server mati), bersihkan memori
         localStorage.removeItem('auth_token');
         localStorage.removeItem('userRole');
         localStorage.removeItem('assignedClass');
@@ -48,31 +71,45 @@ export const UserProvider = ({ children }) => {
     fetchCurrentUser();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { user, token } = response.data.data;
+      console.log("2. Mengirim request Axios ke backend...");
+
+      const response = await api.post('/auth/login', { username, password });
+
+      console.log("3. Jawaban murni dari backend:", response.data);
+
+      const { token, user, profil } = response.data;
+
+      // PERBAIKAN 1: Samakan dengan nama key di useEffect & logout ('auth_token')
+      localStorage.setItem('auth_token', token);
 
       localStorage.setItem('auth_token', token);
       localStorage.setItem('userRole', user.role);
-      
-      if (user.class) {
-        localStorage.setItem('assignedClass', user.class);
-      } else {
-        localStorage.removeItem('assignedClass');
+
+      if (profil && profil.kelas) {
+        localStorage.setItem('assignedClass', profil.kelas.nama_kelas);
       }
 
-      // Check IndexedDB profile picture
-      const savedPic = await getProfilePic(user.id);
-      const userWithPic = {
-        ...user,
-        profile_pic: savedPic || user.profile_pic
+      const userData = {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        status: user.status,
+        namaLengkap: profil ? profil.nama_lengkap : user.username,
+        nisn: profil ? profil.nisn : null,
+        gender: profil ? profil.gender : null,
+        kelas: profil && profil.kelas ? profil.kelas.nama_kelas : '-',
+        waliKelas: profil && profil.kelas && profil.kelas.wali_kelas ? profil.kelas.wali_kelas.nama_lengkap : '-',
+        detailProfil: profil
       };
 
-      setCurrentUser(userWithPic);
-      return user;
+      // PERBAIKAN 2: Gunakan fungsi setter state yang benar
+      setCurrentUser(userData);
+
+      return userData;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("ERROR TERTANGKAP DI KONTEKS:", error);
       throw error;
     }
   };

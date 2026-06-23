@@ -49,28 +49,28 @@ export default function StatCards({ data, isLoading }) {
       icon: Users,
       label: 'Total Siswa Aktif',
       value: data?.totalSiswa || '0',
-      trend: data?.trends?.siswa || 12,
+      trend: data?.trends?.siswa || 0,
       color: 'teal'
     },
     {
       icon: ClipboardCheck,
       label: 'Simulasi Dibuat',
       value: data?.activeTryouts || '0',
-      trend: data?.trends?.tryouts || 5,
+      trend: data?.trends?.tryouts || 0,
       color: 'orange'
     },
     {
       icon: TrendingUp,
       label: 'Rata-rata Nilai',
       value: data?.avgScore || '0.0',
-      trend: data?.trends?.score || -2,
+      trend: data?.trends?.score || 0,
       color: 'indigo'
     },
     {
       icon: BookOpen,
       label: 'Total Soal',
       value: data?.totalQuestions || '0',
-      trend: data?.trends?.questions || 8,
+      trend: data?.trends?.questions || 0,
       color: 'amber'
     },
   ];
